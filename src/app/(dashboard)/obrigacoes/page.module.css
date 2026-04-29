@@ -1,0 +1,159 @@
+.page {
+  padding: 32px;
+  max-width: 1200px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.countBadge {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.15s ease;
+}
+
+.tab:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.tabActive {
+  background: #3b82f6;
+  color: white;
+}
+
+.tabActive:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 20px;
+  color: #6b7280;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badgeENTREGUE {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badgeNAO_ENTREGUE {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badgeINCONSISTENCIA {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badgeEM_PROCESSAMENTO {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badgeOUTROS {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.actionLink {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.actionLink:hover {
+  text-decoration: underline;
+}
