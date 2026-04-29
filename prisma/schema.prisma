@@ -1,0 +1,340 @@
+// Prisma Schema for DOGUP Fiscal Compliance System
+// Multi-contador architecture for accounting offices
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// TIPO PESSOA - Discriminator for PF/PJ
+// ============================================
+enum TipoPessoa {
+  PF  // Pessoa Física
+  PJ  // Pessoa Jurídica
+}
+
+// ============================================
+// CONTADOR - Accounting Office / Accountant
+// ============================================
+model Contador {
+  id                  String    @id @default(cuid())
+  tipoPessoa          TipoPessoa
+  documento          String    @unique  // CPF (PF) or CNPJ (PJ), digits only
+  nome                String
+  slug                String    @unique
+  crc                 String?   // CRC registration number
+  cna                 String?   // CNA code
+  inscricaoEstadual   String?
+  email               String    @unique
+  telefone            String?
+  logradouro          String?
+  numero              String?
+  complemento         String?
+  bairro              String?
+  cidade              String?
+  uf                  String    @default("")
+  cep                 String?
+  logoUrl             String?
+  responsavel         String?   // Technical responsible name
+  usuarios            Usuario[]
+  clientes            ClienteFinal[]
+  perfis              Perfil[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([documento])
+  @@index([crc])
+}
+
+// ============================================
+// USUÁRIO - User belonging to a Contador
+// ============================================
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  senha     String   // bcrypt hashed
+  nome      String
+  cargo     String?
+  perfil    Perfil?  @relation(fields: [perfilId], references: [id])
+  perfilId  String?
+  contador   Contador  @relation(fields: [contadorId], references: [id], onDelete: Cascade)
+  contadorId String
+  sessoes   Sessao[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contadorId])
+}
+
+// ============================================
+// SESSÃO - Authentication sessions
+// ============================================
+model Sessao {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([usuarioId])
+}
+
+// ============================================
+// CLIENTE FINAL - CNPJ/CPF Client of the contador
+// ============================================
+model ClienteFinal {
+  id                  String            @id @default(cuid())
+  tipoPessoa          TipoPessoa
+  documento           String            @unique  // CPF or CNPJ, digits only
+  nomeRazao           String
+  nomeFantasia        String?
+  estadoCivil         String?           // Only for PF
+  inscricaoEstadual   String?
+  regime              RegimeTributario
+  contador            Contador          @relation(fields: [contadorId], references: [id], onDelete: Cascade)
+  contadorId          String
+  situacaoFiscal      SituacaoFiscal
+  logradouro          String?
+  bairro              String?
+  cidade              String?
+  uf                  String?
+  cep                 String?
+  email               String?
+  telefone            String?
+  responsavelTecnico   String?
+  obrigacoes          Obrigacao[]
+  parcelamentos       Parcelamento[]
+  certificados        Certificado[]
+  procuracoes         Procuracao[]
+  mensagens           Mensagem[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([contadorId])
+  @@index([documento])
+}
+
+enum RegimeTributario {
+  SIMPLES_NACIONAL
+  NORMAL
+}
+
+enum SituacaoFiscal {
+  REGULAR
+  REGULARIZADO
+  IRREGULAR
+}
+
+// ============================================
+// OBRIGAÇÃO ACESSÓRIA - DCTFWeb, etc.
+// ============================================
+model Obrigacao {
+  id          String           @id @default(cuid())
+  cliente     ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId   String
+  tipo        TipoObrigacao
+  ano         Int
+  mes         Int
+  status      StatusObrigacao
+  reciboUrl   String?
+  observacao  String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([clienteId])
+  @@index([tipo, ano, mes])
+  @@index([status])
+}
+
+enum TipoObrigacao {
+  DCTFWEB
+  GFIP
+  DIRF
+  RAIS
+}
+
+enum StatusObrigacao {
+  ENTREGUE
+  NAO_ENTREGUE
+  INCONSISTENCIA
+  EM_PROCESSAMENTO
+  OUTROS
+}
+
+// ============================================
+// PARCELAMENTO - Federal Installments
+// ============================================
+model Parcelamento {
+  id          String             @id @default(cuid())
+  cliente     ClienteFinal       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId   String
+  tipo        TipoParcelamento
+  total       Decimal            @db.Decimal(15, 2)
+  parcelas    Int
+  parcelasEmAtraso Int            @default(0)
+  valorAtraso Decimal?            @db.Decimal(15, 2)
+  inicio      DateTime
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([clienteId])
+  @@index([tipo])
+}
+
+enum TipoParcelamento {
+  PGFN
+  NAO_PREVIDENCIARIO
+  SIMPLES_NACIONAL
+  SIMPLIFICADO
+  PREVIDENCIARIO
+}
+
+// ============================================
+// CERTIFICADO - Digital Certificate
+// ============================================
+model Certificado {
+  id          String   @id @default(cuid())
+  cliente     ClienteFinal  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId   String
+  tipo        String   // A1, A3
+  cnpj        String?  // emissor do certificado
+  validade    DateTime
+  responsavel String? // quem está em posse
+  status      StatusCertificado
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([validade])
+}
+
+enum StatusCertificado {
+  VALIDO
+  VENCIDO
+  CANCELADO
+}
+
+// ============================================
+// PROCURACAO - e-CAC Power of Attorney
+// ============================================
+model Procuracao {
+  id          String           @id @default(cuid())
+  cliente     ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId   String
+  tipo        TipoProcuracao
+  validade    DateTime
+  status      StatusProcuracao
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([clienteId])
+  @@index([validade])
+}
+
+enum TipoProcuracao {
+  COMPLETA
+  PARCIAL
+  LIMITADA
+}
+
+enum StatusProcuracao {
+  VALIDA
+  VENCIDA
+  CANCELADA
+  SEM_PROCURACAO
+}
+
+// ============================================
+// MENSAGEM - e-CAC Mailbox Messages
+// ============================================
+model Mensagem {
+  id          String           @id @default(cuid())
+  cliente     ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId   String
+  titulo      String
+  conteudo    String
+  tipo        TipoMensagem
+  relevancia  RelevanciaMensagem
+  lida        Boolean          @default(false)
+  data        DateTime
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([clienteId])
+  @@index([relevancia, lida])
+}
+
+enum TipoMensagem {
+  NOTIFICACAO
+  INTIMACAO
+  TERMO_EXCLUSAO
+  INFORMATIVA
+  OTIMOS
+}
+
+enum RelevanciaMensagem {
+  RELEVANTE
+  NAO_RELEVANTE
+}
+
+// ============================================
+// RBAC - Roles & Permissions
+// ============================================
+model Perfil {
+  id          String      @id @default(cuid())
+  nome        String
+  isAdmin     Boolean     @default(false)
+  contador    Contador    @relation(fields: [contadorId], references: [id], onDelete: Cascade)
+  contadorId   String
+  usuarios    Usuario[]
+  permissoes  Permissao[] @relation("PerfilPermissoes")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([nome, contadorId])
+  @@index([contadorId])
+}
+
+model Permissao {
+  id          String   @id @default(cuid())
+  codigo      String   @unique
+  descricao   String?
+  perfis      Perfil[] @relation("PerfilPermissoes")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// AUDITORIA - Audit Trail
+// ============================================
+model Auditoria {
+  id           String         @id @default(cuid())
+  usuarioId    String
+  usuarioNome  String
+  contadorId   String
+  acao         EnumAuditoria
+  entidade     String
+  entidadeId   String
+  dadosAntigos Json?
+  dadosNovos   Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime       @default(now())
+
+  @@index([contadorId, createdAt])
+  @@index([entidade, entidadeId])
+  @@index([usuarioId])
+  @@index([acao])
+}
+
+enum EnumAuditoria {
+  CREATE
+  UPDATE
+  DELETE
+}

@@ -1,0 +1,10 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--page-bg, #f8fafc);
+}
