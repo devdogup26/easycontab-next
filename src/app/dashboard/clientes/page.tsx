@@ -49,9 +49,6 @@ export default async function ClientesPage({ searchParams }: PageProps) {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Clientes</h1>
-        <Link href="/dashboard/clientes/novo" className={styles.newButton}>
-          + Novo Cliente
-        </Link>
       </div>
 
       <form method="GET" className={styles.searchBar}>
