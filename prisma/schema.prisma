@@ -18,6 +18,14 @@ enum TipoPessoa {
 }
 
 // ============================================
+// GLOBAL ROLE - Platform-wide roles
+// ============================================
+enum GlobalRole {
+  CONTADOR      // Regular user within a contador
+  SUPER_ADMIN   // Platform super-admin
+}
+
+// ============================================
 // CONTADOR - Accounting Office / Accountant
 // ============================================
 model Contador {
@@ -59,10 +67,11 @@ model Usuario {
   senha     String   // bcrypt hashed
   nome      String
   cargo     String?
+  globalRole GlobalRole @default(CONTADOR)
   perfil    Perfil?  @relation(fields: [perfilId], references: [id])
   perfilId  String?
-  contador   Contador  @relation(fields: [contadorId], references: [id], onDelete: Cascade)
-  contadorId String
+  contador   Contador?  @relation(fields: [contadorId], references: [id], onDelete: Cascade)
+  contadorId String?
   sessoes   Sessao[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -135,28 +144,37 @@ enum SituacaoFiscal {
 // OBRIGAÇÃO ACESSÓRIA - DCTFWeb, etc.
 // ============================================
 model Obrigacao {
-  id          String           @id @default(cuid())
-  cliente     ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  clienteId   String
-  tipo        TipoObrigacao
-  ano         Int
-  mes         Int
-  status      StatusObrigacao
-  reciboUrl   String?
-  observacao  String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id              String           @id @default(cuid())
+  cliente         ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId       String
+  tipo            TipoObrigacao
+  ano             Int
+  mes             Int
+  dataVencimento  DateTime?
+  status          StatusObrigacao
+  reciboUrl       String?
+  observacao      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   @@index([clienteId])
   @@index([tipo, ano, mes])
   @@index([status])
+  @@index([dataVencimento])
 }
 
 enum TipoObrigacao {
   DCTFWEB
-  GFIP
-  DIRF
-  RAIS
+  EFD_ICMS_IPI
+  DEFIS
+  DMED
+  ECD_SPED
+  ECF_SPED
+  EFD_CONTRIBUICOES
+  ESOCIAL
+  PGDAS
+  REINF_R2099
+  REINF_R4099
 }
 
 enum StatusObrigacao {
@@ -308,6 +326,21 @@ model Permissao {
   perfis      Perfil[] @relation("PerfilPermissoes")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ============================================
+// CONFIGURAÇÕES AUXILIARES - CFOP, NCM, CST, etc.
+// ============================================
+model ConfigAuxiliar {
+  id          String   @id @default(cuid())
+  tipo        String   // cfop, ncm, cst, aliquotas
+  codigo      String
+  descricao   String
+  aliquota    Decimal? @db.Decimal(5, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tipo, codigo])
 }
 
 // ============================================

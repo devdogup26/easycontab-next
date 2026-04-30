@@ -1,0 +1,410 @@
+.page {
+  padding: 40px;
+  max-width: 1400px;
+  background: transparent;
+  min-height: 100vh;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.contadorBadge {
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* ============================================ */
+/* GOB 360° HEADER - Client Base Stats */
+/* ============================================ */
+.dashboardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.GOB360Header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px 32px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+.GOB360Stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.GOB360Icon {
+  color: var(--accent);
+}
+
+.GOB360IconSuccess {
+  color: var(--success);
+}
+
+.GOB360StatContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.GOB360StatValue {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.GOB360StatLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.GOB360Divider {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(180deg, transparent, var(--glass-border), transparent);
+}
+
+.GOB360StatGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.GOB360Regime {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.GOB360RegimeLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+  min-width: 120px;
+}
+
+.GOB360RegimeValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ============================================ */
+/* e-CAC ALERT BANNER */
+/* ============================================ */
+.eCACBanner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: var(--radius-lg);
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.eCACBannerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 50%;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.eCACBannerText {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.eCACBannerText strong {
+  color: var(--warning);
+}
+
+/* ============================================ */
+/* MAIN GRID LAYOUT */
+/* ============================================ */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fullWidth {
+  grid-column: span 1;
+}
+
+/* ============================================ */
+/* GLASS CARDS */
+/* ============================================ */
+.glassCard {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass);
+  transition: all 0.3s ease;
+}
+
+.glassCard:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cardHeader svg {
+  color: var(--accent);
+}
+
+.cardCount {
+  margin-left: auto;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ============================================ */
+/* PARCELAMENTOS GRID */
+/* ============================================ */
+.parcelamentosGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.parcelamentoBadge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.parcelamentoBadge:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border-hover);
+}
+
+.parcelamentoBadge.parcelamentoAtraso {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.03) 100%);
+}
+
+.parcelamentoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.parcelamentoLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.parcelamentoUrgency {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--danger);
+  position: relative;
+}
+
+.parcelamentoUrgency sup {
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--danger);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  position: absolute;
+  top: -8px;
+  right: -12px;
+}
+
+.parcelamentoStats {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.parcelamentoTotal {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.parcelamentoAtrasoLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ============================================ */
+/* FISCAL CARD */
+/* ============================================ */
+.fiscalCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================ */
+/* RESPONSIVE */
+/* ============================================ */
+@media (max-width: 1200px) {
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .rightColumn {
+    order: -1;
+  }
+}
+
+@media (max-width: 1024px) {
+  .page {
+    padding: 24px;
+  }
+
+  .GOB360Header {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .GOB360Divider {
+    display: none;
+  }
+
+  .GOB360StatGroup {
+    width: 100%;
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .parcelamentosGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .GOB360Header {
+    padding: 20px;
+  }
+
+  .GOB360StatValue {
+    font-size: 24px;
+  }
+
+  .GOB360StatGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .parcelamentosGrid {
+    grid-template-columns: 1fr;
+  }
+}

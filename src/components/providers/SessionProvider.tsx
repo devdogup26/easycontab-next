@@ -11,10 +11,14 @@ function PermissionsSync() {
 
   useEffect(() => {
     if (session?.user) {
+      // Admin access if: perfil.isAdmin=true OR legacy globalRole=SUPER_ADMIN (backwards compat)
+      const user = session.user as any
+      const isAdmin = user.perfil?.isAdmin || user.globalRole === 'SUPER_ADMIN'
       setPermissions({
-        isAdmin: (session.user as any).perfil?.isAdmin || false,
-        permissoes: (session.user as any).permissoes || [],
-        perfilNome: (session.user as any).perfil?.nome
+        isAdmin,
+        isSuperAdmin: user.globalRole === 'SUPER_ADMIN', // kept for badge display
+        permissoes: user.permissoes || [],
+        perfilNome: user.perfil?.nome
       })
     }
   }, [session, setPermissions])

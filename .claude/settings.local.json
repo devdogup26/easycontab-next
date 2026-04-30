@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma *)",
+      "Bash(node *)",
+      "Bash(curl *)",
+      "Bash(dir \"src\\\\app\" /b)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(npm run *)",
+      "Bash(taskkill //PID 24708 //F)",
+      "Bash(taskkill //PID 19448 //F)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(powershell -Command \"Expand-Archive -Path 'Entrevista.docx' -DestinationPath 'temp_docx_extract' -Force; Get-Content 'temp_docx_extract/word/document.xml' -Raw\")",
+      "Bash(sed 's/<[^>]*>//g')",
+      "Bash(powershell *)",
+      "Bash(python3 -c \"from docx import Document; doc = Document\\('D:/projetos/easycontab-next/Entrevista.docx'\\); print\\('\\\\n'.join\\([p.text for p in doc.paragraphs]\\)\\)\")",
+      "Bash(python -c \"from docx import Document; doc = Document\\('D:/projetos/easycontab-next/Entrevista.docx'\\); print\\('\\\\n'.join\\([p.text for p in doc.paragraphs]\\)\\)\")",
+      "Bash(npm install *)",
+      "Bash(cmd *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(mv dashboard_new dashboard)",
+      "Bash(mkdir -p \"D:/projetos/easycontab-next/src/app/api/contadores/[id]/usuarios/[userId]\")",
+      "Bash(mkdir -p \"D:/projetos/easycontab-next/src/app/api/contadores/[id]/perfis/[perfilId]\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

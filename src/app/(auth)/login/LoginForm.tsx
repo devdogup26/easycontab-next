@@ -1,20 +1,51 @@
 'use client'
 
-import { useFormState } from 'react-dom'
-import { login, LoginState } from './actions'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Mail, Lock } from 'lucide-react'
 import styles from './LoginForm.module.css'
 
-const initialState: LoginState = { error: null }
-
 export function LoginForm() {
-  const [state, formAction] = useFormState(login, initialState)
-  const [showPassword, setShowPassword] = React.useState(false)
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
+      })
+
+      if (result?.error) {
+        setError('Credenciais inválidas')
+        setLoading(false)
+        return
+      }
+
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Erro interno. Tente novamente.')
+      setLoading(false)
+    }
+  }
 
   return (
-    <form action={formAction} className={styles.form}>
-      {state?.error && (
-        <div className={styles.error}>{state.error}</div>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      {error && (
+        <div className={styles.error}>{error}</div>
       )}
 
       <div className={styles.field}>
@@ -39,26 +70,17 @@ export function LoginForm() {
           <input
             id="password"
             name="password"
-            type={showPassword ? 'text' : 'password'}
+            type="password"
             required
             placeholder="••••••••"
             className={styles.input}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className={styles.toggleBtn}
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
         </div>
       </div>
 
-      <button type="submit" className={styles.submitBtn}>
-        Entrar
+      <button type="submit" className={styles.submitBtn} disabled={loading}>
+        {loading ? 'Entrando...' : 'Entrar'}
       </button>
     </form>
   )
 }
-
-import React from 'react'

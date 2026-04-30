@@ -8,7 +8,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.header}>
-          <span className={styles.logo}>📊</span>
+          <span className={styles.logoIcon}>📊</span>
           <h1 className={styles.title}>EasyContab</h1>
           <p className={styles.subtitle}>Sistema de gestão contábil</p>
         </div>
