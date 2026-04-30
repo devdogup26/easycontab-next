@@ -8,6 +8,8 @@ interface Message {
   titulo: string
   conteudo: string
   tipo: string
+  relevancia: string
+  lida: boolean
   clienteNome: string
   data: string
 }

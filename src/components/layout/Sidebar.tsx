@@ -12,17 +12,25 @@ import {
 } from 'lucide-react'
 import styles from './Sidebar.module.css'
 
+type NavItem = {
+  label: string
+  href?: string
+  icon: React.ElementType
+  code?: string | null
+  children?: { label: string; href: string }[]
+}
+
 // Navigation for ADMIN users (isAdmin=true in their perfil)
-const adminNavItems = [
-  { label: 'Dashboard', href: '/dashboard/admin', icon: BarChart3 },
-  { label: 'Contadores', href: '/dashboard/contadores', icon: Building2 },
-  { label: 'Config. Auxiliares', href: '/dashboard/config-auxiliares', icon: TableProperties },
-  { label: 'Auditoria', href: '/dashboard/auditoria', icon: History },
-  { label: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
+const adminNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/admin', icon: BarChart3 },
+  { label: 'Contadores', href: '/admin/contadores', icon: Building2 },
+  { label: 'Config. Auxiliares', href: '/admin/config-auxiliares', icon: TableProperties },
+  { label: 'Auditoria', href: '/admin/auditoria', icon: History },
+  { label: 'Configurações', href: '/admin/configuracoes', icon: Settings },
 ]
 
 // Navigation for regular USUARIO (belongs to escritorio, isAdmin=false)
-const usuarioNavItems = [
+const usuarioNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: Home, code: null },
   {
     label: 'Clientes',
@@ -80,7 +88,7 @@ export function Sidebar() {
   }
 
   const isActive = (href: string) => pathname === href
-  const isParentActive = (item: typeof navItems[0]) => {
+  const isParentActive = (item: NavItem) => {
     if (!item.children) return isActive(item.href || '')
     return item.children.some(child => isActive(child.href))
   }

@@ -192,6 +192,57 @@ async function main() {
   console.log('Created Operador User\n');
 
   // ============================================
+  // CREATE ESCRITORIO FOR DOGUP
+  // ============================================
+  const escritorio = await prisma.escritorio.upsert({
+    where: { contadorId: contador.id },
+    update: {},
+    create: {
+      contadorId: contador.id,
+      nome: 'DOGUP Assessoria Contábil',
+      documento: '12345678000190',
+      email: 'admin@dogup.com.br',
+      telefone: '(11) 99999-9999',
+      crc: 'SP123456',
+      status: 'ATIVO',
+      dataVencimento: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+    }
+  });
+  console.log(`Created Escritorio: ${escritorio.nome}`);
+
+  // Get the users we just created
+  const superAdmin = await prisma.usuario.findUnique({ where: { email: 'superadmin@dogup.com.br' } });
+  const admin = await prisma.usuario.findUnique({ where: { email: 'admin@dogup.com.br' } });
+
+  // Create EscritorioOwner links
+  if (superAdmin) {
+    await prisma.escritorioOwner.upsert({
+      where: { escritorioId_usuarioId: { escritorioId: escritorio.id, usuarioId: superAdmin.id } },
+      update: {},
+      create: {
+        escritorioId: escritorio.id,
+        usuarioId: superAdmin.id,
+        role: 'OWNER'
+      }
+    });
+    console.log('Created EscritorioOwner: Super Admin as OWNER');
+  }
+
+  if (admin) {
+    await prisma.escritorioOwner.upsert({
+      where: { escritorioId_usuarioId: { escritorioId: escritorio.id, usuarioId: admin.id } },
+      update: {},
+      create: {
+        escritorioId: escritorio.id,
+        usuarioId: admin.id,
+        role: 'ADMIN'
+      }
+    });
+    console.log('Created EscritorioOwner: Admin as ADMIN');
+  }
+  console.log('');
+
+  // ============================================
   // CREATE 221 CLIENTS WITH CORRECT DISTRIBUTION
   // ============================================
   console.log('Creating 221 clients...');

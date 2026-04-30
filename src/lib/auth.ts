@@ -18,7 +18,8 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
           include: {
             contador: true,
-            perfil: { include: { permissoes: true } }
+            perfil: { include: { permissoes: true } },
+            escritorioOwners: { include: { escritorio: true } }
           }
         })
 
@@ -34,6 +35,7 @@ export const authOptions: NextAuthOptions = {
           globalRole: user.globalRole,
           contadorId: user.contadorId,
           contadorNome: user.contador?.nome,
+          escritorioOwners: user.escritorioOwners,
           perfil: user.perfil ? {
             nome: user.perfil.nome,
             isAdmin: user.perfil.isAdmin,
@@ -54,6 +56,7 @@ export const authOptions: NextAuthOptions = {
         token.globalRole = user.globalRole
         token.contadorId = user.contadorId
         token.contadorNome = user.contadorNome
+        token.escritoriosIds = user.escritorioOwners?.map((eo: any) => eo.escritorioId) || []
         token.perfil = user.perfil
         token.permissoes = user.perfil?.permissoes || []
       }
@@ -65,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         session.user.globalRole = token.globalRole
         session.user.contadorId = token.contadorId
         session.user.contadorNome = token.contadorNome
+        session.user.escritoriosIds = token.escritoriosIds || []
         session.user.perfil = token.perfil
         session.user.permissoes = token.permissoes || []
       }

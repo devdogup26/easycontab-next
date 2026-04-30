@@ -1,13 +1,14 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Mail, Lock } from 'lucide-react'
 import styles from './LoginForm.module.css'
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -33,7 +34,20 @@ export function LoginForm() {
         return
       }
 
-      router.push('/dashboard')
+      // Fetch session to determine redirect based on role
+      const response = await fetch('/api/auth/session')
+      const session = await response.json()
+
+      const user = session?.user
+      const callbackUrl = searchParams.get('callbackUrl')
+
+      if (callbackUrl) {
+        router.push(callbackUrl)
+      } else if (user?.globalRole === 'SUPER_ADMIN') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
       router.refresh()
     } catch (err) {
       console.error('Login error:', err)

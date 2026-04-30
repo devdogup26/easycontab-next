@@ -64,8 +64,8 @@ export function DoughnutChart({
                 boxShadow: 'var(--shadow-glass)'
               }}
               itemStyle={{ color: 'var(--text-primary)' }}
-              formatter={(value: number, name: string) => [
-                `${value} (${((value / total) * 100).toFixed(1)}%)`,
+              formatter={(value, name) => [
+                `${value} (${((Number(value) / total) * 100).toFixed(1)}%)`,
                 name
               ]}
             />

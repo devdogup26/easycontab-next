@@ -11,10 +11,12 @@ function PermissionsSync() {
 
   useEffect(() => {
     if (session?.user) {
+      const user = session.user as any
       setPermissions({
-        isAdmin: (session.user as any).perfil?.isAdmin || false,
-        permissoes: (session.user as any).permissoes || [],
-        perfilNome: (session.user as any).perfil?.nome
+        isAdmin: user.perfil?.isAdmin || false,
+        isSuperAdmin: user.globalRole === 'SUPER_ADMIN',
+        permissoes: user.permissoes || [],
+        perfilNome: user.perfil?.nome
       })
     }
   }, [session, setPermissions])

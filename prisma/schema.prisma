@@ -26,6 +26,24 @@ enum GlobalRole {
 }
 
 // ============================================
+// ESCOPO STATUS - Subscription status
+// ============================================
+enum EscopoStatus {
+  ATIVO
+  VENCIDO
+  SUSPENSO
+}
+
+// ============================================
+// OWNER ROLE - Role within escritorio
+// ============================================
+enum OwnerRole {
+  OWNER
+  ADMIN
+  SUPPORT
+}
+
+// ============================================
 // CONTADOR - Accounting Office / Accountant
 // ============================================
 model Contador {
@@ -48,6 +66,7 @@ model Contador {
   cep                 String?
   logoUrl             String?
   responsavel         String?   // Technical responsible name
+  escritorio         Escritorio?
   usuarios            Usuario[]
   clientes            ClienteFinal[]
   perfis              Perfil[]
@@ -59,7 +78,45 @@ model Contador {
 }
 
 // ============================================
-// USUÁRIO - User belonging to a Contador
+// ESCRITORIO - System client (accounting office platform customer)
+// ============================================
+model Escritorio {
+  id              String       @id @default(cuid())
+  contadorId      String       @unique
+  nome            String
+  documento       String       // CNPJ
+  email           String
+  telefone        String?
+  crc             String?
+  status          EscopoStatus @default(ATIVO)
+  dataVencimento  DateTime?
+
+  contador        Contador       @relation(fields: [contadorId], references: [id], onDelete: Cascade)
+  owners          EscritorioOwner[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// ============================================
+// ESCRITORIO OWNER - Super Admin's relationship to escritorios
+// ============================================
+model EscritorioOwner {
+  id            String      @id @default(cuid())
+  escritorioId  String
+  usuarioId     String
+  role          OwnerRole   @default(ADMIN)
+
+  escritorio    Escritorio  @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([escritorioId, usuarioId])
+  @@index([usuarioId])
+  @@index([escritorioId])
+}
+
+// ============================================
+// USUÁRIO - User belonging to a Contador/Escritorio
 // ============================================
 model Usuario {
   id        String   @id @default(cuid())
@@ -72,6 +129,7 @@ model Usuario {
   perfilId  String?
   contador   Contador?  @relation(fields: [contadorId], references: [id], onDelete: Cascade)
   contadorId String?
+  escritorioOwners  EscritorioOwner[]
   sessoes   Sessao[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

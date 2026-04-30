@@ -45,6 +45,8 @@ export default async function CaixaPostalPage() {
     titulo: m.titulo,
     conteudo: m.conteudo,
     tipo: m.tipo,
+    relevancia: m.relevancia,
+    lida: m.lida,
     clienteNome: m.cliente.nomeRazao,
     data: m.data.toLocaleDateString('pt-BR')
   }))

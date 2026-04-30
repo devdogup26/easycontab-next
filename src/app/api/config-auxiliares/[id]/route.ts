@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/server/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -22,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: {
         codigo,
         descricao,
-        aliquota: aliquota !== undefined ? (aliquota ? BigInt(Math.round(aliquota * 100)) : null) : undefined
+        aliquota: aliquota !== undefined ? (aliquota ? new Prisma.Decimal(aliquota.toString()) : null) : undefined
       }
     })
 
