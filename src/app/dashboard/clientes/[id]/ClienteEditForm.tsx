@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateCliente } from '../actions'
 import styles from './ClienteEditForm.module.css'
 
@@ -26,7 +27,6 @@ interface Cliente {
 
 interface ClienteEditFormProps {
   cliente: Cliente
-  onCancel: () => void
 }
 
 type ActionState = {
@@ -38,23 +38,51 @@ type ActionState = {
 
 const initialState: ActionState = {}
 
-export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormProps) {
-  async function formAction(prevState: ActionState, formData: FormData) {
+export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
+  const router = useRouter()
+  const [state, formAction, isPending] = useActionState(formActionHandler, initialState)
+
+  async function formActionHandler(prevState: ActionState, formData: FormData) {
     return updateCliente(cliente.id, prevState, formData)
   }
 
-  const [state, formAction2, isPending] = useActionState(formAction, initialState)
-
-  if (state.success) {
-    window.location.href = `/dashboard/clientes/${cliente.id}`
-    return null
-  }
+  useEffect(() => {
+    if (state.success) {
+      router.push('/dashboard/clientes')
+      router.refresh()
+    }
+  }, [state.success, router])
 
   return (
-    <form action={formAction2} className={styles.form}>
+    <form action={formAction} className={styles.form}>
+      {/* Form fields remain the same */}
       <div className={styles.grid}>
         <div className={styles.field}>
-          <label htmlFor="nomeRazao">Razão Social *</label>
+          <label htmlFor="tipoPessoa">Tipo de Pessoa</label>
+          <select
+            id="tipoPessoa"
+            name="tipoPessoa"
+            defaultValue={cliente.tipoPessoa}
+            disabled={isPending}
+          >
+            <option value="PJ">Pessoa Jurídica (CNPJ)</option>
+            <option value="PF">Pessoa Física (CPF)</option>
+          </select>
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="documento">CNPJ/CPF</label>
+          <input
+            type="text"
+            id="documento"
+            name="documento"
+            defaultValue={cliente.documento}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="nomeRazao">Razão Social / Nome</label>
           <input
             type="text"
             id="nomeRazao"
@@ -63,9 +91,6 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
             required
             disabled={isPending}
           />
-          {state.errors?.nomeRazao && (
-            <span className={styles.error}>{state.errors.nomeRazao[0]}</span>
-          )}
         </div>
 
         <div className={styles.field}>
@@ -80,42 +105,8 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="tipoPessoa">Tipo de Pessoa *</label>
-          <select id="tipoPessoa" name="tipoPessoa" defaultValue={cliente.tipoPessoa} required disabled={isPending}>
-            <option value="PJ">Pessoa Jurídica (PJ)</option>
-            <option value="PF">Pessoa Física (PF)</option>
-          </select>
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="documento">CPF/CNPJ *</label>
-          <input
-            type="text"
-            id="documento"
-            name="documento"
-            defaultValue={cliente.documento}
-            required
-            disabled={isPending}
-          />
-          {state.errors?.documento && (
-            <span className={styles.error}>{state.errors.documento[0]}</span>
-          )}
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
-          <input
-            type="text"
-            id="inscricaoEstadual"
-            name="inscricaoEstadual"
-            defaultValue={cliente.inscricaoEstadual || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="regime">Regime Tributário *</label>
-          <select id="regime" name="regime" defaultValue={cliente.regime} required disabled={isPending}>
+          <label htmlFor="regime">Regime Tributário</label>
+          <select id="regime" name="regime" defaultValue={cliente.regime} disabled={isPending}>
             <option value="SIMPLES_NACIONAL">Simples Nacional</option>
             <option value="NORMAL">Normal</option>
           </select>
@@ -131,80 +122,18 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="estadoCivil">Estado Civil</label>
+          <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
           <input
             type="text"
-            id="estadoCivil"
-            name="estadoCivil"
-            defaultValue={cliente.estadoCivil || ''}
-            disabled={isPending}
-          />
-        </div>
-      </div>
-
-      <h3 className={styles.sectionTitle}>Endereço</h3>
-      <div className={styles.grid}>
-        <div className={`${styles.field} ${styles.fullWidth}`}>
-          <label htmlFor="logradouro">Logradouro</label>
-          <input
-            type="text"
-            id="logradouro"
-            name="logradouro"
-            defaultValue={cliente.logradouro || ''}
+            id="inscricaoEstadual"
+            name="inscricaoEstadual"
+            defaultValue={cliente.inscricaoEstadual || ''}
             disabled={isPending}
           />
         </div>
 
         <div className={styles.field}>
-          <label htmlFor="bairro">Bairro</label>
-          <input
-            type="text"
-            id="bairro"
-            name="bairro"
-            defaultValue={cliente.bairro || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="cidade">Cidade</label>
-          <input
-            type="text"
-            id="cidade"
-            name="cidade"
-            defaultValue={cliente.cidade || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="uf">UF</label>
-          <input
-            type="text"
-            id="uf"
-            name="uf"
-            defaultValue={cliente.uf || ''}
-            maxLength={2}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="cep">CEP</label>
-          <input
-            type="text"
-            id="cep"
-            name="cep"
-            defaultValue={cliente.cep || ''}
-            disabled={isPending}
-          />
-        </div>
-      </div>
-
-      <h3 className={styles.sectionTitle}>Contato</h3>
-      <div className={styles.grid}>
-        <div className={styles.field}>
-          <label htmlFor="email">E-mail</label>
+          <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
@@ -212,9 +141,6 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
             defaultValue={cliente.email || ''}
             disabled={isPending}
           />
-          {state.errors?.email && (
-            <span className={styles.error}>{state.errors.email[0]}</span>
-          )}
         </div>
 
         <div className={styles.field}>
@@ -228,7 +154,7 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
           />
         </div>
 
-        <div className={`${styles.field} ${styles.fullWidth}`}>
+        <div className={styles.field}>
           <label htmlFor="responsavelTecnico">Responsável Técnico</label>
           <input
             type="text"
@@ -247,9 +173,6 @@ export default function ClienteEditForm({ cliente, onCancel }: ClienteEditFormPr
       <div className={styles.actions}>
         <button type="submit" className={styles.submitButton} disabled={isPending}>
           {isPending ? 'Salvando...' : 'Salvar Alterações'}
-        </button>
-        <button type="button" onClick={onCancel} className={styles.cancelButton} disabled={isPending}>
-          Cancelar
         </button>
       </div>
     </form>

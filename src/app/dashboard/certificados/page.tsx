@@ -14,10 +14,10 @@ export default async function CertificadosPage() {
     redirect('/login')
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const certificados = await prisma.certificado.findMany({
-    where: { cliente: { contadorId } },
+    where: { cliente: { escritorioId } },
     include: { cliente: { select: { id: true, nomeRazao: true, documento: true } } },
     orderBy: { validade: 'asc' }
   })

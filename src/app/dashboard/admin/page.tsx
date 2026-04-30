@@ -18,23 +18,22 @@ export default async function AdminPage() {
   const perfil = (session.user as any).perfil
   if (!perfil?.isAdmin) redirect('/dashboard')
 
-  // Fetch all data
   const [
-    contadores,
+    escritorios,
     stats,
     clientesPorSituacao,
     obrigacoesPorStatus,
     recentClientes,
     topEscritorios
   ] = await Promise.all([
-    prisma.contador.findMany({
+    prisma.escritorio.findMany({
       include: {
         _count: { select: { clientes: true, usuarios: true } }
       },
       orderBy: { createdAt: 'desc' }
     }),
     prisma.$transaction([
-      prisma.contador.count(),
+      prisma.escritorio.count(),
       prisma.clienteFinal.count(),
       prisma.usuario.count(),
       prisma.obrigacao.count({ where: { status: 'NAO_ENTREGUE' } }),
@@ -52,9 +51,9 @@ export default async function AdminPage() {
     prisma.clienteFinal.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
-      include: { contador: { select: { nome: true } } }
+      include: { escritorio: { select: { nome: true } } }
     }),
-    prisma.contador.findMany({
+    prisma.escritorio.findMany({
       take: 5,
       orderBy: { clientes: { _count: 'desc' } },
       include: {
@@ -76,7 +75,7 @@ export default async function AdminPage() {
     clientesSimples
   ] = stats
 
-  const maxClientes = Math.max(...contadores.map(c => c._count.clientes), 1)
+  const maxClientes = Math.max(...escritorios.map(e => e._count.clientes), 1)
 
   const situacaoMap = Object.fromEntries(clientesPorSituacao.map(s => [s.situacaoFiscal, s._count]))
   const statusMap = Object.fromEntries(obrigacoesPorStatus.map(s => [s.status, s._count]))
@@ -88,13 +87,12 @@ export default async function AdminPage() {
           <h1 className={styles.title}>Painel Administrativo</h1>
           <p className={styles.subtitle}>Visão geral da plataforma</p>
         </div>
-        <Link href="/dashboard/contadores" className={styles.manageBtn}>
+        <Link href="/admin/escritorios" className={styles.manageBtn}>
           <span>Gerenciar Escritórios</span>
           <ArrowRight size={16} />
         </Link>
       </header>
 
-      {/* Stats Cards */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statIcon} style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa' }}>
@@ -137,11 +135,8 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Two Column Layout */}
       <div className={styles.gridTwo}>
-        {/* Left Column */}
         <div className={styles.column}>
-          {/* Fiscal Situation Card */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
@@ -183,7 +178,6 @@ export default async function AdminPage() {
             </div>
           </div>
 
-          {/* Obrigações Status Card */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
@@ -216,16 +210,14 @@ export default async function AdminPage() {
           </div>
         </div>
 
-        {/* Right Column */}
         <div className={styles.column}>
-          {/* Top Escritórios Card */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
                 <TrendingUp size={18} />
                 Top 5 Escritórios
               </h2>
-              <Link href="/dashboard/contadores" className={styles.cardLink}>Ver todos</Link>
+              <Link href="/admin/escritorios" className={styles.cardLink}>Ver todos</Link>
             </div>
             <div className={styles.topList}>
               {topEscritorios.map((esc, idx) => (
@@ -244,7 +236,6 @@ export default async function AdminPage() {
             </div>
           </div>
 
-          {/* Recent Clients Card */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
@@ -261,7 +252,7 @@ export default async function AdminPage() {
                   <div className={styles.recentInfo}>
                     <span className={styles.recentName}>{cliente.nomeRazao}</span>
                     <span className={styles.recentMeta}>
-                      {cliente.contador.nome} • {cliente.regime.replace('_', ' ')}
+                      {cliente.escritorio.nome} • {cliente.regime.replace('_', ' ')}
                     </span>
                   </div>
                   <span className={`${styles.situacaoBadge} ${styles[`badge${cliente.situacaoFiscal}`]}`}>
@@ -274,7 +265,6 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Escritórios Chart */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h2 className={styles.cardTitle}>
@@ -283,7 +273,7 @@ export default async function AdminPage() {
           </h2>
         </div>
         <div className={styles.chartList}>
-          {contadores
+          {escritorios
             .sort((a, b) => b._count.clientes - a._count.clientes)
             .slice(0, 8)
             .map(esc => (

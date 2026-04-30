@@ -1,26 +1,17 @@
 'use client'
 
-import { Building2, Users, FileText, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { Building2, Users, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import Link from 'next/link'
 import styles from './page.module.css'
 
 interface Escritorio {
   id: string
+  codigo: number
   nome: string
   documento: string
   email: string
   status: string
   dataVencimento: Date | string | null
-  contador: {
-    nome: string
-  }
-  owners: Array<{
-    role: string
-    usuario: {
-      id: string
-      nome: string
-      email: string
-    }
-  }>
 }
 
 interface AdminData {
@@ -31,7 +22,6 @@ interface AdminData {
     escritoriosVencidos: number
     escritoriosSuspensos: number
     totalClientes: number
-    totalObrigacoes: number
   }
 }
 
@@ -100,7 +90,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
       </div>
 
       {/* Secondary Stats */}
-      <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <div className={styles.statsGrid} style={{ gridTemplateColumns: 'repeat(1, 1fr)' }}>
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
             <Users size={24} />
@@ -108,16 +98,6 @@ export function AdminDashboard({ data }: { data: AdminData }) {
           <div className={styles.statContent}>
             <div className={styles.statValue}>{stats.totalClientes}</div>
             <div className={styles.statLabel}>Total Clientes na Plataforma</div>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statIcon}>
-            <FileText size={24} />
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statValue}>{stats.totalObrigacoes}</div>
-            <div className={styles.statLabel}>Total Obrigações Cadastradas</div>
           </div>
         </div>
       </div>
@@ -138,7 +118,6 @@ export function AdminDashboard({ data }: { data: AdminData }) {
             <thead>
               <tr>
                 <th>Escritório</th>
-                <th>Responsável</th>
                 <th>Status</th>
                 <th>Vencimento</th>
                 <th>Ações</th>
@@ -156,12 +135,6 @@ export function AdminDashboard({ data }: { data: AdminData }) {
                       </div>
                     </td>
                     <td>
-                      <div className={styles.escritorioInfo}>
-                        <span>{escritorio.contador.nome}</span>
-                        <span className={styles.escritorioDoc}>{escritorio.owners.map(o => o.usuario.nome).join(', ')}</span>
-                      </div>
-                    </td>
-                    <td>
                       <span className={`${styles.statusBadge} ${styles[`status${escritorio.status}`]}`}>
                         {escritorio.status}
                       </span>
@@ -176,8 +149,9 @@ export function AdminDashboard({ data }: { data: AdminData }) {
                     </td>
                     <td>
                       <div className={styles.actions}>
-                        <button className={styles.actionBtn}>Ver</button>
-                        <button className={styles.actionBtn}>Editar</button>
+                        <Link href={`/admin/escritorios/${escritorio.id}`} className={styles.actionBtn}>
+                          Ver
+                        </Link>
                       </div>
                     </td>
                   </tr>

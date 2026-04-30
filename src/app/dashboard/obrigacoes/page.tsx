@@ -11,10 +11,10 @@ export default async function ObrigacoesPage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const obrigacoes = await prisma.obrigacao.findMany({
-    where: { cliente: { contadorId } },
+    where: { cliente: { escritorioId } },
     include: { cliente: true },
     orderBy: { createdAt: 'desc' },
     take: 50

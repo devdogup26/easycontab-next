@@ -65,32 +65,32 @@ export function DashboardCards({ data }: DashboardCardsProps) {
 
   return (
     <div className={styles.dashboardContent}>
-      {/* GOB 360° Header with stats */}
-      <div className={styles.GOB360Header}>
-        <div className={styles.GOB360Stat}>
-          <Users size={24} className={styles.GOB360Icon} />
-          <div className={styles.GOB360StatContent}>
-            <span className={styles.GOB360StatValue}>{stats.totalClientes}</span>
-            <span className={styles.GOB360StatLabel}>CNPJs Ativos</span>
+      {/* Dashboard Header with stats */}
+      <div className={styles.dashboardHeader}>
+        <div className={styles.headerStat}>
+          <Users size={24} className={styles.headerIcon} />
+          <div className={styles.headerStatContent}>
+            <span className={styles.headerStatValue}>{stats.totalClientes}</span>
+            <span className={styles.headerStatLabel}>CNPJs Ativos</span>
           </div>
         </div>
-        <div className={styles.GOB360Divider} />
-        <div className={styles.GOB360StatGroup}>
-          <span className={styles.GOB360Regime}>
-            <span className={styles.GOB360RegimeLabel}>Simples Nacional</span>
-            <span className={styles.GOB360RegimeValue}>{stats.simplesNacionalCount} ({simplesPercent}%)</span>
+        <div className={styles.headerDivider} />
+        <div className={styles.headerStatGroup}>
+          <span className={styles.regime}>
+            <span className={styles.regimeLabel}>Simples Nacional</span>
+            <span className={styles.regimeValue}>{stats.simplesNacionalCount} ({simplesPercent}%)</span>
           </span>
-          <span className={styles.GOB360Regime}>
-            <span className={styles.GOB360RegimeLabel}>Normal</span>
-            <span className={styles.GOB360RegimeValue}>{stats.normalCount} ({normalPercent}%)</span>
+          <span className={styles.regime}>
+            <span className={styles.regimeLabel}>Normal</span>
+            <span className={styles.regimeValue}>{stats.normalCount} ({normalPercent}%)</span>
           </span>
         </div>
-        <div className={styles.GOB360Divider} />
-        <div className={styles.GOB360Stat}>
-          <CheckCircle size={24} className={styles.GOB360IconSuccess} />
-          <div className={styles.GOB360StatContent}>
-            <span className={styles.GOB360StatValue}>{stats.regularCount + stats.regularizadoCount}</span>
-            <span className={styles.GOB360StatLabel}>Em Conformidade</span>
+        <div className={styles.headerDivider} />
+        <div className={styles.headerStat}>
+          <CheckCircle size={24} className={styles.headerIconSuccess} />
+          <div className={styles.headerStatContent}>
+            <span className={styles.headerStatValue}>{stats.regularCount + stats.regularizadoCount}</span>
+            <span className={styles.headerStatLabel}>Em Conformidade</span>
           </div>
         </div>
       </div>

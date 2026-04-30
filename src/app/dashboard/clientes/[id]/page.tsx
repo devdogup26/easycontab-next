@@ -37,10 +37,10 @@ export default async function EditClientePage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const cliente = await prisma.clienteFinal.findFirst({
-    where: { id, contadorId },
+    where: { id, escritorioId },
     include: {
       _count: {
         select: {
@@ -274,7 +274,7 @@ export default async function EditClientePage({ params }: PageProps) {
           </svg>
           Editar Cliente
         </h2>
-        <ClienteEditForm cliente={cliente} onCancel={() => {}} />
+        <ClienteEditForm cliente={cliente} />
       </div>
     </div>
   )

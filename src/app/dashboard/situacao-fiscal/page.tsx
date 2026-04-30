@@ -14,30 +14,30 @@ export default async function SituacaoFiscalPage() {
     redirect('/login')
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const [totalClientes, regularCount, regularizadoCount, irregularCount] = await Promise.all([
-    prisma.clienteFinal.count({ where: { contadorId } }),
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'REGULAR' } }),
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'REGULARIZADO' } }),
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'IRREGULAR' } })
+    prisma.clienteFinal.count({ where: { escritorioId } }),
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'REGULAR' } }),
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'REGULARIZADO' } }),
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'IRREGULAR' } })
   ])
 
   // Get clients by situation for the list
   const clientesRegular = await prisma.clienteFinal.findMany({
-    where: { contadorId, situacaoFiscal: 'REGULAR' },
+    where: { escritorioId, situacaoFiscal: 'REGULAR' },
     select: { id: true, nomeRazao: true, documento: true },
     take: 20
   })
 
   const clientesRegularizado = await prisma.clienteFinal.findMany({
-    where: { contadorId, situacaoFiscal: 'REGULARIZADO' },
+    where: { escritorioId, situacaoFiscal: 'REGULARIZADO' },
     select: { id: true, nomeRazao: true, documento: true },
     take: 20
   })
 
   const clientesIrregular = await prisma.clienteFinal.findMany({
-    where: { contadorId, situacaoFiscal: 'IRREGULAR' },
+    where: { escritorioId, situacaoFiscal: 'IRREGULAR' },
     select: { id: true, nomeRazao: true, documento: true },
     take: 20
   })

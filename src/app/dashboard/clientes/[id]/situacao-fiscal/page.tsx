@@ -28,10 +28,10 @@ export default async function ClienteSituacaoFiscalPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const cliente = await prisma.clienteFinal.findFirst({
-    where: { id, contadorId },
+    where: { id, escritorioId },
     include: {
       obrigacoes: {
         orderBy: [{ ano: 'desc' }, { mes: 'desc' }]

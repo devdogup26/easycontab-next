@@ -4,81 +4,30 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
-import { usePermissionsStore } from '@/stores/permissions'
 import {
-  Home, Users, FileText, Shield, CreditCard, Mail,
-  FileCheck, Key, History, BarChart3, Settings, LogOut, Menu, X,
-  ChevronRight, Building2, TableProperties
+  BarChart3, Building2, Settings, LogOut, Menu, X,
+  ChevronRight
 } from 'lucide-react'
-import styles from './Sidebar.module.css'
+import styles from './AdminSidebar.module.css'
 
 type NavItem = {
   label: string
   href?: string
   icon: React.ElementType
-  code?: string | null
   children?: { label: string; href: string }[]
 }
 
-// Navigation for ADMIN users (isAdmin=true in their perfil)
 const adminNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: BarChart3 },
   { label: 'Escritórios', href: '/admin/escritorios', icon: Building2 },
-  { label: 'Config. Auxiliares', href: '/admin/config-auxiliares', icon: TableProperties },
-  { label: 'Auditoria', href: '/admin/auditoria', icon: History },
   { label: 'Configurações', href: '/admin/configuracoes', icon: Settings },
 ]
 
-// Navigation for regular USUARIO (belongs to escritorio, isAdmin=false)
-const usuarioNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: Home, code: null },
-  {
-    label: 'Clientes',
-    href: '/dashboard/clientes',
-    icon: Users,
-    code: 'clientes:read',
-    children: [
-      { label: 'Visão Geral', href: '/dashboard/clientes' },
-      { label: 'Todos os Clientes', href: '/dashboard/clientes' }
-    ]
-  },
-  {
-    label: 'Obrigações',
-    icon: FileText,
-    code: 'obrigacoes:read',
-    children: [
-      { label: 'Tipos de Obrigações', href: '/dashboard/obrigacoes' },
-      { label: 'Prazos de Entrega', href: '/dashboard/obrigacoes/prazos' },
-      { label: 'DCTFWeb em Andamento', href: '/dashboard/obrigacoes/dctfweb' },
-      { label: 'Todas as Obrigações', href: '/dashboard/obrigacoes' }
-    ]
-  },
-  { label: 'Situação Fiscal Federal', href: '/dashboard/situacao-fiscal', icon: Shield, code: null },
-  { label: 'Parcelamentos Federais', href: '/dashboard/parcelamentos', icon: CreditCard, code: 'parcelamentos:read' },
-  { label: 'Caixa Postal', href: '/dashboard/caixa-postal', icon: Mail, code: null },
-  {
-    label: 'Certidões',
-    icon: FileCheck,
-    code: 'certidoes:read',
-    children: [
-      { label: 'Federal', href: '/dashboard/certidoes' },
-      { label: 'Estadual', href: '/dashboard/certidoes/estadual' }
-    ]
-  },
-  { label: 'Certificados', href: '/dashboard/certificados', icon: Key, code: null },
-  { label: 'Auditoria', href: '/dashboard/auditoria', icon: History, code: 'auditoria:read' },
-  { label: 'Configurações', href: '/dashboard/configuracoes', icon: Settings, code: 'configuracoes' },
-]
-
-export function Sidebar() {
+export function AdminSidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const { isAdmin } = usePermissionsStore()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
-
-  // Admin sees admin nav, otherwise regular usuario nav
-  const navItems = isAdmin ? adminNavItems : usuarioNavItems
 
   const toggleMobile = () => setMobileOpen(!mobileOpen)
   const closeMobile = () => setMobileOpen(false)
@@ -103,15 +52,15 @@ export function Sidebar() {
 
       <aside className={`${styles.sidebar} ${mobileOpen ? styles.mobileOpen : ''}`}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>📊</span>
-          <span className={styles.logoText}>EasyContab</span>
+          <span className={styles.logoIcon}>⚙️</span>
+          <span className={styles.logoText}>Admin</span>
           <button className={styles.mobileClose} onClick={closeMobile} aria-label="Fechar">
             <X size={20} />
           </button>
         </div>
 
         <nav className={styles.nav}>
-          {navItems.map(item => {
+          {adminNavItems.map(item => {
             const hasChildren = item.children && item.children.length > 0
             const isExpanded = expandedMenus[item.label]
             const parentIsActive = isParentActive(item)
@@ -166,10 +115,7 @@ export function Sidebar() {
           {session?.user && (
             <div className={styles.user}>
               <span className={styles.userName}>{(session.user as any).nome}</span>
-              <span className={styles.userEmail}>{(session.user as any).escritorioNome || 'Admin'}</span>
-              {isAdmin && (
-                <span className={styles.userBadge}>Admin</span>
-              )}
+              <span className={styles.userEmail}>Super Admin</span>
             </div>
           )}
           <button

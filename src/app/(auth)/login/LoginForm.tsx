@@ -18,12 +18,12 @@ export function LoginForm() {
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
+    const login = formData.get('login') as string
     const password = formData.get('password') as string
 
     try {
       const result = await signIn('credentials', {
-        email,
+        login,
         password,
         redirect: false
       })
@@ -63,15 +63,15 @@ export function LoginForm() {
       )}
 
       <div className={styles.field}>
-        <label htmlFor="email" className={styles.label}>Email</label>
+        <label htmlFor="login" className={styles.label}>Login</label>
         <div className={styles.inputWrapper}>
           <Mail size={18} className={styles.icon} />
           <input
-            id="email"
-            name="email"
-            type="email"
+            id="login"
+            name="login"
+            type="text"
             required
-            placeholder="seu@email.com"
+            placeholder="1_admin ou email@exemplo.com"
             className={styles.input}
           />
         </div>

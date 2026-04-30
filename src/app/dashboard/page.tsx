@@ -21,21 +21,21 @@ export default async function DashboardPage() {
     redirect('/dashboard/admin')
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   // ============================================
-  // GOB 360° - Client Base Stats
+  // Dashboard - Client Base Stats
   // ============================================
   const [totalClientes, clientesSimplesNacional, clientesNormal] = await Promise.all([
-    prisma.clienteFinal.count({ where: { contadorId } }),
-    prisma.clienteFinal.count({ where: { contadorId, regime: 'SIMPLES_NACIONAL' } }),
-    prisma.clienteFinal.count({ where: { contadorId, regime: 'NORMAL' } })
+    prisma.clienteFinal.count({ where: { escritorioId } }),
+    prisma.clienteFinal.count({ where: { escritorioId, regime: 'SIMPLES_NACIONAL' } }),
+    prisma.clienteFinal.count({ where: { escritorioId, regime: 'NORMAL' } })
   ])
 
   const [regularCount, regularizadoCount, irregularCount] = await Promise.all([
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'REGULAR' } }),
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'REGULARIZADO' } }),
-    prisma.clienteFinal.count({ where: { contadorId, situacaoFiscal: 'IRREGULAR' } })
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'REGULAR' } }),
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'REGULARIZADO' } }),
+    prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'IRREGULAR' } })
   ])
 
   // ============================================
@@ -46,7 +46,7 @@ export default async function DashboardPage() {
 
   const dctfwebObligacoes = await prisma.obrigacao.findMany({
     where: {
-      cliente: { contadorId },
+      cliente: { escritorioId },
       tipo: 'DCTFWEB',
       ano: currentYear,
       mes: { gte: 1, lte: currentMonth }
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
   // Parcelamentos Stats
   // ============================================
   const parcelamentos = await prisma.parcelamento.findMany({
-    where: { cliente: { contadorId } }
+    where: { cliente: { escritorioId } }
   })
 
   const parcelamentoAlert = {
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   // ============================================
   const relevantUnreadMessages = await prisma.mensagem.findMany({
     where: {
-      cliente: { contadorId },
+      cliente: { escritorioId },
       relevancia: 'RELEVANTE',
       lida: false
     },
@@ -127,13 +127,13 @@ export default async function DashboardPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>GOB 360°</h1>
+          <h1 className={styles.title}>Dashboard</h1>
           <p className={styles.subtitle}>
-            Painel de Monitoramento de Conformidade Fiscal
+            Painel de Gestão de Clientes e Obrigações
           </p>
         </div>
         <div className={styles.contadorBadge}>
-          {(session.user as any).contadorNome}
+          {(session.user as any).escritorioNome}
         </div>
       </header>
 

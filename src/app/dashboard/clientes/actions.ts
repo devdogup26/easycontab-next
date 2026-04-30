@@ -13,7 +13,7 @@ export async function createCliente(prevState: any, formData: FormData) {
     return { error: 'Não autenticado. Faça login novamente.' }
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const rawData = {
     tipoPessoa: formData.get('tipoPessoa') as string,
@@ -74,7 +74,7 @@ export async function createCliente(prevState: any, formData: FormData) {
         email: data.email,
         telefone: data.telefone,
         responsavelTecnico: data.responsavelTecnico,
-        contadorId
+        escritorioId
       }
     })
 
@@ -94,11 +94,11 @@ export async function updateCliente(id: string, prevState: any, formData: FormDa
     return { error: 'Não autenticado. Faça login novamente.' }
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   // Verify ownership
   const existing = await prisma.clienteFinal.findFirst({
-    where: { id, contadorId }
+    where: { id, escritorioId }
   })
   if (!existing) {
     return { error: 'Cliente não encontrado' }

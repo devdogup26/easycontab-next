@@ -14,12 +14,12 @@ export default async function CaixaPostalPage() {
     redirect('/login')
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const [relevantUnread, otherMessages] = await Promise.all([
     prisma.mensagem.findMany({
       where: {
-        cliente: { contadorId },
+        cliente: { escritorioId },
         relevancia: 'RELEVANTE',
         lida: false
       },
@@ -28,7 +28,7 @@ export default async function CaixaPostalPage() {
     }),
     prisma.mensagem.findMany({
       where: {
-        cliente: { contadorId },
+        cliente: { escritorioId },
         OR: [
           { relevancia: 'NAO_RELEVANTE' },
           { relevancia: 'RELEVANTE', lida: true }

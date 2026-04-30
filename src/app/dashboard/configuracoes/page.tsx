@@ -11,15 +11,15 @@ export default async function ConfiguracoesPage() {
   if (!session) redirect('/login')
 
   const userId = (session.user as any).id
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
-  const [usuario, contador] = await Promise.all([
+  const [usuario, escritorio] = await Promise.all([
     prisma.usuario.findUnique({
       where: { id: userId },
       include: { perfil: true }
     }),
-    prisma.contador.findUnique({
-      where: { id: contadorId }
+    prisma.escritorio.findUnique({
+      where: { id: escritorioId }
     })
   ])
 
@@ -35,18 +35,17 @@ export default async function ConfiguracoesPage() {
     } : null
   } : null
 
-  const contadorData = contador ? {
-    id: contador.id,
-    nome: contador.nome,
-    slug: contador.slug,
-    logoUrl: contador.logoUrl,
-    email: contador.email,
-    telefone: contador.telefone,
-    crc: contador.crc,
-    cna: contador.cna
+  const escritorioData = escritorio ? {
+    id: escritorio.id,
+    nome: escritorio.nome,
+    logoUrl: escritorio.logoUrl,
+    email: escritorio.email,
+    telefone: escritorio.telefone,
+    crc: escritorio.crc,
+    cna: escritorio.cna
   } : null
 
   return (
-    <ConfiguracoesClient usuario={usuarioData} contador={contadorData} />
+    <ConfiguracoesClient usuario={usuarioData} escritorio={escritorioData} />
   )
 }

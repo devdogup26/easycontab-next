@@ -17,13 +17,13 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
   const params = await searchParams
   const search = params.search || ''
   const page = Math.max(1, parseInt(params.page || '1', 10))
 
   const where = {
-    contadorId,
+    escritorioId,
     ...(search ? {
       OR: [
         { nomeRazao: { contains: search, mode: 'insensitive' as const } },

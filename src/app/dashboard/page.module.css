@@ -55,7 +55,7 @@
 }
 
 /* ============================================ */
-/* GOB 360° HEADER - Client Base Stats */
+/* Dashboard Header - Client Base Stats */
 /* ============================================ */
 .dashboardContent {
   display: flex;
@@ -63,7 +63,7 @@
   gap: 24px;
 }
 
-.GOB360Header {
+.dashboardHeader {
   display: flex;
   align-items: center;
   gap: 32px;
@@ -76,27 +76,27 @@
   box-shadow: var(--shadow-glass);
 }
 
-.GOB360Stat {
+.headerStat {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.GOB360Icon {
+.headerIcon {
   color: var(--accent);
 }
 
-.GOB360IconSuccess {
+.headerIconSuccess {
   color: var(--success);
 }
 
-.GOB360StatContent {
+.headerStatContent {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.GOB360StatValue {
+.headerStatValue {
   font-size: 32px;
   font-weight: 800;
   color: var(--text-primary);
@@ -104,38 +104,38 @@
   letter-spacing: -0.02em;
 }
 
-.GOB360StatLabel {
+.headerStatLabel {
   font-size: 12px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.GOB360Divider {
+.headerDivider {
   width: 1px;
   height: 48px;
   background: linear-gradient(180deg, transparent, var(--glass-border), transparent);
 }
 
-.GOB360StatGroup {
+.headerStatGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.GOB360Regime {
+.regime {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.GOB360RegimeLabel {
+.regimeLabel {
   font-size: 13px;
   color: var(--text-secondary);
   min-width: 120px;
 }
 
-.GOB360RegimeValue {
+.regimeValue {
   font-size: 15px;
   font-weight: 700;
   color: var(--accent);
@@ -361,16 +361,16 @@
     padding: 24px;
   }
 
-  .GOB360Header {
+  .dashboardHeader {
     flex-wrap: wrap;
     gap: 20px;
   }
 
-  .GOB360Divider {
+  .headerDivider {
     display: none;
   }
 
-  .GOB360StatGroup {
+  .headerStatGroup {
     width: 100%;
     flex-direction: row;
     gap: 24px;
@@ -391,15 +391,15 @@
     gap: 16px;
   }
 
-  .GOB360Header {
+  .dashboardHeader {
     padding: 20px;
   }
 
-  .GOB360StatValue {
+  .headerStatValue {
     font-size: 24px;
   }
 
-  .GOB360StatGroup {
+  .headerStatGroup {
     flex-direction: column;
     gap: 8px;
   }

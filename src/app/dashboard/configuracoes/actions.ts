@@ -43,23 +43,18 @@ export async function updateEscritorio(prevState: ActionState | null, formData: 
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const nome = formData.get('nome') as string
-  const slug = formData.get('slug') as string
 
-  if (!nome || !slug) {
-    return { success: false, error: 'Nome e slug são obrigatórios' }
-  }
-
-  if (!/^[a-z0-9-]+$/.test(slug)) {
-    return { success: false, error: 'Slug deve conter apenas letras minúsculas, números e hifens' }
+  if (!nome) {
+    return { success: false, error: 'Nome é obrigatório' }
   }
 
   try {
-    await prisma.contador.update({
-      where: { id: contadorId },
-      data: { nome, slug }
+    await prisma.escritorio.update({
+      where: { id: escritorioId },
+      data: { nome }
     })
     revalidatePath('/dashboard/configuracoes')
     return { success: true, message: 'Escritório atualizado com sucesso' }

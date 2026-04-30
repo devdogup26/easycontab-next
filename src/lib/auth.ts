@@ -8,18 +8,23 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        login: { label: "Login", type: "text" },
         password: { label: "Senha", type: "password" }
       },
       async authorize(credentials: any) {
-        if (!credentials?.email || !credentials?.password) return null
+        if (!credentials?.login || !credentials?.password) return null
 
-        const user = await prisma.usuario.findUnique({
-          where: { email: credentials.email },
+        // Find user by login or email
+        const user = await prisma.usuario.findFirst({
+          where: {
+            OR: [
+              { login: credentials.login },
+              { email: credentials.login }
+            ]
+          },
           include: {
-            contador: true,
-            perfil: { include: { permissoes: true } },
-            escritorioOwners: { include: { escritorio: true } }
+            escritorio: { select: { id: true, codigo: true, nome: true } },
+            perfil: { include: { permissoes: true } }
           }
         })
 
@@ -30,15 +35,16 @@ export const authOptions: NextAuthOptions = {
 
         return {
           id: user.id,
+          login: user.login,
           email: user.email,
           nome: user.nome,
           globalRole: user.globalRole,
-          contadorId: user.contadorId,
-          contadorNome: user.contador?.nome,
-          escritorioOwners: user.escritorioOwners,
+          escritorioId: user.escritorioId,
+          escritorioCodigo: user.escritorio?.codigo,
+          escritorioNome: user.escritorio?.nome,
           perfil: user.perfil ? {
             nome: user.perfil.nome,
-            isAdmin: user.perfil.isAdmin,
+            isAdmin: user.perfil.nome === 'ADMIN',
             permissoes: user.perfil.permissoes.map((p: any) => p.codigo)
           } : undefined
         }
@@ -53,10 +59,11 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id
+        token.login = user.login
         token.globalRole = user.globalRole
-        token.contadorId = user.contadorId
-        token.contadorNome = user.contadorNome
-        token.escritoriosIds = user.escritorioOwners?.map((eo: any) => eo.escritorioId) || []
+        token.escritorioId = user.escritorioId
+        token.escritorioCodigo = user.escritorioCodigo
+        token.escritorioNome = user.escritorioNome
         token.perfil = user.perfil
         token.permissoes = user.perfil?.permissoes || []
       }
@@ -65,10 +72,11 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }: any) {
       if (session.user) {
         session.user.id = token.id
+        session.user.login = token.login
         session.user.globalRole = token.globalRole
-        session.user.contadorId = token.contadorId
-        session.user.contadorNome = token.contadorNome
-        session.user.escritoriosIds = token.escritoriosIds || []
+        session.user.escritorioId = token.escritorioId
+        session.user.escritorioCodigo = token.escritorioCodigo
+        session.user.escritorioNome = token.escritorioNome
         session.user.perfil = token.perfil
         session.user.permissoes = token.permissoes || []
       }

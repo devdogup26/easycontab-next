@@ -10,11 +10,11 @@ export async function createObrigacao(formData: FormData) {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const clienteId = formData.get('clienteId') as string
   const cliente = await prisma.clienteFinal.findFirst({
-    where: { id: clienteId, contadorId }
+    where: { id: clienteId, escritorioId }
   })
   if (!cliente) throw new Error('Cliente não encontrado')
 

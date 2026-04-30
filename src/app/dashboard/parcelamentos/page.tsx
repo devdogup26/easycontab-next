@@ -14,10 +14,10 @@ export default async function ParcelamentosPage() {
     redirect('/login')
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const parcelamentos = await prisma.parcelamento.findMany({
-    where: { cliente: { contadorId } },
+    where: { cliente: { escritorioId } },
     include: {
       cliente: {
         select: {

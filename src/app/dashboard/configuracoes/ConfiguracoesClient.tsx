@@ -104,7 +104,7 @@ function ProfileForm({ user }: { user: any }) {
   )
 }
 
-function EscritorioForm({ contador }: { contador: any }) {
+function EscritorioForm({ escritorio }: { escritorio: any }) {
   const [state, formAction] = useFormState(updateEscritorio, null)
 
   return (
@@ -118,8 +118,8 @@ function EscritorioForm({ contador }: { contador: any }) {
 
       <div className={styles.logoSection}>
         <div className={styles.logoPreview}>
-          {contador?.logoUrl ? (
-            <img src={contador.logoUrl} alt="Logo" />
+          {escritorio?.logoUrl ? (
+            <img src={escritorio.logoUrl} alt="Logo" />
           ) : (
             <Building2 />
           )}
@@ -137,32 +137,17 @@ function EscritorioForm({ contador }: { contador: any }) {
             type="text"
             id="escritorio-nome"
             name="nome"
-            defaultValue={contador?.nome || ''}
+            defaultValue={escritorio?.nome || ''}
             placeholder="Nome do escritório"
             required
           />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="slug">Slug</label>
-          <input
-            type="text"
-            id="slug"
-            name="slug"
-            defaultValue={contador?.slug || ''}
-            placeholder="nome-escritorio"
-            pattern="[a-z0-9-]+"
-            required
-          />
-          <span className={styles.hint}>
-            URL do seu escritório: dogup.com.br/{contador?.slug || 'seu-slug'}
-          </span>
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="crc">CRC</label>
           <input
             type="text"
             id="crc"
-            defaultValue={contador?.crc || ''}
+            defaultValue={escritorio?.crc || ''}
             readOnly
           />
         </div>
@@ -171,7 +156,7 @@ function EscritorioForm({ contador }: { contador: any }) {
           <input
             type="text"
             id="cna"
-            defaultValue={contador?.cna || ''}
+            defaultValue={escritorio?.cna || ''}
             readOnly
           />
         </div>
@@ -420,10 +405,10 @@ function ApiSection() {
 
 interface ConfiguracoesClientProps {
   usuario: any
-  contador: any
+  escritorio: any
 }
 
-export function ConfiguracoesClient({ usuario, contador }: ConfiguracoesClientProps) {
+export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClientProps) {
   const [activeTab, setActiveTab] = useState('perfil')
 
   return (
@@ -459,7 +444,7 @@ export function ConfiguracoesClient({ usuario, contador }: ConfiguracoesClientPr
         {activeTab === 'escritorio' && (
           <>
             <h2 className={styles.sectionTitle}>Configurações do Escritório</h2>
-            <EscritorioForm contador={contador} />
+            <EscritorioForm escritorio={escritorio} />
           </>
         )}
 

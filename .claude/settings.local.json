@@ -21,7 +21,10 @@
       "Bash(mv dashboard_new dashboard)",
       "Bash(mkdir -p \"D:/projetos/easycontab-next/src/app/api/contadores/[id]/usuarios/[userId]\")",
       "Bash(mkdir -p \"D:/projetos/easycontab-next/src/app/api/contadores/[id]/perfis/[perfilId]\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx tsx *)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"sim\" npx prisma *)",
+      "Bash(git add *)"
     ]
   }
 }

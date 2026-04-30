@@ -9,9 +9,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
   const userId = (session.user as any).id
-  const userName = (session.user as any).name || 'Usuario'
+  const userName = (session.user as any).nome || 'Usuario'
 
   try {
     const formData = await request.formData()
@@ -19,9 +19,9 @@ export async function POST(request: Request) {
     const ano = parseInt(formData.get('ano') as string)
     const mes = parseInt(formData.get('mes') as string)
 
-    // Verify client belongs to contador
+    // Verify client belongs to escritorio
     const cliente = await prisma.clienteFinal.findFirst({
-      where: { id: clienteId, contadorId }
+      where: { id: clienteId, escritorioId }
     })
     if (!cliente) {
       return NextResponse.json({ error: 'Cliente não encontrado' }, { status: 404 })
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       data: {
         usuarioId: userId,
         usuarioNome: userName,
-        contadorId,
+        escritorioId,
         acao: 'CREATE',
         entidade: 'Obrigacao',
         entidadeId: obrigacao.id,

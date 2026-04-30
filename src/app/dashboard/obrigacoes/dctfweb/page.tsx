@@ -11,11 +11,11 @@ export default async function DCTFWebPage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
-  const contadorId = (session.user as any).contadorId
+  const escritorioId = (session.user as any).escritorioId
 
   const obrigacoes = await prisma.obrigacao.findMany({
     where: {
-      cliente: { contadorId },
+      cliente: { escritorioId },
       tipo: 'DCTFWEB'
     },
     include: {
