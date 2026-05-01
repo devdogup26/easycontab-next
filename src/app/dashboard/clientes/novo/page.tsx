@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createClienteSchema, type CreateClienteInput } from '@/lib/validations/cliente';
 import { useRouter } from 'next/navigation';
-import { Building2, Mail, MapPin, User, FileText, Shield } from 'lucide-react';
-import Link from 'next/link';
+import { Mail, MapPin, User, FileText, Shield, Search, Loader2, CheckCircle } from 'lucide-react';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import styles from './page.module.css';
 
@@ -48,10 +47,25 @@ const ESTADO_CIVIL_OPTIONS = [
   { value: 'UNIAO_ESTAVEL', label: 'União Estável' },
 ];
 
+// Format CNPJ/CPF as user types (only for numeric, alphanumeric is kept as-is)
+function formatDocumento(value: string, tipoPessoa: 'PF' | 'PJ'): string {
+  const clean = value.replace(/[^A-Z0-9]/gi, '');
+  if (tipoPessoa === 'PF') {
+    return clean.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+  }
+  // For alphanumeric CNPJ (contains letters), keep as uppercase without formatting
+  if (/[A-Z]/i.test(clean)) {
+    return clean.toUpperCase();
+  }
+  return clean.replace(/^(\d{2})(\d{3})(\d{4})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+}
+
 export default function NovoClientePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isSearchingCnpj, setIsSearchingCnpj] = useState(false);
+  const [cnpjFound, setCnpjFound] = useState(false);
 
   const {
     register,
@@ -69,6 +83,55 @@ export default function NovoClientePage() {
   });
 
   const tipoPessoa = watch('tipoPessoa');
+  const documento = watch('documento') || '';
+
+  async function searchCnpj() {
+    const cleanCnpj = documento.replace(/[^A-Z0-9]/gi, '');
+    if (cleanCnpj.length !== 14) {
+      setServerError('CNPJ deve ter 14 caracteres');
+      return;
+    }
+
+    setIsSearchingCnpj(true);
+    setServerError(null);
+    setCnpjFound(false);
+
+    try {
+      const response = await fetch(`/api/cnpj/${cleanCnpj}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao consultar CNPJ');
+      }
+
+      if (data.message) {
+        setServerError(data.message);
+        setIsSearchingCnpj(false);
+        return;
+      }
+
+      if (data.nomeRazao) setValue('nomeRazao', data.nomeRazao);
+      if (data.nomeFantasia) setValue('nomeFantasia', data.nomeFantasia);
+      if (data.inscricaoEstadual) setValue('inscricaoEstadual', data.inscricaoEstadual);
+      if (data.situacaoFiscal) setValue('situacaoFiscal', data.situacaoFiscal);
+      if (data.regime) setValue('regime', data.regime);
+      if (data.logradouro) setValue('logradouro', data.logradouro);
+      if (data.bairro) setValue('bairro', data.bairro);
+      if (data.cidade) setValue('cidade', data.cidade);
+      if (data.uf) setValue('uf', data.uf);
+      if (data.cep) setValue('cep', data.cep);
+      if (data.email) setValue('email', data.email);
+      if (data.telefone) setValue('telefone', data.telefone);
+
+      setCnpjFound(true);
+      setTimeout(() => setCnpjFound(false), 3000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'CNPJ não encontrado na Receita Federal';
+      setServerError(errorMessage);
+    } finally {
+      setIsSearchingCnpj(false);
+    }
+  }
 
   async function onSubmit(data: CreateClienteInput) {
     setIsLoading(true);
@@ -125,6 +188,13 @@ export default function NovoClientePage() {
             </div>
           )}
 
+          {cnpjFound && (
+            <div className={styles.successBanner}>
+              <CheckCircle size={16} />
+              Dados preenchidos automaticamente a partir da Receita Federal!
+            </div>
+          )}
+
           {/* Dados principais */}
           <div className={styles.formSection}>
             <h2 className={styles.sectionTitle}>
@@ -142,14 +212,38 @@ export default function NovoClientePage() {
                 />
               </div>
 
-              <div className={styles.field}>
+              <div className={`${styles.field} ${styles.cnpjField}`}>
                 <label className={styles.label}>{tipoPessoa === 'PF' ? 'CPF *' : 'CNPJ *'}</label>
-                <input
-                  type="text"
-                  {...register('documento')}
-                  className={`${styles.input} ${errors.documento ? styles.inputError : ''}`}
-                  placeholder={tipoPessoa === 'PF' ? '000.000.000-00' : '00.000.000/0000-00'}
-                />
+                <div className={styles.cnpjInput}>
+                  <input
+                    type="text"
+                    {...register('documento', {
+                      onChange: (e) => {
+                        const formatted = formatDocumento(e.target.value, tipoPessoa);
+                        setValue('documento', formatted, { shouldValidate: true });
+                      },
+                    })}
+                    className={`${styles.input} ${errors.documento ? styles.inputError : ''}`}
+                    placeholder={tipoPessoa === 'PF' ? '000.000.000-00' : '00.000.000/0000-00 ou ABCD12XY0001AB'}
+                    maxLength={tipoPessoa === 'PF' ? 14 : 18}
+                  />
+                  {tipoPessoa === 'PJ' && (
+                    <button
+                      type="button"
+                      onClick={searchCnpj}
+                      disabled={isSearchingCnpj || documento.replace(/[^A-Z0-9]/gi, '').length !== 14}
+                      className={styles.searchCnpjBtn}
+                      title="Buscar CNPJ na Receita Federal"
+                    >
+                      {isSearchingCnpj ? (
+                        <Loader2 size={16} className={styles.spin} />
+                      ) : (
+                        <Search size={16} />
+                      )}
+                      {isSearchingCnpj ? 'Buscando...' : 'Receita Federal'}
+                    </button>
+                  )}
+                </div>
                 {errors.documento && <p className={styles.fieldError}>{errors.documento.message}</p>}
               </div>
 

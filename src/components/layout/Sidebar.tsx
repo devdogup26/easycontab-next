@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { usePermissionsStore } from '@/stores/permissions';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import {
   Home,
   Users,
@@ -57,7 +58,7 @@ const usuarioNavItems: NavItem[] = [
     icon: FileText,
     code: 'obrigacoes:read',
     children: [
-      { label: 'Tipos de Obrigações', href: '/dashboard/obrigacoes' },
+      { label: 'Tipos de Obrigações', href: '/dashboard/obrigacoes/tipos' },
       { label: 'Prazos de Entrega', href: '/dashboard/obrigacoes/prazos' },
       { label: 'DCTFWeb em Andamento', href: '/dashboard/obrigacoes/dctfweb' },
       { label: 'Todas as Obrigações', href: '/dashboard/obrigacoes' },
@@ -100,6 +101,7 @@ export function Sidebar() {
   const { data: session } = useSession();
   const { isAdmin } = usePermissionsStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
   // Admin sees admin nav, otherwise regular usuario nav
@@ -198,11 +200,7 @@ export function Sidebar() {
             </div>
           )}
           <button
-            onClick={() => {
-              if (confirm('Deseja realmente sair?')) {
-                signOut({ callbackUrl: '/login' });
-              }
-            }}
+            onClick={() => setShowLogoutDialog(true)}
             className={styles.logoutBtn}
           >
             <LogOut size={18} />
@@ -210,6 +208,17 @@ export function Sidebar() {
           </button>
         </div>
       </aside>
-    </>
-  );
-}
+
+        <ConfirmDialog
+          isOpen={showLogoutDialog}
+          title="Sair do Sistema"
+          message="Deseja realmente sair?"
+          confirmLabel="Sair"
+          cancelLabel="Cancelar"
+          variant="default"
+          onConfirm={() => signOut({ callbackUrl: '/login' })}
+          onCancel={() => setShowLogoutDialog(false)}
+        />
+      </>
+    );
+  }

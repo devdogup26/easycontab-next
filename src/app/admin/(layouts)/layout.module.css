@@ -7,7 +7,9 @@
   flex: 1;
   margin-left: 260px;
   min-height: 100vh;
-  background: var(--background);
+  background: var(--page-bg);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
 }
 
 /* Usuarios page extras */

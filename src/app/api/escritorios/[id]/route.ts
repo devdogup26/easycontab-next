@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 // GET /api/escritorios/[id] - Get single escritorio with full details
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -59,7 +60,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { nome, documento, email, telefone, crc, status, dataVencimento } = body;
 
   try {
-    const escritorio = await prisma.escritorio.update({
+    // Fetch current escritorio before update for audit
+    const oldEscritorio = await prisma.escritorio.findUnique({
+      where: { id },
+    });
+
+    if (!oldEscritorio) {
+      return NextResponse.json({ error: 'Escritório não encontrado' }, { status: 404 });
+    }
+
+    const updatedEscritorio = await prisma.escritorio.update({
       where: { id },
       data: {
         nome,
@@ -72,7 +82,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
 
-    return NextResponse.json(escritorio);
+    // Fire-and-forget audit logging
+    registrarAuditoria({
+      acao: 'UPDATE',
+      entidade: 'Escritorio',
+      entidadeId: id,
+      dadosAntigos: oldEscritorio,
+      dadosNovos: updatedEscritorio,
+    }).catch(() => {});
+
+    return NextResponse.json(updatedEscritorio);
   } catch (error: any) {
     console.error('Error updating escritorio:', error);
     if (error.code === 'P2025') {
@@ -100,9 +119,27 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id } = await params;
 
   try {
+    // Fetch escritorio before deletion for audit
+    const deletedEscritorio = await prisma.escritorio.findUnique({
+      where: { id },
+    });
+
+    if (!deletedEscritorio) {
+      return NextResponse.json({ error: 'Escritório não encontrado' }, { status: 404 });
+    }
+
     await prisma.escritorio.delete({
       where: { id },
     });
+
+    // Fire-and-forget audit logging
+    registrarAuditoria({
+      acao: 'DELETE',
+      entidade: 'Escritorio',
+      entidadeId: id,
+      dadosAntigos: deletedEscritorio,
+      dadosNovos: null,
+    }).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

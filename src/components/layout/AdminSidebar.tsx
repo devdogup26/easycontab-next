@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { BarChart3, Building2, Settings, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from './AdminSidebar.module.css';
 
 type NavItem = {
@@ -25,6 +26,7 @@ export function AdminSidebar() {
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const toggleMobile = () => setMobileOpen(!mobileOpen);
   const closeMobile = () => setMobileOpen(false);
@@ -116,11 +118,7 @@ export function AdminSidebar() {
             </div>
           )}
           <button
-            onClick={() => {
-              if (confirm('Deseja realmente sair?')) {
-                signOut({ callbackUrl: '/login' });
-              }
-            }}
+            onClick={() => setShowLogoutDialog(true)}
             className={styles.logoutBtn}
           >
             <LogOut size={18} />
@@ -128,6 +126,17 @@ export function AdminSidebar() {
           </button>
         </div>
       </aside>
+
+      <ConfirmDialog
+        isOpen={showLogoutDialog}
+        title="Sair do Sistema"
+        message="Deseja realmente sair?"
+        confirmLabel="Sair"
+        cancelLabel="Cancelar"
+        variant="default"
+        onConfirm={() => signOut({ callbackUrl: '/login' })}
+        onCancel={() => setShowLogoutDialog(false)}
+      />
     </>
   );
 }

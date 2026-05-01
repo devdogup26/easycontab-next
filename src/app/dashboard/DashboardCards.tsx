@@ -48,6 +48,10 @@ interface ParcelamentoAlert {
   simplesAtraso: number;
   simplificadoTotal: number;
   simplificadoAtraso: number;
+  naoPrevTotal: number;
+  naoPrevAtraso: number;
+  prevTotal: number;
+  prevAtraso: number;
 }
 
 interface DashboardData {
@@ -98,7 +102,7 @@ export function DashboardCards({ data }: DashboardCardsProps) {
           </span>
         </div>
         <div className={styles.headerDivider} />
-        <div className={styles.headerStat}>
+        <div className={`${styles.headerStat} ${styles.headerStatSuccess}`}>
           <CheckCircle size={24} className={styles.headerIconSuccess} />
           <div className={styles.headerStatContent}>
             <span className={styles.headerStatValue}>
@@ -163,6 +167,16 @@ export function DashboardCards({ data }: DashboardCardsProps) {
                 label="Simplificado"
                 total={parcelamentoAlert.simplificadoTotal}
                 atrasado={parcelamentoAlert.simplificadoAtraso}
+              />
+              <ParcelamentoBadge
+                label="Não Prev."
+                total={parcelamentoAlert.naoPrevTotal}
+                atrasado={parcelamentoAlert.naoPrevAtraso}
+              />
+              <ParcelamentoBadge
+                label="Prev."
+                total={parcelamentoAlert.prevTotal}
+                atrasado={parcelamentoAlert.prevAtraso}
               />
             </div>
           </div>

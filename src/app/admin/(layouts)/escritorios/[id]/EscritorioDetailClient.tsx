@@ -16,6 +16,7 @@ import {
   Shield,
 } from 'lucide-react';
 import Link from 'next/link';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from '../../dashboard/page.module.css';
 
 interface Escritorio {
@@ -87,6 +88,10 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
     tipoPerfil: 'OPERADOR',
   });
   const [userError, setUserError] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; usuario: Usuario | null }>({
+    isOpen: false,
+    usuario: null,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,11 +199,15 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
 
   async function handleDeleteUser(usuario: Usuario) {
     if (usuario.email === 'admin@dogup.com.br') {
-      alert('Usuário sistema não pode ser excluído');
+      setUserError('Usuário sistema não pode ser excluído');
       return;
     }
-    if (!confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) return;
+    setDeleteConfirm({ isOpen: true, usuario });
+  }
 
+  const confirmDeleteUser = async () => {
+    const usuario = deleteConfirm.usuario;
+    if (!usuario) return;
     try {
       const res = await fetch(`/api/escritorios/${escritorio.id}/usuarios/${usuario.id}`, {
         method: 'DELETE',
@@ -207,11 +216,13 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
         const data = await res.json();
         throw new Error(data.error || 'Erro ao excluir');
       }
+      setDeleteConfirm({ isOpen: false, usuario: null });
       loadUsuarios();
     } catch (err: any) {
-      alert(err.message);
+      setUserError(err.message);
+      setDeleteConfirm({ isOpen: false, usuario: null });
     }
-  }
+  };
 
   return (
     <div className={styles.detailContainer}>

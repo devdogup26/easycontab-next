@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Users } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Users, Search, Filter } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from '../dashboard/page.module.css';
 
 interface Escritorio {
@@ -20,9 +21,15 @@ interface Escritorio {
 
 interface EscritoriosClientProps {
   escritorios: Escritorio[];
+  total: number;
+  page: number;
+  totalPages: number;
+  search: string;
+  status: string;
 }
 
 const STATUS_OPTIONS = [
+  { value: '', label: 'Todos os status' },
   { value: 'ATIVO', label: 'Ativo' },
   { value: 'VENCIDO', label: 'Vencido' },
   { value: 'SUSPENSO', label: 'Suspenso' },
@@ -44,7 +51,7 @@ function getVencimentoStatus(dataVencimento: Date | string | null): 'ok' | 'prox
   return 'ok';
 }
 
-export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
+export function EscritoriosClient({ escritorios, total, page, totalPages, search, status }: EscritoriosClientProps) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [editingEscritorio, setEditingEscritorio] = useState<Escritorio | null>(null);
@@ -59,6 +66,22 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; escritorioId: string | null; escritorioNome: string }>({
+    isOpen: false,
+    escritorioId: null,
+    escritorioNome: '',
+  });
+
+  const buildUrl = (updates: Record<string, string | null>) => {
+    const params = new URLSearchParams();
+    const base = { search, status, page: String(page) };
+    const merged = { ...base, ...updates };
+    Object.entries(merged).forEach(([k, v]) => {
+      if (v && v !== '' && v !== '1') params.set(k, v);
+    });
+    const str = params.toString();
+    return `/admin/escritorios${str ? '?' + str : ''}`;
+  };
 
   const openNewModal = () => {
     setEditingEscritorio(null);
@@ -140,26 +163,62 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (
-      !confirm('Tem certeza que deseja excluir este escritório? Esta ação não pode ser desfeita.')
-    ) {
-      return;
-    }
+    const escritorio = escritorios.find(e => e.id === id);
+    if (!escritorio) return;
+    setDeleteConfirm({ isOpen: true, escritorioId: id, escritorioNome: escritorio.nome });
+  };
 
+  const confirmDelete = async () => {
+    if (!deleteConfirm.escritorioId) return;
     try {
-      const res = await fetch(`/api/escritorios/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/escritorios/${deleteConfirm.escritorioId}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Erro ao excluir');
       }
+      setDeleteConfirm({ isOpen: false, escritorioId: null, escritorioNome: '' });
       router.refresh();
     } catch (err: any) {
-      alert(err.message);
+      setError(err.message);
+      setDeleteConfirm({ isOpen: false, escritorioId: null, escritorioNome: '' });
     }
   };
 
   return (
     <>
+      {/* Search and Filter Bar */}
+      <form method="GET" className={styles.searchBar}>
+        <div className={styles.searchInputWrapper}>
+          <Search size={16} className={styles.searchIcon} />
+          <input
+            type="text"
+            name="search"
+            defaultValue={search}
+            placeholder="Buscar por nome, CNPJ ou email..."
+            className={styles.searchInput}
+            style={{ paddingLeft: '40px' }}
+          />
+        </div>
+        <select
+          name="status"
+          defaultValue={status}
+          className={styles.filterSelect}
+        >
+          {STATUS_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <button type="submit" className={styles.pageButton}>
+          <Filter size={14} />
+          Filtrar
+        </button>
+        {(search || status) && (
+          <Link href="/admin/escritorios" className={styles.secondaryButton}>
+            Limpar
+          </Link>
+        )}
+      </form>
+
       {/* Table Card */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
@@ -265,6 +324,25 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
           </table>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          {page > 1 && (
+            <Link href={buildUrl({ page: String(page - 1) })} className={styles.pageButton}>
+              Anterior
+            </Link>
+          )}
+          <span className={styles.pageInfo}>
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link href={buildUrl({ page: String(page + 1) })} className={styles.pageButton}>
+              Próxima
+            </Link>
+          )}
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (
@@ -379,6 +457,17 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.isOpen}
+        title="Excluir Escritório"
+        message={`Tem certeza que deseja excluir "${deleteConfirm.escritorioNome}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, escritorioId: null, escritorioNome: '' })}
+      />
     </>
   );
 }

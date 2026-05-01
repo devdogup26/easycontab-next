@@ -82,6 +82,14 @@ export default async function DashboardPage() {
     simplificadoAtraso: parcelamentos
       .filter(p => p.tipo === 'SIMPLIFICADO' && p.parcelasEmAtraso > 0)
       .reduce((sum, p) => sum + p.parcelasEmAtraso, 0),
+    naoPrevTotal: parcelamentos.filter(p => p.tipo === 'NAO_PREVIDENCIARIO').length,
+    naoPrevAtraso: parcelamentos
+      .filter(p => p.tipo === 'NAO_PREVIDENCIARIO' && p.parcelasEmAtraso > 0)
+      .reduce((sum, p) => sum + p.parcelasEmAtraso, 0),
+    prevTotal: parcelamentos.filter(p => p.tipo === 'PREVIDENCIARIO').length,
+    prevAtraso: parcelamentos
+      .filter(p => p.tipo === 'PREVIDENCIARIO' && p.parcelasEmAtraso > 0)
+      .reduce((sum, p) => sum + p.parcelasEmAtraso, 0),
   };
 
   // ============================================

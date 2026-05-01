@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
+import { registrarAuditoria } from '@/lib/auditoria';
 import bcrypt from 'bcryptjs';
 
 // GET /api/escritorios - List all escritorios (SUPER_ADMIN only)
@@ -56,6 +57,8 @@ export async function POST(req: NextRequest) {
     `;
     const nextCode = nextCodeResult[0].max || 1;
 
+    const user = session.user as any;
+
     // Create Escritorio standalone
     const escritorio = await prisma.escritorio.create({
       data: {
@@ -70,6 +73,15 @@ export async function POST(req: NextRequest) {
         tipoPessoa: tipoPessoa || 'PJ',
       },
     });
+
+    // Fire-and-forget audit logging
+    registrarAuditoria({
+      acao: 'CREATE',
+      entidade: 'Escritorio',
+      entidadeId: escritorio.id,
+      dadosAntigos: null,
+      dadosNovos: escritorio,
+    }).catch(() => {});
 
     // Create default profiles
     const perfilAdmin = await prisma.perfil.create({

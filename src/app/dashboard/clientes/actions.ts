@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClienteSchema, updateClienteSchema } from '@/lib/validations/cliente';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 export async function createCliente(prevState: any, formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -56,7 +57,7 @@ export async function createCliente(prevState: any, formData: FormData) {
   }
 
   try {
-    await prisma.clienteFinal.create({
+    const createdCliente = await prisma.clienteFinal.create({
       data: {
         tipoPessoa: data.tipoPessoa,
         documento: formattedDocumento,
@@ -76,6 +77,20 @@ export async function createCliente(prevState: any, formData: FormData) {
         responsavelTecnico: data.responsavelTecnico,
         escritorioId,
       },
+    });
+
+    const user = session.user as any;
+    registrarAuditoria({
+      usuarioId: user.id,
+      usuarioNome: user.nome || user.email,
+      escritorioId,
+      acao: 'CREATE',
+      entidade: 'Cliente',
+      entidadeId: createdCliente.id,
+      dadosAntigos: null,
+      dadosNovos: createdCliente,
+      ipAddress: null,
+      userAgent: null,
     });
 
     revalidatePath('/dashboard/clientes');
@@ -146,7 +161,7 @@ export async function updateCliente(id: string, prevState: any, formData: FormDa
   }
 
   try {
-    const cliente = await prisma.clienteFinal.update({
+    const updatedCliente = await prisma.clienteFinal.update({
       where: { id },
       data: {
         ...data,
@@ -163,10 +178,24 @@ export async function updateCliente(id: string, prevState: any, formData: FormDa
       },
     });
 
+    const user = session.user as any;
+    registrarAuditoria({
+      usuarioId: user.id,
+      usuarioNome: user.nome || user.email,
+      escritorioId,
+      acao: 'UPDATE',
+      entidade: 'Cliente',
+      entidadeId: updatedCliente.id,
+      dadosAntigos: existing,
+      dadosNovos: updatedCliente,
+      ipAddress: null,
+      userAgent: null,
+    });
+
     revalidatePath('/dashboard/clientes');
     revalidatePath(`/dashboard/clientes/${id}`);
 
-    return { success: true, cliente };
+    return { success: true, cliente: updatedCliente };
   } catch (error: any) {
     if (error?.message?.includes('Unique constraint')) {
       return { errors: { documento: ['Cliente já cadastrado com este documento'] } };

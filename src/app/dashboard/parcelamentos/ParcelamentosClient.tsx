@@ -68,9 +68,7 @@ export function ParcelamentosClient({ parcelamentos, stats }: ParcelamentosClien
               className={`${styles.statCard} ${hasAtraso ? styles.statCardAtraso : ''}`}
             >
               {hasAtraso && (
-                <div className={styles.urgencyBadge}>
-                  <AlertTriangle size={14} />
-                </div>
+                <div className={styles.urgencyDot} />
               )}
               <div className={styles.statHeader}>
                 <span className={styles.statLabel}>{TIPO_LABELS[tipo]}</span>

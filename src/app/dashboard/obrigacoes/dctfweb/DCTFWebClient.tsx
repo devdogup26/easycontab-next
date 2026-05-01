@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
+import { useAlertsStore } from '@/stores/alerts';
 import styles from './page.module.css';
 
 interface Cliente {
@@ -22,6 +24,9 @@ interface Obrigacao {
 
 interface DCTFWebClientProps {
   obrigacoes: Obrigacao[];
+  page: number;
+  totalPages: number;
+  buildUrl: (updates: Record<string, string | null>) => string;
 }
 
 function getMonthName(month: number): string {
@@ -55,11 +60,12 @@ function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString('pt-BR');
 }
 
-export default function DCTFWebClient({ obrigacoes }: DCTFWebClientProps) {
-  const [transmitting, setTransmitting] = useState(false);
+export default function DCTFWebClient({ obrigacoes, page, totalPages, buildUrl }: DCTFWebClientProps) {
+  const [transmitting, setTransmitting] = useState<string | null>(null);
+  const { addToast } = useAlertsStore();
 
   const handleTransmit = async (clienteId: string, ano: number, mes: number) => {
-    setTransmitting(true);
+    setTransmitting(`${clienteId}-${ano}-${mes}`);
     try {
       const formData = new FormData();
       formData.set('clienteId', clienteId);
@@ -78,53 +84,73 @@ export default function DCTFWebClient({ obrigacoes }: DCTFWebClientProps) {
       window.location.reload();
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao transmitir DCTFWeb');
+      addToast({ id: Date.now().toString(), titulo: 'Erro', mensagem: 'Erro ao transmitir DCTFWeb', tipo: 'error', urgente: true });
     } finally {
-      setTransmitting(false);
+      setTransmitting(null);
     }
   };
 
   return (
-    <div className={styles.tableContainer}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th className={styles.th}>CNPJ</th>
-            <th className={styles.th}>Cliente</th>
-            <th className={styles.th}>Período</th>
-            <th className={styles.th}>Status</th>
-            <th className={styles.th}>Início</th>
-          </tr>
-        </thead>
-        <tbody>
-          {obrigacoes.length === 0 ? (
+    <>
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead>
             <tr>
-              <td colSpan={5} className={styles.emptyState}>
-                Nenhuma DCTFWeb em andamento
-              </td>
+              <th className={styles.th}>CNPJ</th>
+              <th className={styles.th}>Cliente</th>
+              <th className={styles.th}>Período</th>
+              <th className={styles.th}>Status</th>
+              <th className={styles.th}>Início</th>
             </tr>
-          ) : (
-            obrigacoes.map(obg => {
-              const statusInfo = getStatusInfo(obg.status);
-              return (
-                <tr key={obg.id} className={styles.tr}>
-                  <td className={styles.td}>{obg.cliente.documento}</td>
-                  <td className={styles.td}>{obg.cliente.nomeRazao}</td>
-                  <td className={styles.td + ' ' + styles.textCenter}>
-                    {getMonthName(obg.mes)}/{obg.ano}
-                  </td>
-                  <td className={styles.td}>
-                    <span className={`${styles.badge} ${statusInfo.class}`}>
-                      {statusInfo.label}
-                    </span>
-                  </td>
-                  <td className={styles.td}>{formatDate(obg.createdAt)}</td>
-                </tr>
-              );
-            })
+          </thead>
+          <tbody>
+            {obrigacoes.length === 0 ? (
+              <tr>
+                <td colSpan={5} className={styles.emptyState}>
+                  Nenhuma DCTFWeb encontrada
+                </td>
+              </tr>
+            ) : (
+              obrigacoes.map(obg => {
+                const statusInfo = getStatusInfo(obg.status);
+                return (
+                  <tr key={obg.id} className={styles.tr}>
+                    <td className={styles.td}>{obg.cliente.documento}</td>
+                    <td className={styles.td}>{obg.cliente.nomeRazao}</td>
+                    <td className={styles.td + ' ' + styles.textCenter}>
+                      {getMonthName(obg.mes)}/{obg.ano}
+                    </td>
+                    <td className={styles.td}>
+                      <span className={`${styles.badge} ${statusInfo.class}`}>
+                        {statusInfo.label}
+                      </span>
+                    </td>
+                    <td className={styles.td}>{formatDate(obg.createdAt)}</td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          {page > 1 && (
+            <Link href={buildUrl({ page: String(page - 1) })} className={styles.pageBtn}>
+              Anterior
+            </Link>
           )}
-        </tbody>
-      </table>
-    </div>
+          <span className={styles.pageInfo}>
+            Página {page} de {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link href={buildUrl({ page: String(page + 1) })} className={styles.pageBtn}>
+              Próxima
+            </Link>
+          )}
+        </div>
+      )}
+    </>
   );
 }

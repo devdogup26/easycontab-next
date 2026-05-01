@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import bcrypt from 'bcryptjs';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 // PUT /api/escritorios/[id]/usuarios/[userId] - Update usuario
 export async function PUT(
@@ -22,6 +23,8 @@ export async function PUT(
   const { nome, email, cargo, senha } = body;
 
   try {
+    const oldUsuario = await prisma.usuario.findUnique({ where: { id: userId } });
+
     const updateData: any = { nome, email, cargo };
     if (senha) updateData.senha = await bcrypt.hash(senha, 10);
 
@@ -30,6 +33,22 @@ export async function PUT(
       data: updateData,
       include: { perfil: { select: { id: true, nome: true, isAdmin: true } } },
     });
+
+    const auditUser = session.user as any;
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
+    registrarAuditoria({
+      usuarioId: auditUser.id,
+      usuarioNome: auditUser.nome,
+      escritorioId: id,
+      acao: 'UPDATE',
+      entidade: 'Usuario',
+      entidadeId: usuario.id,
+      dadosAntigos: oldUsuario,
+      dadosNovos: usuario,
+      ipAddress,
+      userAgent: req.headers.get('user-agent'),
+    }).catch((err) => console.error('[AUDITORIA]', err));
+
     return NextResponse.json(usuario);
   } catch (error: any) {
     if (error.code === 'P2025')
@@ -61,7 +80,22 @@ export async function DELETE(
   }
 
   try {
-    await prisma.usuario.delete({ where: { id: userId } });
+    const deletedUsuario = await prisma.usuario.delete({ where: { id: userId } });
+    const auditUser = session.user as any;
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
+    registrarAuditoria({
+      usuarioId: auditUser.id,
+      usuarioNome: auditUser.nome,
+      escritorioId: id,
+      acao: 'DELETE',
+      entidade: 'Usuario',
+      entidadeId: userId,
+      dadosAntigos: deletedUsuario,
+      dadosNovos: null,
+      ipAddress,
+      userAgent: req.headers.get('user-agent'),
+    }).catch((err) => console.error('[AUDITORIA]', err));
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error.code === 'P2025')

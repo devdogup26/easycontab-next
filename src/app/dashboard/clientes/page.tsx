@@ -9,10 +9,23 @@ import sharedStyles from '../_shared.module.css';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  searchParams: Promise<{ search?: string; page?: string }>;
+  searchParams: Promise<{ search?: string; tipo?: string; situacao?: string; page?: string }>;
 }
 
 const PAGE_SIZE = 20;
+
+const TIPO_OPTIONS = [
+  { value: '', label: 'Todos os tipos' },
+  { value: 'PJ', label: 'Pessoa Jurídica' },
+  { value: 'PF', label: 'Pessoa Física' },
+];
+
+const SITUACAO_OPTIONS = [
+  { value: '', label: 'Todas as situações' },
+  { value: 'REGULAR', label: 'Regular' },
+  { value: 'REGULARIZADO', label: 'Regularizado' },
+  { value: 'IRREGULAR', label: 'Irregular' },
+];
 
 export default async function ClientesPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions);
@@ -21,6 +34,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const escritorioId = (session.user as any).escritorioId;
   const params = await searchParams;
   const search = params.search || '';
+  const tipo = params.tipo || '';
+  const situacao = params.situacao || '';
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
   const where = {
@@ -34,6 +49,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           ],
         }
       : {}),
+    ...(tipo ? { tipoPessoa: tipo as 'PJ' | 'PF' } : {}),
+    ...(situacao ? { situacaoFiscal: situacao as 'REGULAR' | 'REGULARIZADO' | 'IRREGULAR' } : {}),
   };
 
   const [clientes, total] = await Promise.all([
@@ -48,11 +65,23 @@ export default async function ClientesPage({ searchParams }: PageProps) {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
+  const buildUrl = (updates: Record<string, string | null>) => {
+    const base = { search, tipo, situacao, page: String(page) };
+    const merged = { ...base, ...updates };
+    const params = new URLSearchParams();
+    Object.entries(merged).forEach(([k, v]) => {
+      if (v && v !== '' && v !== '1') params.set(k, v);
+    });
+    const str = params.toString();
+    return `/dashboard/clientes${str ? '?' + str : ''}`;
+  };
+
   return (
     <div className={styles.page}>
       <div className={sharedStyles.header}>
         <div className={sharedStyles.headerContent}>
           <h1 className={sharedStyles.title}>Clientes</h1>
+          <p className={sharedStyles.subtitle}>{total} cliente{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}</p>
         </div>
         <Link href="/dashboard/clientes/novo" className={sharedStyles.newButton}>
           + Novo Cliente
@@ -67,11 +96,21 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           placeholder="Buscar por nome, documento ou cidade..."
           className={sharedStyles.searchInput}
         />
+        <select name="tipo" defaultValue={tipo} className={sharedStyles.filterSelect}>
+          {TIPO_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <select name="situacao" defaultValue={situacao} className={sharedStyles.filterSelect}>
+          {SITUACAO_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
         <button type="submit" className={sharedStyles.pageButton}>
-          Buscar
+          Filtrar
         </button>
-        {search && (
-          <Link href="/dashboard/clientes" className={sharedStyles.pageButton}>
+        {(search || tipo || situacao) && (
+          <Link href="/dashboard/clientes" className={sharedStyles.secondaryButton}>
             Limpar
           </Link>
         )}
@@ -118,10 +157,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
           {totalPages > 1 && (
             <div className={sharedStyles.pagination}>
               {page > 1 && (
-                <Link
-                  href={`/dashboard/clientes?page=${page - 1}${search ? `&search=${search}` : ''}`}
-                  className={sharedStyles.pageButton}
-                >
+                <Link href={buildUrl({ page: String(page - 1) })} className={sharedStyles.pageButton}>
                   Anterior
                 </Link>
               )}
@@ -129,10 +165,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                 Página {page} de {totalPages}
               </span>
               {page < totalPages && (
-                <Link
-                  href={`/dashboard/clientes?page=${page + 1}${search ? `&search=${search}` : ''}`}
-                  className={sharedStyles.pageButton}
-                >
+                <Link href={buildUrl({ page: String(page + 1) })} className={sharedStyles.pageButton}>
                   Próxima
                 </Link>
               )}

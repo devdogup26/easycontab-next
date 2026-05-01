@@ -179,14 +179,14 @@ function NotificacoesForm() {
       </div>
 
       <div className={styles.toggleRow}>
-        <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+        <div className={styles.formGroup}>
           <label htmlFor="frequency">Frequência de emails</label>
           <select
             id="frequency"
             name="frequency"
             value={frequency}
             onChange={e => setFrequency(e.target.value)}
-            style={{ minWidth: '150px' }}
+            className={styles.toggleSelect}
           >
             <option value="daily">Diário</option>
             <option value="weekly">Semanal</option>
@@ -217,43 +217,39 @@ function SegurancaForm({ user }: { user: any }) {
       )}
 
       <div className={styles.divider}>
-        <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '12px' }}>
-          Alterar senha
-        </h3>
-        <form action={formAction} style={{ maxWidth: '400px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div className={styles.formGroup}>
-              <label htmlFor="currentPassword">Senha atual</label>
-              <input
-                type="password"
-                id="currentPassword"
-                name="currentPassword"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="newPassword">Nova senha</label>
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                placeholder="Mínimo 6 caracteres"
-                required
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="confirmPassword">Confirmar nova senha</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+        <h3>Alterar senha</h3>
+        <form className={styles.dividerForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="currentPassword">Senha atual</label>
+            <input
+              type="password"
+              id="currentPassword"
+              name="currentPassword"
+              placeholder="••••••••"
+              required
+            />
           </div>
-          <div style={{ marginTop: '16px' }}>
+          <div className={styles.formGroup}>
+            <label htmlFor="newPassword">Nova senha</label>
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="confirmPassword">Confirmar nova senha</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <div className={styles.dividerFormActions}>
             <SubmitButton label="Atualizar senha" />
           </div>
         </form>
@@ -271,10 +267,8 @@ function SegurancaForm({ user }: { user: any }) {
         </div>
       </div>
 
-      <div>
-        <h3 style={{ fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '12px' }}>
-          Sessões ativas
-        </h3>
+      <div className={styles.divider}>
+        <h3>Sessões ativas</h3>
         <div className={styles.sessionsList}>
           <div className={styles.session}>
             <div className={styles.sessionInfo}>
@@ -378,10 +372,12 @@ export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClient
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Configurações</h1>
-        <p className={styles.subtitle}>Gerencie suas preferências e configurações da conta</p>
-      </header>
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Configurações</h1>
+          <p className={styles.subtitle}>Gerencie suas preferências e configurações da conta</p>
+        </div>
+      </div>
 
       <div className={styles.tabs}>
         {tabs.map(tab => (
@@ -396,7 +392,7 @@ export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClient
         ))}
       </div>
 
-      <div className={styles.content} style={{ padding: '24px' }}>
+      <div className={styles.card}>
         {activeTab === 'perfil' && (
           <>
             <h2 className={styles.sectionTitle}>Perfil do Usuário</h2>

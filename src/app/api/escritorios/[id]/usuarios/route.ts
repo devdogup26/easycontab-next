@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import bcrypt from 'bcryptjs';
+import { registrarAuditoria } from '@/lib/auditoria';
 
 // GET /api/escritorios/[id]/usuarios - List usuarios for escritorio
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -84,6 +85,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       },
       include: { perfil: { select: { id: true, nome: true, isAdmin: true } } },
     });
+
+    const auditUser = session.user as any;
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
+    registrarAuditoria({
+      usuarioId: auditUser.id,
+      usuarioNome: auditUser.nome,
+      escritorioId: id,
+      acao: 'CREATE',
+      entidade: 'Usuario',
+      entidadeId: usuario.id,
+      dadosAntigos: null,
+      dadosNovos: usuario,
+      ipAddress,
+      userAgent: req.headers.get('user-agent'),
+    }).catch((err) => console.error('[AUDITORIA]', err));
+
     return NextResponse.json(usuario, { status: 201 });
   } catch (error: any) {
     if (error.code === 'P2002')
