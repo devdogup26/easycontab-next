@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Glassmorphism Theme - Deep Space */
 :root {
@@ -14,7 +14,11 @@
 
   /* Sidebar Glass */
   --sidebar-bg: rgba(15, 12, 41, 0.8);
-  --sidebar-bg-gradient: linear-gradient(180deg, rgba(26, 26, 62, 0.95) 0%, rgba(15, 12, 41, 0.98) 100%);
+  --sidebar-bg-gradient: linear-gradient(
+    180deg,
+    rgba(26, 26, 62, 0.95) 0%,
+    rgba(15, 12, 41, 0.98) 100%
+  );
   --sidebar-text: rgba(255, 255, 255, 0.6);
   --sidebar-text-active: #ffffff;
   --sidebar-hover: rgba(139, 92, 246, 0.2);
@@ -84,7 +88,11 @@ body {
   background-image: var(--bg-gradient);
   background-attachment: fixed;
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -110,8 +118,13 @@ body::before {
 }
 
 @keyframes ambientMove {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.1) rotate(2deg); }
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(2deg);
+  }
 }
 
 /* Custom Scrollbar */
@@ -148,41 +161,85 @@ body::before {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.5); }
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  }
 }
 
-.animate-fadeIn { animation: fadeIn 0.4s ease-out; }
-.animate-slideUp { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-.animate-slideIn { animation: slideIn 0.4s ease-out; }
-.animate-scaleIn { animation: scaleIn 0.3s ease-out; }
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-glow { animation: glow 3s ease-in-out infinite; }
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+.animate-slideUp {
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out;
+}
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
 
 /* Glass Card Base */
 .glass {
@@ -293,7 +350,9 @@ body::before {
 }
 
 /* Input Styles */
-input, select, textarea {
+input,
+select,
+textarea {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
@@ -304,7 +363,9 @@ input, select, textarea {
   backdrop-filter: blur(10px);
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);

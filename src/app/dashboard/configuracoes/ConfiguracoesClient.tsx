@@ -1,19 +1,10 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
-import { updateProfile, updateEscritorio, changePassword } from './actions'
-import {
-  User,
-  Building2,
-  Bell,
-  Shield,
-  Key,
-  Monitor,
-  Copy,
-  Check
-} from 'lucide-react'
-import styles from './page.module.css'
+import { useState } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
+import { updateProfile, updateEscritorio, changePassword } from './actions';
+import { User, Building2, Bell, Shield, Key, Monitor, Copy, Check } from 'lucide-react';
+import styles from './page.module.css';
 
 const tabs = [
   { id: 'perfil', label: 'Perfil', icon: User },
@@ -21,19 +12,19 @@ const tabs = [
   { id: 'notificacoes', label: 'Notificações', icon: Bell },
   { id: 'seguranca', label: 'Segurança', icon: Shield },
   { id: 'api', label: 'API', icon: Key },
-]
+];
 
 function SubmitButton({ label }: { label: string }) {
-  const { pending } = useFormStatus()
+  const { pending } = useFormStatus();
   return (
     <button type="submit" className={styles.btn} disabled={pending}>
       {pending ? 'Salvando...' : label}
     </button>
-  )
+  );
 }
 
 function ProfileForm({ user }: { user: any }) {
-  const [state, formAction] = useFormState(updateProfile, null)
+  const [state, formAction] = useFormState(updateProfile, null);
 
   return (
     <form action={formAction}>
@@ -45,9 +36,7 @@ function ProfileForm({ user }: { user: any }) {
       )}
 
       <div className={styles.avatarSection}>
-        <div className={styles.avatar}>
-          {user?.nome?.charAt(0) || 'U'}
-        </div>
+        <div className={styles.avatar}>{user?.nome?.charAt(0) || 'U'}</div>
         <div className={styles.avatarInfo}>
           <button type="button">Alterar foto</button>
           <p>JPG, PNG ou GIF. Máximo 2MB.</p>
@@ -79,12 +68,7 @@ function ProfileForm({ user }: { user: any }) {
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="cargo">Cargo</label>
-          <input
-            type="text"
-            id="cargo"
-            defaultValue={user?.cargo || ''}
-            readOnly
-          />
+          <input type="text" id="cargo" defaultValue={user?.cargo || ''} readOnly />
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="perfil">Perfil</label>
@@ -101,11 +85,11 @@ function ProfileForm({ user }: { user: any }) {
         <SubmitButton label="Salvar alterações" />
       </div>
     </form>
-  )
+  );
 }
 
 function EscritorioForm({ escritorio }: { escritorio: any }) {
-  const [state, formAction] = useFormState(updateEscritorio, null)
+  const [state, formAction] = useFormState(updateEscritorio, null);
 
   return (
     <form action={formAction}>
@@ -118,11 +102,7 @@ function EscritorioForm({ escritorio }: { escritorio: any }) {
 
       <div className={styles.logoSection}>
         <div className={styles.logoPreview}>
-          {escritorio?.logoUrl ? (
-            <img src={escritorio.logoUrl} alt="Logo" />
-          ) : (
-            <Building2 />
-          )}
+          {escritorio?.logoUrl ? <img src={escritorio.logoUrl} alt="Logo" /> : <Building2 />}
         </div>
         <div className={styles.logoInfo}>
           <button type="button">Alterar logo</button>
@@ -144,21 +124,11 @@ function EscritorioForm({ escritorio }: { escritorio: any }) {
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="crc">CRC</label>
-          <input
-            type="text"
-            id="crc"
-            defaultValue={escritorio?.crc || ''}
-            readOnly
-          />
+          <input type="text" id="crc" defaultValue={escritorio?.crc || ''} readOnly />
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="cna">CNA</label>
-          <input
-            type="text"
-            id="cna"
-            defaultValue={escritorio?.cna || ''}
-            readOnly
-          />
+          <input type="text" id="cna" defaultValue={escritorio?.cna || ''} readOnly />
         </div>
       </div>
 
@@ -166,13 +136,13 @@ function EscritorioForm({ escritorio }: { escritorio: any }) {
         <SubmitButton label="Salvar alterações" />
       </div>
     </form>
-  )
+  );
 }
 
 function NotificacoesForm() {
-  const [emailAlerts, setEmailAlerts] = useState(true)
-  const [reminders, setReminders] = useState(true)
-  const [frequency, setFrequency] = useState('daily')
+  const [emailAlerts, setEmailAlerts] = useState(true);
+  const [reminders, setReminders] = useState(true);
+  const [frequency, setFrequency] = useState('daily');
 
   return (
     <form>
@@ -186,7 +156,7 @@ function NotificacoesForm() {
             type="checkbox"
             name="emailAlerts"
             checked={emailAlerts}
-            onChange={(e) => setEmailAlerts(e.target.checked)}
+            onChange={e => setEmailAlerts(e.target.checked)}
           />
           <span className={styles.toggleSlider}></span>
         </label>
@@ -202,7 +172,7 @@ function NotificacoesForm() {
             type="checkbox"
             name="reminders"
             checked={reminders}
-            onChange={(e) => setReminders(e.target.checked)}
+            onChange={e => setReminders(e.target.checked)}
           />
           <span className={styles.toggleSlider}></span>
         </label>
@@ -215,7 +185,7 @@ function NotificacoesForm() {
             id="frequency"
             name="frequency"
             value={frequency}
-            onChange={(e) => setFrequency(e.target.value)}
+            onChange={e => setFrequency(e.target.value)}
             style={{ minWidth: '150px' }}
           >
             <option value="daily">Diário</option>
@@ -231,11 +201,11 @@ function NotificacoesForm() {
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 function SegurancaForm({ user }: { user: any }) {
-  const [state, formAction] = useFormState(changePassword, null)
+  const [state, formAction] = useFormState(changePassword, null);
 
   return (
     <div>
@@ -320,33 +290,34 @@ function SegurancaForm({ user }: { user: any }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function ApiSection() {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
-  const accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvX2lkIiwiaWF0IjoxNzAz...'
-  const refreshToken = 'rt_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz'
+  const accessToken =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvX2lkIiwiaWF0IjoxNzAz...';
+  const refreshToken = 'rt_abc123def456ghi789jkl012mno345pqr678stu901vwx234yz';
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const apiTokens = [
     { name: 'Mobile App (iOS)', createdAt: '2024-01-15', lastUsed: '2024-04-20' },
     { name: 'Mobile App (Android)', createdAt: '2024-02-10', lastUsed: '2024-04-19' },
-  ]
+  ];
 
   return (
     <div>
       <div className={styles.apiInfo}>
         <Bell />
         <p>
-          Use os tokens abaixo para autenticar requisições da API mobile.
-          O token JWT expira em <strong>24h</strong> e o refresh token em <strong>30 dias</strong>.
+          Use os tokens abaixo para autenticar requisições da API mobile. O token JWT expira em{' '}
+          <strong>24h</strong> e o refresh token em <strong>30 dias</strong>.
         </p>
       </div>
 
@@ -354,11 +325,7 @@ function ApiSection() {
         <h3>Access Token (JWT)</h3>
         <div className={styles.tokenInput}>
           <input type="text" readOnly value={accessToken} />
-          <button
-            type="button"
-            onClick={() => copyToClipboard(accessToken)}
-            title="Copiar"
-          >
+          <button type="button" onClick={() => copyToClipboard(accessToken)} title="Copiar">
             {copied ? <Check size={16} /> : <Copy size={16} />}
           </button>
         </div>
@@ -369,11 +336,7 @@ function ApiSection() {
         <h3>Refresh Token</h3>
         <div className={styles.tokenInput}>
           <input type="text" readOnly value={refreshToken} />
-          <button
-            type="button"
-            onClick={() => copyToClipboard(refreshToken)}
-            title="Copiar"
-          >
+          <button type="button" onClick={() => copyToClipboard(refreshToken)} title="Copiar">
             {copied ? <Check size={16} /> : <Copy size={16} />}
           </button>
         </div>
@@ -390,7 +353,9 @@ function ApiSection() {
               </div>
               <div className={styles.appDetails}>
                 <p>{token.name}</p>
-                <span>Criado em {token.createdAt} • Último uso {token.lastUsed}</span>
+                <span>
+                  Criado em {token.createdAt} • Último uso {token.lastUsed}
+                </span>
               </div>
             </div>
             <button type="button" className={styles.appAction}>
@@ -400,24 +365,22 @@ function ApiSection() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 interface ConfiguracoesClientProps {
-  usuario: any
-  escritorio: any
+  usuario: any;
+  escritorio: any;
 }
 
 export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClientProps) {
-  const [activeTab, setActiveTab] = useState('perfil')
+  const [activeTab, setActiveTab] = useState('perfil');
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Configurações</h1>
-        <p className={styles.subtitle}>
-          Gerencie suas preferências e configurações da conta
-        </p>
+        <p className={styles.subtitle}>Gerencie suas preferências e configurações da conta</p>
       </header>
 
       <div className={styles.tabs}>
@@ -470,5 +433,5 @@ export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClient
         )}
       </div>
     </div>
-  )
+  );
 }

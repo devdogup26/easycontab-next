@@ -1,53 +1,65 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Users, FileText, AlertCircle, Plus, Edit2, Trash2, X, User, Shield } from 'lucide-react'
-import Link from 'next/link'
-import styles from '../../dashboard/page.module.css'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft,
+  Save,
+  Users,
+  FileText,
+  AlertCircle,
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  User,
+  Shield,
+} from 'lucide-react';
+import Link from 'next/link';
+import styles from '../../dashboard/page.module.css';
 
 interface Escritorio {
-  id: string
-  codigo: number
-  nome: string
-  documento: string
-  email: string
-  telefone: string | null
-  crc: string | null
-  status: string
-  dataVencimento: Date | string | null
+  id: string;
+  codigo: number;
+  nome: string;
+  documento: string;
+  email: string;
+  telefone: string | null;
+  crc: string | null;
+  status: string;
+  dataVencimento: Date | string | null;
 }
 
 interface EscritorioDetailClientProps {
-  escritorio: Escritorio
-  stats: { totalClientes: number; totalObrigacoes: number }
+  escritorio: Escritorio;
+  stats: { totalClientes: number; totalObrigacoes: number };
 }
 
 const STATUS_OPTIONS = [
   { value: 'ATIVO', label: 'Ativo' },
   { value: 'VENCIDO', label: 'Vencido' },
-  { value: 'SUSPENSO', label: 'Suspenso' }
-]
+  { value: 'SUSPENSO', label: 'Suspenso' },
+];
 
 interface Usuario {
-  id: string
-  login: string | null
-  nome: string
-  email: string
-  cargo: string | null
-  globalRole: string
-  perfil: { id: string; nome: string; isAdmin: boolean } | null
-  createdAt: string
+  id: string;
+  login: string | null;
+  nome: string;
+  email: string;
+  cargo: string | null;
+  globalRole: string;
+  perfil: { id: string; nome: string; isAdmin: boolean } | null;
+  createdAt: string;
 }
 
 function formatDate(dateStr: Date | string | null): string {
-  if (!dateStr) return '-'
-  const date = dateStr instanceof Date ? dateStr : new Date(dateStr)
-  return date.toLocaleDateString('pt-BR')
+  if (!dateStr) return '-';
+  const date = dateStr instanceof Date ? dateStr : new Date(dateStr);
+  return date.toLocaleDateString('pt-BR');
 }
 
 export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailClientProps) {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState({
     nome: escritorio.nome,
     documento: escritorio.documento,
@@ -57,130 +69,147 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
     status: escritorio.status,
     dataVencimento: escritorio.dataVencimento
       ? new Date(escritorio.dataVencimento).toISOString().split('T')[0]
-      : ''
-  })
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+      : '',
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [usuarios, setUsuarios] = useState<Usuario[]>([])
-  const [loadingUsers, setLoadingUsers] = useState(false)
-  const [showUserModal, setShowUserModal] = useState(false)
-  const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null)
-  const [userForm, setUserForm] = useState({ nome: '', email: '', cargo: '', senha: '', login: '', tipoPerfil: 'OPERADOR' })
-  const [userError, setUserError] = useState<string | null>(null)
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [editingUsuario, setEditingUsuario] = useState<Usuario | null>(null);
+  const [userForm, setUserForm] = useState({
+    nome: '',
+    email: '',
+    cargo: '',
+    senha: '',
+    login: '',
+    tipoPerfil: 'OPERADOR',
+  });
+  const [userError, setUserError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch(`/api/escritorios/${escritorio.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erro ao atualizar')
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao atualizar');
       }
 
-      router.push('/admin/escritorios')
-      router.refresh()
+      router.push('/admin/escritorios');
+      router.refresh();
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   async function loadUsuarios() {
-    setLoadingUsers(true)
+    setLoadingUsers(true);
     try {
-      const res = await fetch(`/api/escritorios/${escritorio.id}/usuarios`)
-      if (res.ok) setUsuarios(await res.json())
+      const res = await fetch(`/api/escritorios/${escritorio.id}/usuarios`);
+      if (res.ok) setUsuarios(await res.json());
     } catch (err) {
-      console.error('Error loading users:', err)
+      console.error('Error loading users:', err);
     } finally {
-      setLoadingUsers(false)
+      setLoadingUsers(false);
     }
   }
 
   function openNewUserModal() {
-    setEditingUsuario(null)
-    setUserForm({ nome: '', email: '', cargo: '', senha: '', login: `${escritorio.codigo}_`, tipoPerfil: 'OPERADOR' })
-    setUserError(null)
-    setShowUserModal(true)
-    loadUsuarios()
+    setEditingUsuario(null);
+    setUserForm({
+      nome: '',
+      email: '',
+      cargo: '',
+      senha: '',
+      login: `${escritorio.codigo}_`,
+      tipoPerfil: 'OPERADOR',
+    });
+    setUserError(null);
+    setShowUserModal(true);
+    loadUsuarios();
   }
 
   function openEditUserModal(usuario: Usuario) {
-    setEditingUsuario(usuario)
+    setEditingUsuario(usuario);
     setUserForm({
       nome: usuario.nome,
       email: usuario.email,
       cargo: usuario.cargo || '',
       senha: '',
       login: usuario.login || '',
-      tipoPerfil: usuario.perfil?.nome || 'OPERADOR'
-    })
-    setUserError(null)
-    setShowUserModal(true)
-    loadUsuarios()
+      tipoPerfil: usuario.perfil?.nome || 'OPERADOR',
+    });
+    setUserError(null);
+    setShowUserModal(true);
+    loadUsuarios();
   }
 
   function slugify(text: string): string {
-    return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 
   async function handleUserSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setUserError(null)
+    e.preventDefault();
+    setUserError(null);
 
     try {
-      const method = editingUsuario ? 'PUT' : 'POST'
+      const method = editingUsuario ? 'PUT' : 'POST';
 
       const url = editingUsuario
         ? `/api/escritorios/${escritorio.id}/usuarios/${editingUsuario.id}`
-        : `/api/escritorios/${escritorio.id}/usuarios`
+        : `/api/escritorios/${escritorio.id}/usuarios`;
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userForm)
-      })
+        body: JSON.stringify(userForm),
+      });
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erro ao salvar')
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao salvar');
       }
 
-      setShowUserModal(false)
-      loadUsuarios()
+      setShowUserModal(false);
+      loadUsuarios();
     } catch (err: any) {
-      setUserError(err.message)
+      setUserError(err.message);
     }
   }
 
   async function handleDeleteUser(usuario: Usuario) {
     if (usuario.email === 'admin@dogup.com.br') {
-      alert('Usuário sistema não pode ser excluído')
-      return
+      alert('Usuário sistema não pode ser excluído');
+      return;
     }
-    if (!confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) return
+    if (!confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) return;
 
     try {
       const res = await fetch(`/api/escritorios/${escritorio.id}/usuarios/${usuario.id}`, {
-        method: 'DELETE'
-      })
+        method: 'DELETE',
+      });
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erro ao excluir')
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao excluir');
       }
-      loadUsuarios()
+      loadUsuarios();
     } catch (err: any) {
-      alert(err.message)
+      alert(err.message);
     }
   }
 
@@ -282,7 +311,9 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
                 onChange={e => setFormData({ ...formData, status: e.target.value })}
               >
                 {STATUS_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -338,7 +369,9 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
               {usuarios.map(usuario => (
                 <tr key={usuario.id}>
                   <td>
-                    <code style={{ fontSize: '12px', color: 'var(--accent)' }}>{usuario.login || '-'}</code>
+                    <code style={{ fontSize: '12px', color: 'var(--accent)' }}>
+                      {usuario.login || '-'}
+                    </code>
                   </td>
                   <td>
                     <div className={styles.userInfo}>
@@ -354,7 +387,10 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
                         <Shield size={12} /> Admin
                       </span>
                     ) : usuario.perfil?.nome === 'CONTADOR' ? (
-                      <span className={styles.perfilBadge} style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)' }}>
+                      <span
+                        className={styles.perfilBadge}
+                        style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)' }}
+                      >
                         Contador
                       </span>
                     ) : (
@@ -373,7 +409,9 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
                         className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                         onClick={() => handleDeleteUser(usuario)}
                         disabled={usuario.email === 'admin@dogup.com.br'}
-                        title={usuario.email === 'admin@dogup.com.br' ? 'Usuário sistema' : 'Excluir'}
+                        title={
+                          usuario.email === 'admin@dogup.com.br' ? 'Usuário sistema' : 'Excluir'
+                        }
                       >
                         <Trash2 size={12} />
                       </button>
@@ -429,19 +467,31 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
                       type="text"
                       value={`${escritorio.codigo}_`}
                       disabled
-                      style={{ width: '60px', background: 'var(--bg-disabled)', textAlign: 'center', fontFamily: 'monospace' }}
+                      style={{
+                        width: '60px',
+                        background: 'var(--bg-disabled)',
+                        textAlign: 'center',
+                        fontFamily: 'monospace',
+                      }}
                     />
                     <input
                       type="text"
                       value={userForm.login.replace(`${escritorio.codigo}_`, '')}
-                      onChange={e => setUserForm({ ...userForm, login: `${escritorio.codigo}_${e.target.value}` })}
+                      onChange={e =>
+                        setUserForm({
+                          ...userForm,
+                          login: `${escritorio.codigo}_${e.target.value}`,
+                        })
+                      }
                       placeholder="nomeusuario"
                       required
                       pattern="[a-z0-9_]+"
                       style={{ flex: 1, fontFamily: 'monospace' }}
                     />
                   </div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Apenas letras minúsculas, números e underscore</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Apenas letras minúsculas, números e underscore
+                  </span>
                 </div>
 
                 <div className={styles.formField}>
@@ -491,7 +541,11 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
               </div>
 
               <div className={styles.modalActions}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setShowUserModal(false)}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setShowUserModal(false)}
+                >
                   Cancelar
                 </button>
                 <button type="submit" className={styles.submitBtn}>
@@ -503,5 +557,5 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
         </div>
       )}
     </div>
-  )
+  );
 }

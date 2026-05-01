@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { Bell, Mail, AlertTriangle, Info, CheckCircle } from 'lucide-react'
-import styles from './page.module.css'
+import { Bell, Mail, AlertTriangle, Info, CheckCircle } from 'lucide-react';
+import styles from './page.module.css';
 
 interface Message {
-  id: string
-  titulo: string
-  conteudo: string
-  tipo: string
-  relevancia: string
-  lida: boolean
-  clienteNome: string
-  data: string
+  id: string;
+  titulo: string;
+  conteudo: string;
+  tipo: string;
+  relevancia: string;
+  lida: boolean;
+  clienteNome: string;
+  data: string;
 }
 
 interface CaixaPostalClientProps {
-  relevantUnreadMessages: Message[]
-  otherMessages: Message[]
+  relevantUnreadMessages: Message[];
+  otherMessages: Message[];
 }
 
 const TIPO_ICONS: Record<string, React.ReactNode> = {
@@ -24,30 +24,30 @@ const TIPO_ICONS: Record<string, React.ReactNode> = {
   INTIMACAO: <AlertTriangle size={16} />,
   TERMO_EXCLUSAO: <AlertTriangle size={16} />,
   INFORMATIVA: <Info size={16} />,
-  OTIMOS: <CheckCircle size={16} />
-}
+  OTIMOS: <CheckCircle size={16} />,
+};
 
 const TIPO_COLORS: Record<string, string> = {
   NOTIFICACAO: 'var(--info)',
   INTIMACAO: 'var(--danger)',
   TERMO_EXCLUSAO: 'var(--danger)',
   INFORMATIVA: 'var(--text-secondary)',
-  OTIMOS: 'var(--success)'
-}
+  OTIMOS: 'var(--success)',
+};
 
 const TIPO_LABELS: Record<string, string> = {
   NOTIFICACAO: 'Notificação',
   INTIMACAO: 'Intimação',
   TERMO_EXCLUSAO: 'Termo de Exclusão',
   INFORMATIVA: 'Informativo',
-  OTIMOS: 'Bom News'
-}
+  OTIMOS: 'Bom News',
+};
 
 export function CaixaPostalClient({
   relevantUnreadMessages,
-  otherMessages
+  otherMessages,
 }: CaixaPostalClientProps) {
-  const unreadCount = relevantUnreadMessages.length
+  const unreadCount = relevantUnreadMessages.length;
 
   return (
     <div className={styles.content}>
@@ -58,8 +58,8 @@ export function CaixaPostalClient({
             <Bell size={20} />
           </div>
           <p className={styles.alertBannerText}>
-            Você tem <strong>{unreadCount} mensagens relevantes</strong> não lidas no e-CAC.
-            Ignorar essas mensagens pode afetar a consulta de obrigações e situação fiscal.
+            Você tem <strong>{unreadCount} mensagens relevantes</strong> não lidas no e-CAC. Ignorar
+            essas mensagens pode afetar a consulta de obrigações e situação fiscal.
           </p>
         </div>
       )}
@@ -136,5 +136,5 @@ export function CaixaPostalClient({
         </div>
       </div>
     </div>
-  )
+  );
 }

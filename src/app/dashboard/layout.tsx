@@ -1,22 +1,18 @@
-import { getServerSession } from 'next-auth'
-import { redirect } from 'next/navigation'
-import { authOptions } from '@/lib/auth'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { SessionProvider } from '@/components/providers/SessionProvider'
-import { ToastProvider } from '@/components/alerts/ToastProvider'
-import styles from './layout.module.css'
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { SessionProvider } from '@/components/providers/SessionProvider';
+import { ToastProvider } from '@/components/alerts/ToastProvider';
+import styles from './layout.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const session = await getServerSession(authOptions)
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login')
+    redirect('/login');
   }
 
   return (
@@ -24,11 +20,9 @@ export default async function DashboardLayout({
       <ToastProvider>
         <div className={styles.container}>
           <Sidebar />
-          <main className={styles.main}>
-            {children}
-          </main>
+          <main className={styles.main}>{children}</main>
         </div>
       </ToastProvider>
     </SessionProvider>
-  )
+  );
 }

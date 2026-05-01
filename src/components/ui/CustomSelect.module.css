@@ -1,0 +1,131 @@
+.container {
+  position: relative;
+  width: 100%;
+  z-index: 100;
+}
+
+.trigger {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  color: #e2e8f0;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 101;
+}
+
+.trigger:hover {
+  border-color: #475569;
+  background: #273549;
+}
+
+.trigger.open {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+  background: #273549;
+}
+
+.value {
+  color: #e2e8f0;
+}
+
+.placeholder {
+  color: #94a3b8;
+}
+
+.chevron {
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.hiddenSelect {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  max-height: 240px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.option:hover,
+.option.highlighted {
+  background: #1e293b;
+}
+
+.option.selected {
+  background: rgba(139, 92, 246, 0.3);
+  color: #c4b5fd;
+}
+
+.option svg {
+  color: #a78bfa;
+  flex-shrink: 0;
+}

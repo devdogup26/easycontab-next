@@ -1,38 +1,38 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/server/prisma'
-import { redirect } from 'next/navigation'
-import { AdminDashboard } from './AdminDashboard'
-import styles from './page.module.css'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/server/prisma';
+import { redirect } from 'next/navigation';
+import { AdminDashboard } from './AdminDashboard';
+import styles from './page.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const user = session.user as any
+  const user = session.user as any;
 
   // Only SUPER_ADMIN can access admin area
   if (user.globalRole !== 'SUPER_ADMIN') {
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
 
   // Get all escritórios for SUPER_ADMIN
   const escritorios = await prisma.escritorio.findMany({
-    orderBy: { codigo: 'asc' }
-  })
+    orderBy: { codigo: 'asc' },
+  });
 
   // Stats
-  const totalEscritorios = escritorios.length
-  const escritoriosAtivos = escritorios.filter(e => e.status === 'ATIVO').length
-  const escritoriosVencidos = escritorios.filter(e => e.status === 'VENCIDO').length
-  const escritoriosSuspensos = escritorios.filter(e => e.status === 'SUSPENSO').length
+  const totalEscritorios = escritorios.length;
+  const escritoriosAtivos = escritorios.filter(e => e.status === 'ATIVO').length;
+  const escritoriosVencidos = escritorios.filter(e => e.status === 'VENCIDO').length;
+  const escritoriosSuspensos = escritorios.filter(e => e.status === 'SUSPENSO').length;
 
-  const totalClientes = await prisma.clienteFinal.count()
+  const totalClientes = await prisma.clienteFinal.count();
 
   const adminData = {
     escritorios,
@@ -41,9 +41,9 @@ export default async function AdminPage() {
       escritoriosAtivos,
       escritoriosVencidos,
       escritoriosSuspensos,
-      totalClientes
-    }
-  }
+      totalClientes,
+    },
+  };
 
   return (
     <div className={styles.page}>
@@ -55,5 +55,5 @@ export default async function AdminPage() {
       </header>
       <AdminDashboard data={adminData} />
     </div>
-  )
+  );
 }

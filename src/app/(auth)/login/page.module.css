@@ -25,10 +25,19 @@
 }
 
 @keyframes ambientMove {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(2%, 2%) scale(1.02); }
-  50% { transform: translate(-1%, 1%) scale(0.98); }
-  75% { transform: translate(1%, -1%) scale(1.01); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(2%, 2%) scale(1.02);
+  }
+  50% {
+    transform: translate(-1%, 1%) scale(0.98);
+  }
+  75% {
+    transform: translate(1%, -1%) scale(1.01);
+  }
 }
 
 .card {
@@ -76,8 +85,15 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 8px 32px var(--accent-glow); }
-  50% { box-shadow: 0 8px 48px var(--accent-glow), 0 0 60px rgba(139, 92, 246, 0.3); }
+  0%,
+  100% {
+    box-shadow: 0 8px 32px var(--accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 8px 48px var(--accent-glow),
+      0 0 60px rgba(139, 92, 246, 0.3);
+  }
 }
 
 .title {

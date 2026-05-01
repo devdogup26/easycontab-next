@@ -55,8 +55,8 @@ async function main() {
       cidade: 'São Paulo',
       uf: 'SP',
       responsavel: 'Contador Responsável',
-      dataVencimento: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-    }
+      dataVencimento: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    },
   });
   console.log(`Created Escritorio: ${escritorio.nome}`);
 
@@ -64,21 +64,30 @@ async function main() {
   // CREATE PERMISSOES
   // ============================================
   const permKeys = [
-    'clientes:read', 'clientes:create', 'clientes:update', 'clientes:delete',
-    'obrigacoes:read', 'obrigacoes:create', 'obrigacoes:update', 'obrigacoes:delete',
-    'dctfweb:transmitir', 'dctfweb:view',
-    'parcelamentos:read', 'parcelamentos:create',
-    'certidoes:read', 'certidoes:create',
+    'clientes:read',
+    'clientes:create',
+    'clientes:update',
+    'clientes:delete',
+    'obrigacoes:read',
+    'obrigacoes:create',
+    'obrigacoes:update',
+    'obrigacoes:delete',
+    'dctfweb:transmitir',
+    'dctfweb:view',
+    'parcelamentos:read',
+    'parcelamentos:create',
+    'certidoes:read',
+    'certidoes:create',
     'auditoria:read',
     'configuracoes',
-    'usuarios:manage'
+    'usuarios:manage',
   ];
 
   for (const codigo of permKeys) {
     await prisma.permissao.upsert({
       where: { codigo },
       update: {},
-      create: { codigo, descricao: `Acesso a ${codigo}` }
+      create: { codigo, descricao: `Acesso a ${codigo}` },
     });
   }
   console.log('Created Permissoes');
@@ -93,8 +102,8 @@ async function main() {
       nome: 'ADMIN',
       isAdmin: true,
       escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.map(p => ({ id: p.id })) }
-    }
+      permissoes: { connect: allPerms.map(p => ({ id: p.id })) },
+    },
   });
 
   await prisma.perfil.create({
@@ -102,8 +111,8 @@ async function main() {
       nome: 'CONTADOR',
       isAdmin: false,
       escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.slice(0, 8).map(p => ({ id: p.id })) }
-    }
+      permissoes: { connect: allPerms.slice(0, 8).map(p => ({ id: p.id })) },
+    },
   });
 
   await prisma.perfil.create({
@@ -111,8 +120,8 @@ async function main() {
       nome: 'OPERADOR',
       isAdmin: false,
       escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.slice(0, 5).map(p => ({ id: p.id })) }
-    }
+      permissoes: { connect: allPerms.slice(0, 5).map(p => ({ id: p.id })) },
+    },
   });
 
   console.log('Created Perfis: ADMIN, CONTADOR, OPERADOR');
@@ -131,8 +140,8 @@ async function main() {
       cargo: 'Administrador da Plataforma',
       globalRole: 'SUPER_ADMIN',
       escritorioId: escritorio.id,
-      perfilId: perfilAdmin.id
-    }
+      perfilId: perfilAdmin.id,
+    },
   });
   console.log('Created Superadmin User\n');
 
@@ -144,7 +153,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('Seed failed:', e);
     process.exit(1);
   })

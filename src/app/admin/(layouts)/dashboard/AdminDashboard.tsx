@@ -1,48 +1,48 @@
-'use client'
+'use client';
 
-import { Building2, Users, AlertCircle, CheckCircle, Clock } from 'lucide-react'
-import Link from 'next/link'
-import styles from './page.module.css'
+import { Building2, Users, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import Link from 'next/link';
+import styles from './page.module.css';
 
 interface Escritorio {
-  id: string
-  codigo: number
-  nome: string
-  documento: string
-  email: string
-  status: string
-  dataVencimento: Date | string | null
+  id: string;
+  codigo: number;
+  nome: string;
+  documento: string;
+  email: string;
+  status: string;
+  dataVencimento: Date | string | null;
 }
 
 interface AdminData {
-  escritorios: Escritorio[]
+  escritorios: Escritorio[];
   stats: {
-    totalEscritorios: number
-    escritoriosAtivos: number
-    escritoriosVencidos: number
-    escritoriosSuspensos: number
-    totalClientes: number
-  }
+    totalEscritorios: number;
+    escritoriosAtivos: number;
+    escritoriosVencidos: number;
+    escritoriosSuspensos: number;
+    totalClientes: number;
+  };
 }
 
 function formatDate(dateStr: Date | string | null): string {
-  if (!dateStr) return '-'
-  const date = dateStr instanceof Date ? dateStr : new Date(dateStr)
-  return date.toLocaleDateString('pt-BR')
+  if (!dateStr) return '-';
+  const date = dateStr instanceof Date ? dateStr : new Date(dateStr);
+  return date.toLocaleDateString('pt-BR');
 }
 
 function getVencimentoStatus(dataVencimento: Date | string | null): 'ok' | 'proximo' | 'vencido' {
-  if (!dataVencimento) return 'ok'
-  const now = new Date()
-  const venc = dataVencimento instanceof Date ? dataVencimento : new Date(dataVencimento)
-  const diffDays = Math.ceil((venc.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) return 'vencido'
-  if (diffDays <= 30) return 'proximo'
-  return 'ok'
+  if (!dataVencimento) return 'ok';
+  const now = new Date();
+  const venc = dataVencimento instanceof Date ? dataVencimento : new Date(dataVencimento);
+  const diffDays = Math.ceil((venc.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return 'vencido';
+  if (diffDays <= 30) return 'proximo';
+  return 'ok';
 }
 
 export function AdminDashboard({ data }: { data: AdminData }) {
-  const { escritorios, stats } = data
+  const { escritorios, stats } = data;
 
   return (
     <>
@@ -124,8 +124,8 @@ export function AdminDashboard({ data }: { data: AdminData }) {
               </tr>
             </thead>
             <tbody>
-              {escritorios.map((escritorio) => {
-                const vencimentoStatus = getVencimentoStatus(escritorio.dataVencimento)
+              {escritorios.map(escritorio => {
+                const vencimentoStatus = getVencimentoStatus(escritorio.dataVencimento);
                 return (
                   <tr key={escritorio.id}>
                     <td>
@@ -135,32 +135,42 @@ export function AdminDashboard({ data }: { data: AdminData }) {
                       </div>
                     </td>
                     <td>
-                      <span className={`${styles.statusBadge} ${styles[`status${escritorio.status}`]}`}>
+                      <span
+                        className={`${styles.statusBadge} ${styles[`status${escritorio.status}`]}`}
+                      >
                         {escritorio.status}
                       </span>
                     </td>
                     <td>
-                      <span className={
-                        vencimentoStatus === 'vencido' ? styles.vencimentoVencido :
-                        vencimentoStatus === 'proximo' ? styles.vencimentoProximo : ''
-                      }>
+                      <span
+                        className={
+                          vencimentoStatus === 'vencido'
+                            ? styles.vencimentoVencido
+                            : vencimentoStatus === 'proximo'
+                              ? styles.vencimentoProximo
+                              : ''
+                        }
+                      >
                         {formatDate(escritorio.dataVencimento)}
                       </span>
                     </td>
                     <td>
                       <div className={styles.actions}>
-                        <Link href={`/admin/escritorios/${escritorio.id}`} className={styles.actionBtn}>
+                        <Link
+                          href={`/admin/escritorios/${escritorio.id}`}
+                          className={styles.actionBtn}
+                        >
                           Ver
                         </Link>
                       </div>
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         )}
       </div>
     </>
-  )
+  );
 }

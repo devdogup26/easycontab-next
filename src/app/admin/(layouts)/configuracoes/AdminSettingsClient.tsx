@@ -1,33 +1,33 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Settings, Bell, Shield, Key, Save, Check } from 'lucide-react'
-import styles from '../dashboard/page.module.css'
+import { useState } from 'react';
+import { Settings, Bell, Shield, Key, Save, Check } from 'lucide-react';
+import styles from '../dashboard/page.module.css';
 
-type TabId = 'geral' | 'notificacoes' | 'seguranca' | 'api'
+type TabId = 'geral' | 'notificacoes' | 'seguranca' | 'api';
 
 const TABS = [
   { id: 'geral' as TabId, label: 'Geral', icon: Settings },
   { id: 'notificacoes' as TabId, label: 'Notificações', icon: Bell },
   { id: 'seguranca' as TabId, label: 'Segurança', icon: Shield },
-  { id: 'api' as TabId, label: 'API', icon: Key }
-]
+  { id: 'api' as TabId, label: 'API', icon: Key },
+];
 
 // Geral Tab
 function GeralTab() {
   const [formData, setFormData] = useState({
     nomePlataforma: 'EasyContab',
     emailContato: 'contato@easycontab.com.br',
-    telefone: '(11) 3000-0000'
-  })
-  const [saved, setSaved] = useState(false)
+    telefone: '(11) 3000-0000',
+  });
+  const [saved, setSaved] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // TODO: Save to database
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -69,7 +69,7 @@ function GeralTab() {
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 // Notificações Tab
@@ -79,15 +79,15 @@ function NotificacoesTab() {
     alertasVencimento: true,
     alertasNovosClientes: true,
     alertasObrigacoes: true,
-    templateEmail: 'predefinido'
-  })
-  const [saved, setSaved] = useState(false)
+    templateEmail: 'predefinido',
+  });
+  const [saved, setSaved] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+    e.preventDefault();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -152,7 +152,7 @@ function NotificacoesTab() {
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 // Segurança Tab
@@ -161,15 +161,15 @@ function SegurancaTab() {
     politicaSenha: 'forte',
     expiracaoSessao: 24,
     limiteTentativas: 5,
-    doisFatores: false
-  })
-  const [saved, setSaved] = useState(false)
+    doisFatores: false,
+  });
+  const [saved, setSaved] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
+    e.preventDefault();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -230,13 +230,13 @@ function SegurancaTab() {
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 // API Tab
 function ApiTab() {
-  const [apiKey] = useState('sk_live_easycontab_xxxxxxxxxxxxxxxxxxxxxx')
-  const [showKey, setShowKey] = useState(false)
+  const [apiKey] = useState('sk_live_easycontab_xxxxxxxxxxxxxxxxxxxxxx');
+  const [showKey, setShowKey] = useState(false);
 
   return (
     <div className={styles.apiContainer}>
@@ -247,10 +247,7 @@ function ApiTab() {
 
       <div className={styles.apiKeyBox}>
         <code>{showKey ? apiKey : 'sk_live_easycontab_••••••••••••••••••••••••'}</code>
-        <button
-          className={styles.toggleKeyBtn}
-          onClick={() => setShowKey(!showKey)}
-        >
+        <button className={styles.toggleKeyBtn} onClick={() => setShowKey(!showKey)}>
           {showKey ? 'Ocultar' : 'Mostrar'}
         </button>
       </div>
@@ -258,17 +255,23 @@ function ApiTab() {
       <div className={styles.apiEndpoints}>
         <h4>Endpoints Principais</h4>
         <ul>
-          <li><code>GET /api/v1/clientes</code> - Listar clientes</li>
-          <li><code>GET /api/v1/obrigacoes</code> - Listar obrigações</li>
-          <li><code>POST /api/v1/transmissao</code> - Transmitir DCTFWeb</li>
+          <li>
+            <code>GET /api/v1/clientes</code> - Listar clientes
+          </li>
+          <li>
+            <code>GET /api/v1/obrigacoes</code> - Listar obrigações
+          </li>
+          <li>
+            <code>POST /api/v1/transmissao</code> - Transmitir DCTFWeb
+          </li>
         </ul>
       </div>
     </div>
-  )
+  );
 }
 
 export function AdminSettingsClient() {
-  const [activeTab, setActiveTab] = useState<TabId>('geral')
+  const [activeTab, setActiveTab] = useState<TabId>('geral');
 
   return (
     <div className={styles.settingsContainer}>
@@ -294,5 +297,5 @@ export function AdminSettingsClient() {
         {activeTab === 'api' && <ApiTab />}
       </div>
     </div>
-  )
+  );
 }

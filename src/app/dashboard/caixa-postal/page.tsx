@@ -1,44 +1,42 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/server/prisma'
-import { redirect } from 'next/navigation'
-import { CaixaPostalClient } from './CaixaPostalClient'
-import styles from './page.module.css'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/server/prisma';
+import { redirect } from 'next/navigation';
+import { CaixaPostalClient } from './CaixaPostalClient';
+import styles from './page.module.css';
+import sharedStyles from '../_shared.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default async function CaixaPostalPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const escritorioId = (session.user as any).escritorioId
+  const escritorioId = (session.user as any).escritorioId;
 
   const [relevantUnread, otherMessages] = await Promise.all([
     prisma.mensagem.findMany({
       where: {
         cliente: { escritorioId },
         relevancia: 'RELEVANTE',
-        lida: false
+        lida: false,
       },
       include: { cliente: { select: { id: true, nomeRazao: true } } },
-      orderBy: { data: 'desc' }
+      orderBy: { data: 'desc' },
     }),
     prisma.mensagem.findMany({
       where: {
         cliente: { escritorioId },
-        OR: [
-          { relevancia: 'NAO_RELEVANTE' },
-          { relevancia: 'RELEVANTE', lida: true }
-        ]
+        OR: [{ relevancia: 'NAO_RELEVANTE' }, { relevancia: 'RELEVANTE', lida: true }],
       },
       include: { cliente: { select: { id: true, nomeRazao: true } } },
       orderBy: { data: 'desc' },
-      take: 50
-    })
-  ])
+      take: 50,
+    }),
+  ]);
 
   const relevantUnreadMessages = relevantUnread.map(m => ({
     id: m.id,
@@ -48,8 +46,8 @@ export default async function CaixaPostalPage() {
     relevancia: m.relevancia,
     lida: m.lida,
     clienteNome: m.cliente.nomeRazao,
-    data: m.data.toLocaleDateString('pt-BR')
-  }))
+    data: m.data.toLocaleDateString('pt-BR'),
+  }));
 
   const otherMessagesData = otherMessages.map(m => ({
     id: m.id,
@@ -59,24 +57,24 @@ export default async function CaixaPostalPage() {
     relevancia: m.relevancia,
     lida: m.lida,
     clienteNome: m.cliente.nomeRazao,
-    data: m.data.toLocaleDateString('pt-BR')
-  }))
+    data: m.data.toLocaleDateString('pt-BR'),
+  }));
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1 className={styles.title}>Caixa Postal e-CAC</h1>
-          <p className={styles.subtitle}>
+    <div className={sharedStyles.page}>
+      <div className={sharedStyles.header}>
+        <div className={sharedStyles.headerContent}>
+          <h1 className={sharedStyles.title}>Caixa Postal e-CAC</h1>
+          <p className={sharedStyles.subtitle}>
             Mensagens e notificações dos portais governamentais
           </p>
         </div>
-      </header>
+      </div>
 
       <CaixaPostalClient
         relevantUnreadMessages={relevantUnreadMessages}
         otherMessages={otherMessagesData}
       />
     </div>
-  )
+  );
 }

@@ -139,7 +139,8 @@
   gap: 8px;
 }
 
-.editBtn, .deleteBtn {
+.editBtn,
+.deleteBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -344,7 +345,7 @@
 .activeTab {
   background: white;
   color: #2563eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .toolbar {

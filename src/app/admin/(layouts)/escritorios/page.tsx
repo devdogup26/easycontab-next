@@ -1,29 +1,29 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/server/prisma'
-import { redirect } from 'next/navigation'
-import { EscritoriosClient } from './EscritoriosClient'
-import styles from '../dashboard/page.module.css'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/server/prisma';
+import { redirect } from 'next/navigation';
+import { EscritoriosClient } from './EscritoriosClient';
+import styles from '../dashboard/page.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default async function EscritoriosPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const user = session.user as any
+  const user = session.user as any;
 
   if (user.globalRole !== 'SUPER_ADMIN') {
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
 
   // Fetch all escritorios
   const escritorios = await prisma.escritorio.findMany({
-    orderBy: { codigo: 'asc' }
-  })
+    orderBy: { codigo: 'asc' },
+  });
 
   return (
     <div className={styles.page}>
@@ -35,5 +35,5 @@ export default async function EscritoriosPage() {
       </header>
       <EscritoriosClient escritorios={escritorios} />
     </div>
-  )
+  );
 }

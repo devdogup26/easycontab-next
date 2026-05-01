@@ -1,7 +1,7 @@
-import { LoginForm } from './LoginForm'
-import styles from './page.module.css'
+import { LoginForm } from './LoginForm';
+import styles from './page.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   return (
@@ -15,5 +15,5 @@ export default function LoginPage() {
         <LoginForm />
       </div>
     </div>
-  )
+  );
 }

@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface DoughnutChartProps {
   data: {
-    name: string
-    value: number
-    color: string
-  }[]
-  title?: string
-  showLegend?: boolean
-  showLabels?: boolean
-  centerLabel?: string
-  centerValue?: string
+    name: string;
+    value: number;
+    color: string;
+  }[];
+  title?: string;
+  showLegend?: boolean;
+  showLabels?: boolean;
+  centerLabel?: string;
+  centerValue?: string;
 }
 
 const COLORS = {
   success: '#10b981',
   warning: '#f59e0b',
-  danger: '#ef4444'
-}
+  danger: '#ef4444',
+};
 
 export function DoughnutChart({
   data,
@@ -27,9 +27,9 @@ export function DoughnutChart({
   showLegend = true,
   showLabels = true,
   centerLabel,
-  centerValue
+  centerValue,
 }: DoughnutChartProps) {
-  const total = data.reduce((sum, item) => sum + item.value, 0)
+  const total = data.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div className="w-full">
@@ -61,12 +61,12 @@ export function DoughnutChart({
                 border: '1px solid var(--glass-border)',
                 borderRadius: 'var(--radius)',
                 backdropFilter: 'blur(20px)',
-                boxShadow: 'var(--shadow-glass)'
+                boxShadow: 'var(--shadow-glass)',
               }}
               itemStyle={{ color: 'var(--text-primary)' }}
               formatter={(value, name) => [
                 `${value} (${((Number(value) / total) * 100).toFixed(1)}%)`,
-                name
+                name,
               ]}
             />
           </PieChart>
@@ -76,9 +76,7 @@ export function DoughnutChart({
         {centerLabel && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             {centerValue && (
-              <span className="text-3xl font-bold text-[var(--text-primary)]">
-                {centerValue}
-              </span>
+              <span className="text-3xl font-bold text-[var(--text-primary)]">{centerValue}</span>
             )}
             <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
               {centerLabel}
@@ -92,41 +90,34 @@ export function DoughnutChart({
         <div className="flex flex-wrap justify-center gap-4 mt-4">
           {data.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="text-sm text-[var(--text-secondary)]">
-                {item.name}
-              </span>
-              <span className="text-sm font-semibold text-[var(--text-primary)]">
-                {item.value}
-              </span>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="text-sm text-[var(--text-secondary)]">{item.name}</span>
+              <span className="text-sm font-semibold text-[var(--text-primary)]">{item.value}</span>
             </div>
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Preset for Fiscal Situation
 export function FiscalSituationChart({
   regular,
   regularizado,
-  irregular
+  irregular,
 }: {
-  regular: number
-  regularizado: number
-  irregular: number
+  regular: number;
+  regularizado: number;
+  irregular: number;
 }) {
   const data = [
     { name: 'Regular', value: regular, color: COLORS.success },
     { name: 'Regularizado', value: regularizado, color: COLORS.warning },
-    { name: 'Irregular', value: irregular, color: COLORS.danger }
-  ]
+    { name: 'Irregular', value: irregular, color: COLORS.danger },
+  ];
 
-  const total = regular + regularizado + irregular
+  const total = regular + regularizado + irregular;
 
   return (
     <DoughnutChart
@@ -136,5 +127,5 @@ export function FiscalSituationChart({
       centerValue={total.toString()}
       showLabels={true}
     />
-  )
+  );
 }

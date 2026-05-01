@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import { AlertTriangle, CreditCard } from 'lucide-react'
-import styles from './page.module.css'
+import { AlertTriangle, CreditCard } from 'lucide-react';
+import styles from './page.module.css';
 
 interface Parcelamento {
-  id: string
-  clienteNome: string
-  documento: string
-  tipo: string
-  total: number
-  parcelas: number
-  parcelasEmAtraso: number
-  valorAtraso: number
-  inicio: string
+  id: string;
+  clienteNome: string;
+  documento: string;
+  tipo: string;
+  total: number;
+  parcelas: number;
+  parcelasEmAtraso: number;
+  valorAtraso: number;
+  inicio: string;
 }
 
 interface Stats {
   [key: string]: {
-    total: number
-    totalAtraso: number
-    valorTotal: number
-  }
+    total: number;
+    totalAtraso: number;
+    valorTotal: number;
+  };
 }
 
 interface ParcelamentosClientProps {
-  parcelamentos: Parcelamento[]
-  stats: Stats
+  parcelamentos: Parcelamento[];
+  stats: Stats;
 }
 
 const TIPO_LABELS: Record<string, string> = {
@@ -33,28 +33,34 @@ const TIPO_LABELS: Record<string, string> = {
   SIMPLES_NACIONAL: 'Simples Nacional',
   SIMPLIFICADO: 'Simplificado',
   PREVIDENCIARIO: 'Previdenciário',
-  NAO_PREVIDENCIARIO: 'Não Previenciário'
-}
+  NAO_PREVIDENCIARIO: 'Não Previenciário',
+};
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'BRL'
-  }).format(value)
+    currency: 'BRL',
+  }).format(value);
 }
 
 export function ParcelamentosClient({ parcelamentos, stats }: ParcelamentosClientProps) {
-  const tipos = ['PGFN', 'SIMPLES_NACIONAL', 'SIMPLIFICADO', 'PREVIDENCIARIO', 'NAO_PREVIDENCIARIO']
+  const tipos = [
+    'PGFN',
+    'SIMPLES_NACIONAL',
+    'SIMPLIFICADO',
+    'PREVIDENCIARIO',
+    'NAO_PREVIDENCIARIO',
+  ];
 
   return (
     <div className={styles.content}>
       {/* Stats Cards */}
       <div className={styles.statsGrid}>
         {tipos.map(tipo => {
-          const stat = stats[tipo]
-          if (!stat || stat.total === 0) return null
+          const stat = stats[tipo];
+          if (!stat || stat.total === 0) return null;
 
-          const hasAtraso = stat.totalAtraso > 0
+          const hasAtraso = stat.totalAtraso > 0;
 
           return (
             <div
@@ -79,12 +85,10 @@ export function ParcelamentosClient({ parcelamentos, stats }: ParcelamentosClien
                 <span className={hasAtraso ? styles.atrasoText : styles.emDiaText}>
                   {hasAtraso ? `${stat.totalAtraso} em atraso` : 'Em dia'}
                 </span>
-                <span className={styles.statValor}>
-                  {formatCurrency(stat.valorTotal)}
-                </span>
+                <span className={styles.statValor}>{formatCurrency(stat.valorTotal)}</span>
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -143,5 +147,5 @@ export function ParcelamentosClient({ parcelamentos, stats }: ParcelamentosClien
         </div>
       </div>
     </div>
-  )
+  );
 }

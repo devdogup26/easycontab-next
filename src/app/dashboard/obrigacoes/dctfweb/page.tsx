@@ -1,41 +1,41 @@
-import { prisma } from '@/lib/server/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import DCTFWebClient from './DCTFWebClient'
-import styles from './page.module.css'
+import { prisma } from '@/lib/server/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import DCTFWebClient from './DCTFWebClient';
+import styles from './page.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default async function DCTFWebPage() {
-  const session = await getServerSession(authOptions)
-  if (!session) redirect('/login')
+  const session = await getServerSession(authOptions);
+  if (!session) redirect('/login');
 
-  const escritorioId = (session.user as any).escritorioId
+  const escritorioId = (session.user as any).escritorioId;
 
   const obrigacoes = await prisma.obrigacao.findMany({
     where: {
       cliente: { escritorioId },
-      tipo: 'DCTFWEB'
+      tipo: 'DCTFWEB',
     },
     include: {
       cliente: {
         select: {
           id: true,
           documento: true,
-          nomeRazao: true
-        }
-      }
+          nomeRazao: true,
+        },
+      },
     },
     orderBy: [{ ano: 'desc' }, { mes: 'desc' }],
-    take: 50
-  })
+    take: 50,
+  });
 
   const stats = {
     emProcessamento: obrigacoes.filter(o => o.status === 'EM_PROCESSAMENTO').length,
     inconsistencia: obrigacoes.filter(o => o.status === 'INCONSISTENCIA').length,
-    entregue: obrigacoes.filter(o => o.status === 'ENTREGUE').length
-  }
+    entregue: obrigacoes.filter(o => o.status === 'ENTREGUE').length,
+  };
 
   return (
     <div className={styles.page}>
@@ -63,5 +63,5 @@ export default async function DCTFWebPage() {
 
       <DCTFWebClient obrigacoes={obrigacoes} />
     </div>
-  )
+  );
 }

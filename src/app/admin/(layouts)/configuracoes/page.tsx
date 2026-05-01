@@ -1,22 +1,22 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { redirect } from 'next/navigation'
-import { AdminSettingsClient } from './AdminSettingsClient'
-import styles from '../dashboard/page.module.css'
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { AdminSettingsClient } from './AdminSettingsClient';
+import styles from '../dashboard/page.module.css';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export default async function AdminConfiguracoesPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect('/login')
+    redirect('/login');
   }
 
-  const user = session.user as any
+  const user = session.user as any;
 
   if (user.globalRole !== 'SUPER_ADMIN') {
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
 
   return (
@@ -29,5 +29,5 @@ export default async function AdminConfiguracoesPage() {
       </header>
       <AdminSettingsClient />
     </div>
-  )
+  );
 }

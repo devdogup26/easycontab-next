@@ -1,46 +1,43 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
-import { useState } from 'react'
-import {
-  BarChart3, Building2, Settings, LogOut, Menu, X,
-  ChevronRight
-} from 'lucide-react'
-import styles from './AdminSidebar.module.css'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import { useState } from 'react';
+import { BarChart3, Building2, Settings, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import styles from './AdminSidebar.module.css';
 
 type NavItem = {
-  label: string
-  href?: string
-  icon: React.ElementType
-  children?: { label: string; href: string }[]
-}
+  label: string;
+  href?: string;
+  icon: React.ElementType;
+  children?: { label: string; href: string }[];
+};
 
 const adminNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: BarChart3 },
   { label: 'Escritórios', href: '/admin/escritorios', icon: Building2 },
   { label: 'Configurações', href: '/admin/configuracoes', icon: Settings },
-]
+];
 
 export function AdminSidebar() {
-  const pathname = usePathname()
-  const { data: session } = useSession()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  const toggleMobile = () => setMobileOpen(!mobileOpen)
-  const closeMobile = () => setMobileOpen(false)
+  const toggleMobile = () => setMobileOpen(!mobileOpen);
+  const closeMobile = () => setMobileOpen(false);
 
   const toggleSubmenu = (label: string) => {
-    setExpandedMenus(prev => ({ ...prev, [label]: !prev[label] }))
-  }
+    setExpandedMenus(prev => ({ ...prev, [label]: !prev[label] }));
+  };
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => pathname === href;
   const isParentActive = (item: NavItem) => {
-    if (!item.children) return isActive(item.href || '')
-    return item.children.some(child => isActive(child.href))
-  }
+    if (!item.children) return isActive(item.href || '');
+    return item.children.some(child => isActive(child.href));
+  };
 
   return (
     <>
@@ -61,9 +58,9 @@ export function AdminSidebar() {
 
         <nav className={styles.nav}>
           {adminNavItems.map(item => {
-            const hasChildren = item.children && item.children.length > 0
-            const isExpanded = expandedMenus[item.label]
-            const parentIsActive = isParentActive(item)
+            const hasChildren = item.children && item.children.length > 0;
+            const isExpanded = expandedMenus[item.label];
+            const parentIsActive = isParentActive(item);
 
             return (
               <div key={item.label}>
@@ -107,7 +104,7 @@ export function AdminSidebar() {
                   </Link>
                 )}
               </div>
-            )
+            );
           })}
         </nav>
 
@@ -121,7 +118,7 @@ export function AdminSidebar() {
           <button
             onClick={() => {
               if (confirm('Deseja realmente sair?')) {
-                signOut({ callbackUrl: '/login' })
+                signOut({ callbackUrl: '/login' });
               }
             }}
             className={styles.logoutBtn}
@@ -132,5 +129,5 @@ export function AdminSidebar() {
         </div>
       </aside>
     </>
-  )
+  );
 }

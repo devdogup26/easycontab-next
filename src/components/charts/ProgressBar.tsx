@@ -1,22 +1,17 @@
-'use client'
+'use client';
 
 interface ProgressBarProps {
-  title?: string
+  title?: string;
   values: {
-    label: string
-    value: number
-    color: string
-  }[]
-  total: number
-  showPercentages?: boolean
+    label: string;
+    value: number;
+    color: string;
+  }[];
+  total: number;
+  showPercentages?: boolean;
 }
 
-export function ProgressBar({
-  title,
-  values,
-  total,
-  showPercentages = true
-}: ProgressBarProps) {
+export function ProgressBar({ title, values, total, showPercentages = true }: ProgressBarProps) {
   return (
     <div className="w-full">
       {title && (
@@ -28,8 +23,8 @@ export function ProgressBar({
       {/* Progress bar container */}
       <div className="h-8 rounded-full overflow-hidden flex bg-[rgba(255,255,255,0.05)] border border-[var(--glass-border)]">
         {values.map((item, index) => {
-          const percentage = total > 0 ? (item.value / total) * 100 : 0
-          if (percentage === 0) return null
+          const percentage = total > 0 ? (item.value / total) * 100 : 0;
+          if (percentage === 0) return null;
 
           return (
             <div
@@ -38,7 +33,7 @@ export function ProgressBar({
               style={{
                 width: `${percentage}%`,
                 backgroundColor: item.color,
-                minWidth: percentage > 5 ? 'auto' : '0'
+                minWidth: percentage > 5 ? 'auto' : '0',
               }}
               title={`${item.label}: ${item.value} (${percentage.toFixed(1)}%)`}
             >
@@ -48,34 +43,31 @@ export function ProgressBar({
                 </span>
               )}
             </div>
-          )
+          );
         })}
       </div>
 
       {/* Legend below */}
       {showPercentages && (
         <div className="flex flex-wrap justify-center gap-4 mt-3">
-          {values.filter(v => v.value > 0).map((item, index) => {
-            const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0'
-            return (
-              <div key={index} className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="text-sm text-[var(--text-secondary)]">
-                  {item.label}
-                </span>
-                <span className="text-sm font-semibold text-[var(--text-primary)]">
-                  {item.value} ({percentage}%)
-                </span>
-              </div>
-            )
-          })}
+          {values
+            .filter(v => v.value > 0)
+            .map((item, index) => {
+              const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0';
+              return (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm text-[var(--text-secondary)]">{item.label}</span>
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
+                    {item.value} ({percentage}%)
+                  </span>
+                </div>
+              );
+            })}
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Preset for DCTFWeb status
@@ -84,37 +76,31 @@ export function DCTFWebProgressBar({
   naoEntregue,
   inconsistencia,
   emProcessamento,
-  outros
+  outros,
 }: {
-  entregue: number
-  naoEntregue: number
-  inconsistencia: number
-  emProcessamento: number
-  outros: number
+  entregue: number;
+  naoEntregue: number;
+  inconsistencia: number;
+  emProcessamento: number;
+  outros: number;
 }) {
   const COLORS = {
     success: '#10b981',
     danger: '#ef4444',
     warning: '#f59e0b',
     info: '#3b82f6',
-    muted: '#6b7280'
-  }
+    muted: '#6b7280',
+  };
 
   const values = [
     { label: 'Entregue', value: entregue, color: COLORS.success },
     { label: 'Não Entregue', value: naoEntregue, color: COLORS.danger },
     { label: 'Inconsistência', value: inconsistencia, color: COLORS.warning },
     { label: 'Em Processamento', value: emProcessamento, color: COLORS.info },
-    { label: 'Outros', value: outros, color: COLORS.muted }
-  ]
+    { label: 'Outros', value: outros, color: COLORS.muted },
+  ];
 
-  const total = entregue + naoEntregue + inconsistencia + emProcessamento + outros
+  const total = entregue + naoEntregue + inconsistencia + emProcessamento + outros;
 
-  return (
-    <ProgressBar
-      title="DCTFWeb - Situação de Transmisão"
-      values={values}
-      total={total}
-    />
-  )
+  return <ProgressBar title="DCTFWeb - Situação de Transmisão" values={values} total={total} />;
 }

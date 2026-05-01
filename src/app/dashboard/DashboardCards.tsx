@@ -1,67 +1,75 @@
-'use client'
+'use client';
 
-import { DoughnutChart, DCTFWebProgressBar, FiscalSituationChart } from '@/components/charts'
-import { AlertTriangle, Users, FileText, CreditCard, TrendingUp, Bell, CheckCircle } from 'lucide-react'
-import styles from './page.module.css'
+import { DoughnutChart, DCTFWebProgressBar, FiscalSituationChart } from '@/components/charts';
+import {
+  AlertTriangle,
+  Users,
+  FileText,
+  CreditCard,
+  TrendingUp,
+  Bell,
+  CheckCircle,
+} from 'lucide-react';
+import styles from './page.module.css';
 
 interface DashboardStats {
-  totalClientes: number
-  simplesNacionalCount: number
-  normalCount: number
-  regularCount: number
-  regularizadoCount: number
-  irregularCount: number
+  totalClientes: number;
+  simplesNacionalCount: number;
+  normalCount: number;
+  regularCount: number;
+  regularizadoCount: number;
+  irregularCount: number;
 }
 
 interface DCTFWebStats {
-  total: number
-  entregue: number
-  naoEntregue: number
-  inconsistencia: number
-  emProcessamento: number
-  outros: number
+  total: number;
+  entregue: number;
+  naoEntregue: number;
+  inconsistencia: number;
+  emProcessamento: number;
+  outros: number;
 }
 
 interface ECACAlert {
-  count: number
+  count: number;
   messages: {
-    id: string
-    titulo: string
-    clienteNome: string
-    tipo: string
-    data: string
-  }[]
+    id: string;
+    titulo: string;
+    clienteNome: string;
+    tipo: string;
+    data: string;
+  }[];
 }
 
 interface ParcelamentoAlert {
-  pgfnTotal: number
-  pgfnAtraso: number
-  simplesTotal: number
-  simplesAtraso: number
-  simplificadoTotal: number
-  simplificadoAtraso: number
+  pgfnTotal: number;
+  pgfnAtraso: number;
+  simplesTotal: number;
+  simplesAtraso: number;
+  simplificadoTotal: number;
+  simplificadoAtraso: number;
 }
 
 interface DashboardData {
-  stats: DashboardStats
-  dctfweb: DCTFWebStats
-  ecacAlert: ECACAlert
-  parcelamentoAlert: ParcelamentoAlert
+  stats: DashboardStats;
+  dctfweb: DCTFWebStats;
+  ecacAlert: ECACAlert;
+  parcelamentoAlert: ParcelamentoAlert;
 }
 
 interface DashboardCardsProps {
-  data: DashboardData
+  data: DashboardData;
 }
 
 export function DashboardCards({ data }: DashboardCardsProps) {
-  const { stats, dctfweb, ecacAlert, parcelamentoAlert } = data
+  const { stats, dctfweb, ecacAlert, parcelamentoAlert } = data;
 
-  const simplesPercent = stats.totalClientes > 0
-    ? ((stats.simplesNacionalCount / stats.totalClientes) * 100).toFixed(1)
-    : '0'
-  const normalPercent = stats.totalClientes > 0
-    ? ((stats.normalCount / stats.totalClientes) * 100).toFixed(1)
-    : '0'
+  const simplesPercent =
+    stats.totalClientes > 0
+      ? ((stats.simplesNacionalCount / stats.totalClientes) * 100).toFixed(1)
+      : '0';
+  const normalPercent =
+    stats.totalClientes > 0 ? ((stats.normalCount / stats.totalClientes) * 100).toFixed(1) : '0';
 
   return (
     <div className={styles.dashboardContent}>
@@ -78,18 +86,24 @@ export function DashboardCards({ data }: DashboardCardsProps) {
         <div className={styles.headerStatGroup}>
           <span className={styles.regime}>
             <span className={styles.regimeLabel}>Simples Nacional</span>
-            <span className={styles.regimeValue}>{stats.simplesNacionalCount} ({simplesPercent}%)</span>
+            <span className={styles.regimeValue}>
+              {stats.simplesNacionalCount} ({simplesPercent}%)
+            </span>
           </span>
           <span className={styles.regime}>
             <span className={styles.regimeLabel}>Normal</span>
-            <span className={styles.regimeValue}>{stats.normalCount} ({normalPercent}%)</span>
+            <span className={styles.regimeValue}>
+              {stats.normalCount} ({normalPercent}%)
+            </span>
           </span>
         </div>
         <div className={styles.headerDivider} />
         <div className={styles.headerStat}>
           <CheckCircle size={24} className={styles.headerIconSuccess} />
           <div className={styles.headerStatContent}>
-            <span className={styles.headerStatValue}>{stats.regularCount + stats.regularizadoCount}</span>
+            <span className={styles.headerStatValue}>
+              {stats.regularCount + stats.regularizadoCount}
+            </span>
             <span className={styles.headerStatLabel}>Em Conformidade</span>
           </div>
         </div>
@@ -166,10 +180,18 @@ export function DashboardCards({ data }: DashboardCardsProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-function ParcelamentoBadge({ label, total, atrasado }: { label: string; total: number; atrasado: number }) {
+function ParcelamentoBadge({
+  label,
+  total,
+  atrasado,
+}: {
+  label: string;
+  total: number;
+  atrasado: number;
+}) {
   return (
     <div className={`${styles.parcelamentoBadge} ${atrasado > 0 ? styles.parcelamentoAtraso : ''}`}>
       <div className={styles.parcelamentoHeader}>
@@ -188,5 +210,5 @@ function ParcelamentoBadge({ label, total, atrasado }: { label: string; total: n
         </span>
       </div>
     </div>
-  )
+  );
 }

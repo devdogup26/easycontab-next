@@ -1,75 +1,88 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import styles from './page.module.css'
+import { useState } from 'react';
+import styles from './page.module.css';
 
 interface Cliente {
-  id: string
-  documento: string
-  nomeRazao: string
+  id: string;
+  documento: string;
+  nomeRazao: string;
 }
 
 interface Obrigacao {
-  id: string
-  tipo: string
-  ano: number
-  mes: number
-  status: string
-  reciboUrl: string | null
-  createdAt: Date
-  cliente: Cliente
+  id: string;
+  tipo: string;
+  ano: number;
+  mes: number;
+  status: string;
+  reciboUrl: string | null;
+  createdAt: Date;
+  cliente: Cliente;
 }
 
 interface DCTFWebClientProps {
-  obrigacoes: Obrigacao[]
+  obrigacoes: Obrigacao[];
 }
 
 function getMonthName(month: number): string {
-  const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
-  return months[month - 1]
+  const months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+  return months[month - 1];
 }
 
 function getStatusInfo(status: string) {
   const badges: Record<string, { class: string; label: string }> = {
     EM_PROCESSAMENTO: { class: styles.statusWarning, label: 'Em Processamento' },
     INCONSISTENCIA: { class: styles.statusCritical, label: 'Inconsistência' },
-    ENTREGUE: { class: styles.statusSuccess, label: 'Entregue' }
-  }
-  return badges[status] || badges.EM_PROCESSAMENTO
+    ENTREGUE: { class: styles.statusSuccess, label: 'Entregue' },
+  };
+  return badges[status] || badges.EM_PROCESSAMENTO;
 }
 
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString('pt-BR')
+  return new Date(date).toLocaleDateString('pt-BR');
 }
 
 export default function DCTFWebClient({ obrigacoes }: DCTFWebClientProps) {
-  const [transmitting, setTransmitting] = useState(false)
+  const [transmitting, setTransmitting] = useState(false);
 
   const handleTransmit = async (clienteId: string, ano: number, mes: number) => {
-    setTransmitting(true)
+    setTransmitting(true);
     try {
-      const formData = new FormData()
-      formData.set('clienteId', clienteId)
-      formData.set('ano', ano.toString())
-      formData.set('mes', mes.toString())
+      const formData = new FormData();
+      formData.set('clienteId', clienteId);
+      formData.set('ano', ano.toString());
+      formData.set('mes', mes.toString());
 
       const response = await fetch('/api/obrigacoes/dctfweb/transmit', {
         method: 'POST',
-        body: formData
-      })
+        body: formData,
+      });
 
       if (!response.ok) {
-        throw new Error('Erro ao transmitir')
+        throw new Error('Erro ao transmitir');
       }
 
-      window.location.reload()
+      window.location.reload();
     } catch (error) {
-      console.error('Erro:', error)
-      alert('Erro ao transmitir DCTFWeb')
+      console.error('Erro:', error);
+      alert('Erro ao transmitir DCTFWeb');
     } finally {
-      setTransmitting(false)
+      setTransmitting(false);
     }
-  }
+  };
 
   return (
     <div className={styles.tableContainer}>
@@ -91,8 +104,8 @@ export default function DCTFWebClient({ obrigacoes }: DCTFWebClientProps) {
               </td>
             </tr>
           ) : (
-            obrigacoes.map((obg) => {
-              const statusInfo = getStatusInfo(obg.status)
+            obrigacoes.map(obg => {
+              const statusInfo = getStatusInfo(obg.status);
               return (
                 <tr key={obg.id} className={styles.tr}>
                   <td className={styles.td}>{obg.cliente.documento}</td>
@@ -107,11 +120,11 @@ export default function DCTFWebClient({ obrigacoes }: DCTFWebClientProps) {
                   </td>
                   <td className={styles.td}>{formatDate(obg.createdAt)}</td>
                 </tr>
-              )
+              );
             })
           )}
         </tbody>
       </table>
     </div>
-  )
+  );
 }

@@ -1,57 +1,57 @@
-'use client'
+'use client';
 
-import { useActionState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { updateCliente } from '../actions'
-import styles from './ClienteEditForm.module.css'
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { updateCliente } from '../actions';
+import styles from './ClienteEditForm.module.css';
 
 interface Cliente {
-  id: string
-  tipoPessoa: string
-  documento: string
-  nomeRazao: string
-  nomeFantasia: string | null
-  estadoCivil: string | null
-  regime: string
-  situacaoFiscal: string
-  logradouro: string | null
-  cidade: string | null
-  uf: string | null
-  cep: string | null
-  email: string | null
-  telefone: string | null
-  responsavelTecnico: string | null
-  inscricaoEstadual: string | null
-  bairro: string | null
+  id: string;
+  tipoPessoa: string;
+  documento: string;
+  nomeRazao: string;
+  nomeFantasia: string | null;
+  estadoCivil: string | null;
+  regime: string;
+  situacaoFiscal: string;
+  logradouro: string | null;
+  cidade: string | null;
+  uf: string | null;
+  cep: string | null;
+  email: string | null;
+  telefone: string | null;
+  responsavelTecnico: string | null;
+  inscricaoEstadual: string | null;
+  bairro: string | null;
 }
 
 interface ClienteEditFormProps {
-  cliente: Cliente
+  cliente: Cliente;
 }
 
 type ActionState = {
-  errors?: Record<string, string[]>
-  error?: string
-  success?: boolean
-  cliente?: Cliente
-}
+  errors?: Record<string, string[]>;
+  error?: string;
+  success?: boolean;
+  cliente?: Cliente;
+};
 
-const initialState: ActionState = {}
+const initialState: ActionState = {};
 
 export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
-  const router = useRouter()
-  const [state, formAction, isPending] = useActionState(formActionHandler, initialState)
+  const router = useRouter();
+  const [state, formAction, isPending] = useActionState(formActionHandler, initialState);
 
   async function formActionHandler(prevState: ActionState, formData: FormData) {
-    return updateCliente(cliente.id, prevState, formData)
+    return updateCliente(cliente.id, prevState, formData);
   }
 
   useEffect(() => {
     if (state.success) {
-      router.push('/dashboard/clientes')
-      router.refresh()
+      router.push('/dashboard/clientes');
+      router.refresh();
     }
-  }, [state.success, router])
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className={styles.form}>
@@ -114,7 +114,12 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
 
         <div className={styles.field}>
           <label htmlFor="situacaoFiscal">Situação Fiscal</label>
-          <select id="situacaoFiscal" name="situacaoFiscal" defaultValue={cliente.situacaoFiscal} disabled={isPending}>
+          <select
+            id="situacaoFiscal"
+            name="situacaoFiscal"
+            defaultValue={cliente.situacaoFiscal}
+            disabled={isPending}
+          >
             <option value="REGULAR">Regular</option>
             <option value="REGULARIZADO">Regularizado</option>
             <option value="IRREGULAR">Irregular</option>
@@ -166,9 +171,7 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
         </div>
       </div>
 
-      {state.error && (
-        <div className={styles.errorMessage}>{state.error}</div>
-      )}
+      {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
       <div className={styles.actions}>
         <button type="submit" className={styles.submitButton} disabled={isPending}>
@@ -176,5 +179,5 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
         </button>
       </div>
     </form>
-  )
+  );
 }

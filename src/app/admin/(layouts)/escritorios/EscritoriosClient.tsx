@@ -1,53 +1,53 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Users } from 'lucide-react'
-import styles from '../dashboard/page.module.css'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Users } from 'lucide-react';
+import styles from '../dashboard/page.module.css';
 
 interface Escritorio {
-  id: string
-  codigo: number
-  nome: string
-  documento: string
-  email: string
-  telefone: string | null
-  crc: string | null
-  status: string
-  dataVencimento: Date | string | null
+  id: string;
+  codigo: number;
+  nome: string;
+  documento: string;
+  email: string;
+  telefone: string | null;
+  crc: string | null;
+  status: string;
+  dataVencimento: Date | string | null;
 }
 
 interface EscritoriosClientProps {
-  escritorios: Escritorio[]
+  escritorios: Escritorio[];
 }
 
 const STATUS_OPTIONS = [
   { value: 'ATIVO', label: 'Ativo' },
   { value: 'VENCIDO', label: 'Vencido' },
-  { value: 'SUSPENSO', label: 'Suspenso' }
-]
+  { value: 'SUSPENSO', label: 'Suspenso' },
+];
 
 function formatDate(dateStr: Date | string | null): string {
-  if (!dateStr) return '-'
-  const date = dateStr instanceof Date ? dateStr : new Date(dateStr)
-  return date.toLocaleDateString('pt-BR')
+  if (!dateStr) return '-';
+  const date = dateStr instanceof Date ? dateStr : new Date(dateStr);
+  return date.toLocaleDateString('pt-BR');
 }
 
 function getVencimentoStatus(dataVencimento: Date | string | null): 'ok' | 'proximo' | 'vencido' {
-  if (!dataVencimento) return 'ok'
-  const now = new Date()
-  const venc = dataVencimento instanceof Date ? dataVencimento : new Date(dataVencimento)
-  const diffDays = Math.ceil((venc.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) return 'vencido'
-  if (diffDays <= 30) return 'proximo'
-  return 'ok'
+  if (!dataVencimento) return 'ok';
+  const now = new Date();
+  const venc = dataVencimento instanceof Date ? dataVencimento : new Date(dataVencimento);
+  const diffDays = Math.ceil((venc.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return 'vencido';
+  if (diffDays <= 30) return 'proximo';
+  return 'ok';
 }
 
 export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
-  const router = useRouter()
-  const [showModal, setShowModal] = useState(false)
-  const [editingEscritorio, setEditingEscritorio] = useState<Escritorio | null>(null)
+  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [editingEscritorio, setEditingEscritorio] = useState<Escritorio | null>(null);
   const [formData, setFormData] = useState({
     nome: '',
     documento: '',
@@ -55,13 +55,13 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
     telefone: '',
     crc: '',
     status: 'ATIVO',
-    dataVencimento: ''
-  })
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+    dataVencimento: '',
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const openNewModal = () => {
-    setEditingEscritorio(null)
+    setEditingEscritorio(null);
     setFormData({
       nome: '',
       documento: '',
@@ -69,14 +69,14 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
       telefone: '',
       crc: '',
       status: 'ATIVO',
-      dataVencimento: ''
-    })
-    setError(null)
-    setShowModal(true)
-  }
+      dataVencimento: '',
+    });
+    setError(null);
+    setShowModal(true);
+  };
 
   const openEditModal = (escritorio: Escritorio) => {
-    setEditingEscritorio(escritorio)
+    setEditingEscritorio(escritorio);
     setFormData({
       nome: escritorio.nome,
       documento: escritorio.documento,
@@ -86,22 +86,22 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
       status: escritorio.status,
       dataVencimento: escritorio.dataVencimento
         ? new Date(escritorio.dataVencimento).toISOString().split('T')[0]
-        : ''
-    })
-    setError(null)
-    setShowModal(true)
-  }
+        : '',
+    });
+    setError(null);
+    setShowModal(true);
+  };
 
   const closeModal = () => {
-    setShowModal(false)
-    setEditingEscritorio(null)
-    setError(null)
-  }
+    setShowModal(false);
+    setEditingEscritorio(null);
+    setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       if (editingEscritorio) {
@@ -109,52 +109,54 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
         const res = await fetch(`/api/escritorios/${editingEscritorio.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        })
+          body: JSON.stringify(formData),
+        });
 
         if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error || 'Erro ao atualizar')
+          const data = await res.json();
+          throw new Error(data.error || 'Erro ao atualizar');
         }
       } else {
         // Create new
         const res = await fetch('/api/escritorios', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        })
+          body: JSON.stringify(formData),
+        });
 
         if (!res.ok) {
-          const data = await res.json()
-          throw new Error(data.error || 'Erro ao criar')
+          const data = await res.json();
+          throw new Error(data.error || 'Erro ao criar');
         }
       }
 
-      closeModal()
-      router.refresh()
+      closeModal();
+      router.refresh();
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este escritório? Esta ação não pode ser desfeita.')) {
-      return
+    if (
+      !confirm('Tem certeza que deseja excluir este escritório? Esta ação não pode ser desfeita.')
+    ) {
+      return;
     }
 
     try {
-      const res = await fetch(`/api/escritorios/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/escritorios/${id}`, { method: 'DELETE' });
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Erro ao excluir')
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao excluir');
       }
-      router.refresh()
+      router.refresh();
     } catch (err: any) {
-      alert(err.message)
+      alert(err.message);
     }
-  }
+  };
 
   return (
     <>
@@ -185,14 +187,22 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
               </tr>
             </thead>
             <tbody>
-              {escritorios.map((escritorio) => {
-                const vencimentoStatus = getVencimentoStatus(escritorio.dataVencimento)
+              {escritorios.map(escritorio => {
+                const vencimentoStatus = getVencimentoStatus(escritorio.dataVencimento);
                 return (
                   <tr key={escritorio.id}>
                     <td>
                       <div className={styles.escritorioInfo}>
                         <span className={styles.escritorioNome}>
-                          <span style={{ color: 'var(--text-muted)', fontSize: '11px', marginRight: '6px' }}>#{escritorio.codigo}</span>
+                          <span
+                            style={{
+                              color: 'var(--text-muted)',
+                              fontSize: '11px',
+                              marginRight: '6px',
+                            }}
+                          >
+                            #{escritorio.codigo}
+                          </span>
                           {escritorio.nome}
                         </span>
                         <span className={styles.escritorioDoc}>{escritorio.documento}</span>
@@ -204,15 +214,22 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
                       </div>
                     </td>
                     <td>
-                      <span className={`${styles.statusBadge} ${styles[`status${escritorio.status}`]}`}>
+                      <span
+                        className={`${styles.statusBadge} ${styles[`status${escritorio.status}`]}`}
+                      >
                         {escritorio.status}
                       </span>
                     </td>
                     <td>
-                      <span className={
-                        vencimentoStatus === 'vencido' ? styles.vencimentoVencido :
-                        vencimentoStatus === 'proximo' ? styles.vencimentoProximo : ''
-                      }>
+                      <span
+                        className={
+                          vencimentoStatus === 'vencido'
+                            ? styles.vencimentoVencido
+                            : vencimentoStatus === 'proximo'
+                              ? styles.vencimentoProximo
+                              : ''
+                        }
+                      >
                         {formatDate(escritorio.dataVencimento)}
                       </span>
                     </td>
@@ -242,7 +259,7 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
                       </div>
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
@@ -329,7 +346,9 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
                     onChange={e => setFormData({ ...formData, status: e.target.value })}
                   >
                     {STATUS_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -349,7 +368,11 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
                   Cancelar
                 </button>
                 <button type="submit" className={styles.submitBtn} disabled={loading}>
-                  {loading ? 'Salvando...' : editingEscritorio ? 'Salvar Alterações' : 'Criar Escritório'}
+                  {loading
+                    ? 'Salvando...'
+                    : editingEscritorio
+                      ? 'Salvar Alterações'
+                      : 'Criar Escritório'}
                 </button>
               </div>
             </form>
@@ -357,5 +380,5 @@ export function EscritoriosClient({ escritorios }: EscritoriosClientProps) {
         </div>
       )}
     </>
-  )
+  );
 }

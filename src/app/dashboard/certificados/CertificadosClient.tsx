@@ -1,41 +1,39 @@
-'use client'
+'use client';
 
-import { SemiCircleGauge } from '@/components/charts'
-import { Key, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
-import styles from './page.module.css'
+import { SemiCircleGauge } from '@/components/charts';
+import { Key, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import styles from './page.module.css';
 
 interface Certificado {
-  id: string
-  clienteNome: string
-  documento: string
-  tipo: string
-  validade: string
-  status: string
-  responsavel: string | null
+  id: string;
+  clienteNome: string;
+  documento: string;
+  tipo: string;
+  validade: string;
+  status: string;
+  responsavel: string | null;
 }
 
 interface Stats {
-  total: number
-  validos: number
-  proximoVencimento: number
-  vencidos: number
+  total: number;
+  validos: number;
+  proximoVencimento: number;
+  vencidos: number;
 }
 
 interface CertificadosClientProps {
-  certificados: Certificado[]
-  stats: Stats
-  tudoOk: boolean
+  certificados: Certificado[];
+  stats: Stats;
+  tudoOk: boolean;
 }
 
-export function CertificadosClient({
-  certificados,
-  stats,
-  tudoOk
-}: CertificadosClientProps) {
+export function CertificadosClient({ certificados, stats, tudoOk }: CertificadosClientProps) {
   return (
     <div className={styles.content}>
       {/* Status Card */}
-      <div className={`${styles.statusCard} ${tudoOk ? styles.statusOk : stats.vencidos > 0 ? styles.statusDanger : styles.statusWarning}`}>
+      <div
+        className={`${styles.statusCard} ${tudoOk ? styles.statusOk : stats.vencidos > 0 ? styles.statusDanger : styles.statusWarning}`}
+      >
         <div className={styles.statusIcon}>
           {tudoOk ? (
             <CheckCircle size={32} />
@@ -49,17 +47,23 @@ export function CertificadosClient({
           {tudoOk ? (
             <>
               <h2 className={styles.statusTitle}>Tudo certo com seu certificado!</h2>
-              <p className={styles.statusSubtitle}>Todos os certificados estão válidos e com folga de prazo.</p>
+              <p className={styles.statusSubtitle}>
+                Todos os certificados estão válidos e com folga de prazo.
+              </p>
             </>
           ) : stats.vencidos > 0 ? (
             <>
               <h2 className={styles.statusTitle}>Atenção: Certificados vencidos</h2>
-              <p className={styles.statusSubtitle}>{stats.vencidos} certificado(s) precisa(m) de renovação imediata.</p>
+              <p className={styles.statusSubtitle}>
+                {stats.vencidos} certificado(s) precisa(m) de renovação imediata.
+              </p>
             </>
           ) : (
             <>
               <h2 className={styles.statusTitle}>Certificados próximos do vencimento</h2>
-              <p className={styles.statusSubtitle}>{stats.proximoVencimento} certificado(s) vence(m) em até 30 dias.</p>
+              <p className={styles.statusSubtitle}>
+                {stats.proximoVencimento} certificado(s) vence(m) em até 30 dias.
+              </p>
             </>
           )}
         </div>
@@ -120,7 +124,10 @@ export function CertificadosClient({
                 </thead>
                 <tbody>
                   {certificados.map(cert => (
-                    <tr key={cert.id} className={cert.status === 'VENCIDO' ? styles.rowVencido : ''}>
+                    <tr
+                      key={cert.id}
+                      className={cert.status === 'VENCIDO' ? styles.rowVencido : ''}
+                    >
                       <td>
                         <div className={styles.clienteCell}>
                           <span className={styles.clienteNome}>{cert.clienteNome}</span>
@@ -134,7 +141,9 @@ export function CertificadosClient({
                         {cert.validade}
                       </td>
                       <td>
-                        <span className={`${styles.statusBadge} ${cert.status === 'VALIDO' ? styles.badgeSuccess : styles.badgeDanger}`}>
+                        <span
+                          className={`${styles.statusBadge} ${cert.status === 'VALIDO' ? styles.badgeSuccess : styles.badgeDanger}`}
+                        >
                           {cert.status === 'VALIDO' ? 'Válido' : 'Vencido'}
                         </span>
                       </td>
@@ -147,5 +156,5 @@ export function CertificadosClient({
         </div>
       </div>
     </div>
-  )
+  );
 }

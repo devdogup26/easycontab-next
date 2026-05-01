@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { ToastContainer } from './Toast'
+import { ToastContainer } from './Toast';
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -8,5 +8,5 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <ToastContainer />
     </>
-  )
+  );
 }
