@@ -10,43 +10,91 @@ export interface DCTFWebSimulation {
   status: 'rascunho' | 'validando' | 'processando' | 'entregue' | 'erro';
   protocolo: string | null;
   dataEnvio: Date | null;
-  recibo: string | null;
+  reciboXml: string | null;
   erro?: string;
 }
 
-export interface DCTFWebData {
-  clienteId: string;
-  ano: number;
-  mes: number;
-  irpf?: number;
-  csll?: number;
-  pis?: number;
-  cofins?: number;
-  recolhimento?: number;
-}
+/**
+ * Simulates the full DCTFWeb transmission flow:
+ * RASCUNHO -> VALIDANDO -> PROCESSANDO -> ENTREGUE
+ *
+ * This is a realistic mock that shows progress through states
+ * with appropriate delays to simulate real async processing.
+ */
+export async function simulateDCTFWebTransmission(obrigacaoId: string): Promise<DCTFWebSimulation> {
+  // Step 1: RASCUNHO (initial state - already set before calling simulation)
+  // Small delay before starting validation
+  await new Promise(resolve => setTimeout(resolve, 800));
 
-export async function simulateDCTFWebTransmission(data: DCTFWebData): Promise<DCTFWebSimulation> {
-  // Simulate validation delay (2 seconds)
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Step 2: VALIDANDO - Simulate provider validation (2-3 seconds)
+  await prisma.obrigacao.update({
+    where: { id: obrigacaoId },
+    data: { status: 'VALIDANDO' },
+  });
+  await new Promise(resolve => setTimeout(resolve, 2500));
 
-  // Generate protocol number
-  const protocolo = `PROT${Date.now()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  // Step 3: PROCESSANDO - Simulate Receita Federal processing (3-5 seconds)
+  await prisma.obrigacao.update({
+    where: { id: obrigacaoId },
+    data: { status: 'PROCESSANDO' },
+  });
+  await new Promise(resolve => setTimeout(resolve, 3500));
 
-  // Generate mock receipt
-  const recibo = `REC${Date.now()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+  // Step 4: ENTREGUE - Generate protocol and receipt
+  // Generate realistic protocolo number (format: YYYYMMDDHHMMSS + 6 random chars)
+  const now = new Date();
+  const protocolo = [
+    now.getFullYear().toString(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+    String(now.getHours()).padStart(2, '0'),
+    String(now.getMinutes()).padStart(2, '0'),
+    String(now.getSeconds()).padStart(2, '0'),
+    Math.random().toString(36).substring(2, 8).toUpperCase(),
+  ].join('');
 
-  // Simulate processing (1 second)
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Generate mock receipt XML (simplified structure)
+  const reciboXml = `<?xml version="1.0" encoding="UTF-8"?>
+<ReciboDCTFWeb xmlns="http://www.receita.fazenda.gov.br/dctfweb">
+  <protocolo>${protocolo}</protocolo>
+  <dataRecebimento>${now.toISOString()}</dataRecebimento>
+  <numeroRecibo>${protocolo}</numeroRecibo>
+  <versao>1.0</versao>
+</ReciboDCTFWeb>`;
+
+  // Store receipt in database (as JSON string for simplicity)
+  const reciboData = JSON.stringify({
+    protocolo,
+    dataRecebimento: now.toISOString(),
+    numeroRecibo: protocolo,
+    xml: reciboXml,
+  });
+
+  await prisma.obrigacao.update({
+    where: { id: obrigacaoId },
+    data: {
+      status: 'ENTREGUE',
+      reciboUrl: reciboData,
+    },
+  });
 
   return {
     status: 'entregue',
     protocolo,
-    dataEnvio: new Date(),
-    recibo,
+    dataEnvio: now,
+    reciboXml,
   };
 }
 
-export async function transmitDCTFWeb(formData: FormData) {
+/**
+ * Starts the async transmission process.
+ * This creates the obrigacao in RASCUNHO state and returns immediately,
+ * allowing the UI to show progress while the background simulation runs.
+ *
+ * In a real implementation, this would enqueue a job to a queue system
+ * (e.g., Bull, AWS SQS, or similar) for async processing.
+ */
+export async function startDCTFWebTransmission(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
 
@@ -64,7 +112,7 @@ export async function transmitDCTFWeb(formData: FormData) {
   });
   if (!cliente) throw new Error('Cliente não encontrado');
 
-  // Create or update obrigacao with EM_PROCESSAMENTO status
+  // Create or update obrigacao with RASCUNHO status (initial state)
   const existingObrigacao = await prisma.obrigacao.findFirst({
     where: { clienteId, tipo: 'DCTFWEB', ano, mes },
   });
@@ -73,7 +121,7 @@ export async function transmitDCTFWeb(formData: FormData) {
   if (existingObrigacao) {
     obrigacao = await prisma.obrigacao.update({
       where: { id: existingObrigacao.id },
-      data: { status: 'EM_PROCESSAMENTO' },
+      data: { status: 'RASCUNHO' },
     });
   } else {
     obrigacao = await prisma.obrigacao.create({
@@ -82,7 +130,7 @@ export async function transmitDCTFWeb(formData: FormData) {
         tipo: 'DCTFWEB',
         ano,
         mes,
-        status: 'EM_PROCESSAMENTO',
+        status: 'RASCUNHO',
       },
     });
   }
@@ -96,14 +144,34 @@ export async function transmitDCTFWeb(formData: FormData) {
       acao: 'CREATE',
       entidade: 'Obrigacao',
       entidadeId: obrigacao.id,
-      dadosNovos: obrigacao,
+      dadosNovos: { ...obrigacao, action: 'DCTFWEB_TRANSMISSION_STARTED' },
       ipAddress: null,
       userAgent: null,
     },
   });
 
+  // In a real implementation, we would enqueue a background job here.
+  // For the mock, we use setTimeout to simulate async processing.
+  // The simulation runs in the background while this function returns.
+  setTimeout(() => {
+    // Fire and forget - we don't await the simulation
+    simulateDCTFWebTransmission(obrigacao.id).catch(err => {
+      console.error('DCTFWeb simulation failed:', err);
+      // Update status to ERRO on failure
+      prisma.obrigacao.update({
+        where: { id: obrigacao.id },
+        data: { status: 'ERRO' },
+      }).catch(e => console.error('Failed to set ERRO status:', e));
+    });
+  }, 100); // Small delay to let the response return first
+
   revalidatePath('/dashboard/obrigacoes/dctfweb');
   revalidatePath('/dashboard/obrigacoes');
 
-  return { success: true, obrigacaoId: obrigacao.id };
+  return { success: true, obrigacaoId: obrigacao.id, status: 'RASCUNHO' };
+}
+
+// Legacy function kept for backwards compatibility
+export async function transmitDCTFWeb(formData: FormData) {
+  return startDCTFWebTransmission(formData);
 }

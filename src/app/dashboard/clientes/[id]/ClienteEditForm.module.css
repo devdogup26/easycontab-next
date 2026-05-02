@@ -183,6 +183,29 @@
   transform: none;
 }
 
+.dangerButton {
+  padding: 0.625rem 1rem;
+  background: var(--glass-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: var(--danger-bg);
+  transform: translateY(-2px);
+}
+
+.dangerButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .loading {
   display: flex;
   align-items: center;

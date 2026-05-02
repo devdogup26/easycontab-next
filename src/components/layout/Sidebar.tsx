@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 import { usePermissionsStore } from '@/stores/permissions';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import {
   Home,
   Users,
@@ -132,6 +133,7 @@ export function Sidebar() {
         <div className={styles.logo}>
           <span className={styles.logoIcon}>📊</span>
           <span className={styles.logoText}>EasyContab</span>
+          <NotificationBell />
           <button className={styles.mobileClose} onClick={closeMobile} aria-label="Fechar">
             <X size={20} />
           </button>

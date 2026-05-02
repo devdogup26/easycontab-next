@@ -65,6 +65,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ cnpj
       nomeRazao: data.razao_social?.toUpperCase() || '',
       nomeFantasia: estab.nome_fantasia?.toUpperCase() || null,
       inscricaoEstadual: estab.inscricoes_estaduais?.[0]?.inscricao_estadual || null,
+      dataAbertura: data.data_abertura || null,
+      cnae: estab.cnae_fiscal || null,
       situacaoFiscal: mapSituacao(estab.situacao_cadastral),
       regime: 'NORMAL' as const,
       logradouro: formatLogradouro(estab.tipo_logradouro, estab.logradouro, estab.numero, estab.complemento),

@@ -79,6 +79,7 @@ export default function NovoClientePage() {
       tipoPessoa: 'PJ',
       regime: 'SIMPLES_NACIONAL',
       situacaoFiscal: 'REGULAR',
+      optanteSimples: false,
     },
   });
 
@@ -122,6 +123,8 @@ export default function NovoClientePage() {
       if (data.cep) setValue('cep', data.cep);
       if (data.email) setValue('email', data.email);
       if (data.telefone) setValue('telefone', data.telefone);
+      if (data.dataAbertura) setValue('dataAbertura', data.dataAbertura);
+      if (data.cnae) setValue('cnae', data.cnae);
 
       setCnpjFound(true);
       setTimeout(() => setCnpjFound(false), 3000);
@@ -267,6 +270,53 @@ export default function NovoClientePage() {
                   name="regime"
                 />
               </div>
+
+              {tipoPessoa === 'PJ' && (
+                <>
+                  <div className={styles.field}>
+                    <label className={styles.label}>Data Abertura</label>
+                    <input
+                      type="date"
+                      {...register('dataAbertura')}
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.field}>
+                    <label className={styles.label}>CNAE</label>
+                    <input
+                      type="text"
+                      {...register('cnae')}
+                      className={styles.input}
+                      placeholder="0000000"
+                      maxLength={8}
+                    />
+                  </div>
+
+                  <div className={styles.field}>
+                    <label className={styles.label}>Inscrição Municipal</label>
+                    <input
+                      type="text"
+                      {...register('inscricaoMunicipal')}
+                      className={styles.input}
+                      placeholder="Inscrição municipal (ISS)"
+                    />
+                  </div>
+
+                  <div className={styles.field}>
+                    <label className={styles.label}>Optante pelo Simples</label>
+                    <CustomSelect
+                      value={watch('optanteSimples') ? 'true' : 'false'}
+                      onChange={(val) => setValue('optanteSimples', val === 'true')}
+                      options={[
+                        { value: 'false', label: 'Não' },
+                        { value: 'true', label: 'Sim' },
+                      ]}
+                      name="optanteSimples"
+                    />
+                  </div>
+                </>
+              )}
 
               {tipoPessoa === 'PJ' ? (
                 <div className={styles.field}>

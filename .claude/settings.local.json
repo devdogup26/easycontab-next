@@ -28,7 +28,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(git checkout *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=sim npx prisma db push --force-reset)",
+      "Bash(psql \"postgresql://neondb_owner:npg_cCm1EfiFA3Me@ep-rapid-lake-and8hncj-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\d ClienteFinal\")"
     ]
   }
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateCliente } from '../actions';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from './ClienteEditForm.module.css';
 
 interface Cliente {
@@ -25,6 +26,10 @@ interface Cliente {
   telefone: string | null;
   responsavelTecnico: string | null;
   inscricaoEstadual: string | null;
+  inscricaoMunicipal: string | null;
+  dataAbertura: string | null;
+  cnae: string | null;
+  optanteSimples: boolean;
 }
 
 interface ClienteEditFormProps {
@@ -43,6 +48,9 @@ const initialState: ActionState = {};
 export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(formActionHandler, initialState);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function formActionHandler(prevState: ActionState, formData: FormData) {
     return updateCliente(cliente.id, prevState, formData);
@@ -54,6 +62,25 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
       router.refresh();
     }
   }, [state.success, router]);
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch(`/api/clientes?id=${cliente.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao excluir');
+      }
+      router.push('/dashboard/clientes');
+      router.refresh();
+    } catch (err: any) {
+      setDeleteError(err.message);
+      setDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <form action={formAction} className={styles.form}>
@@ -137,6 +164,53 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
             defaultValue={cliente.inscricaoEstadual || ''}
             disabled={isPending}
           />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="inscricaoMunicipal">Inscrição Municipal</label>
+          <input
+            type="text"
+            id="inscricaoMunicipal"
+            name="inscricaoMunicipal"
+            defaultValue={cliente.inscricaoMunicipal || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="dataAbertura">Data Abertura</label>
+          <input
+            type="date"
+            id="dataAbertura"
+            name="dataAbertura"
+            defaultValue={cliente.dataAbertura || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="cnae">CNAE</label>
+          <input
+            type="text"
+            id="cnae"
+            name="cnae"
+            defaultValue={cliente.cnae || ''}
+            maxLength={8}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="optanteSimples">Optante pelo Simples</label>
+          <select
+            id="optanteSimples"
+            name="optanteSimples"
+            defaultValue={cliente.optanteSimples ? 'true' : 'false'}
+            disabled={isPending}
+          >
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
         </div>
 
         <div className={styles.field}>
@@ -255,10 +329,24 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
       {state.error && <div className={styles.errorMessage}>{state.error}</div>}
 
       <div className={styles.actions}>
+        <button type="button" className={styles.dangerButton} onClick={() => setDeleteConfirm(true)}>
+          Excluir Cliente
+        </button>
         <button type="submit" className={styles.submitButton} disabled={isPending}>
           {isPending ? 'Salvando...' : 'Salvar Alterações'}
         </button>
       </div>
     </form>
+    <ConfirmDialog
+      isOpen={deleteConfirm}
+      title="Excluir Cliente"
+      message={`Tem certeza que deseja excluir o cliente "${cliente.nomeRazao}"? Esta ação não pode ser desfeita.`}
+      confirmLabel="Excluir"
+      cancelLabel="Cancelar"
+      variant="danger"
+      onConfirm={handleDelete}
+      onCancel={() => setDeleteConfirm(false)}
+    />
+    {deleteError && <div className={styles.errorMessage}>{deleteError}</div>}
   );
 }

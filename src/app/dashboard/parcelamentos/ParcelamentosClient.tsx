@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, CreditCard } from 'lucide-react';
+import { AlertTriangle, CreditCard, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 interface Parcelamento {

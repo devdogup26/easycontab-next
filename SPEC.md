@@ -420,6 +420,56 @@ npm run pre-commit
 - CNPJ alfanumérico: 14 caracteres (sem formatação)
 - CPF: 11 dígitos
 
+## DCTFWeb Integration Architecture
+
+### Current State
+The DCTFWeb transmission is mocked - it only marks records as EM_PROCESSAMENTO without actually transmitting.
+
+### Real Integration Architecture
+
+#### 1. Certificate Requirements
+- Contador must have valid digital certificate (A1 or A3)
+- Certificate must be registered with Receita Federal
+- Each transmission is signed with the certificate
+
+#### 2. Integration Providers
+- **Fenacon API**: Middleware service with contracted providers
+- **Ombudsman**: Alternative provider
+- **Direct Receita Federal**: Requires PKI integration
+
+#### 3. Data Flow (Real)
+1. User initiates transmission from UI
+2. Backend validates certificate is available and not expired
+3. Data is formatted according to DCTFWeb schema (JSON/XML)
+4. Package is signed with contador's digital certificate
+5. Package is sent to provider API (or direct to Receita)
+6. Async processing: polling for protocol number
+7. Receipt XML is downloaded and stored
+8. Status is updated to ENTREGUE with protocolo
+
+#### 4. Data Flow (Current Mock)
+When user clicks "Transmitir":
+1. Creates/updates obrigacao with EM_PROCESSAMENTO
+2. Records audit trail
+3. Returns success (no actual async processing)
+4. UI reloads page to show updated status
+
+### Implementation Steps for Real DCTFWeb
+
+1. Certificate management - store certificate metadata, not the file itself
+2. Provider integration - choose and integrate with middleware (suggest starting with Fenacon)
+3. Async job queue - for polling protocol status
+4. Receipt storage - persist XML/PDF receipts in object storage or DB
+5. Error handling - specific handling for each type of rejection from Receita
+
+### Transmission States
+- RASCUNHO: Created but not yet transmitted
+- VALIDANDO: Package being validated by provider
+- PROCESSANDO: Sent to Receita, awaiting protocol
+- ENTREGUE: Protocol received, receipt stored
+- INCONSISTENCIA: Rejected by Receita with error codes
+- ERRO: Technical error during transmission
+
 ---
 
 ## 16. Futuras Melhorias

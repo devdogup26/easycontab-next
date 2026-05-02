@@ -229,6 +229,11 @@
   color: var(--danger);
 }
 
+.statusNeutral {
+  background: rgba(107, 114, 128, 0.12);
+  color: var(--gray);
+}
+
 /* Pagination */
 .pagination {
   display: flex;

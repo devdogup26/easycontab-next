@@ -134,6 +134,10 @@ model ClienteFinal {
   email               String?
   telefone            String?
   responsavelTecnico   String?
+  dataAbertura        DateTime?        @map("data_abertura")
+  cnae                String?          @map("cnae")
+  inscricaoMunicipal  String?          @map("inscricao_municipal")
+  optanteSimples      Boolean          @default(false) @map("optante_simples")
   obrigacoes          Obrigacao[]
   parcelamentos       Parcelamento[]
   certificados        Certificado[]
@@ -361,6 +365,22 @@ model ConfigAuxiliar {
   updatedAt   DateTime @updatedAt
 
   @@index([tipo, codigo])
+}
+
+model Notificacao {
+  id           String   @id @default(cuid())
+  usuarioId    String
+  escritorioId String
+  titulo       String
+  mensagem     String
+  tipo         String   // 'warning', 'error', 'info', 'success'
+  link         String?
+  urgente      Boolean  @default(false)
+  lida         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([usuarioId, lida])
+  @@index([escritorioId, createdAt])
 }
 
 // ============================================

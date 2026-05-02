@@ -1,0 +1,458 @@
+/* ============================================
+   Certidões Page Styles
+   ============================================ */
+
+/* Page Container */
+.page {
+  padding: 32px;
+  max-width: 1400px;
+  background: transparent;
+  min-height: 100vh;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================ */
+/* CONTENT */
+/* ============================================ */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ============================================ */
+/* STATUS CARD */
+/* ============================================ */
+.statusCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  border-radius: var(--radius-lg);
+  border: 1px solid;
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.statusCard.statusOk {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.statusCard.statusWarning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.statusCard.statusDanger {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.statusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusOk .statusIcon {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.statusWarning .statusIcon {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.statusDanger .statusIcon {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.statusContent {
+  flex: 1;
+}
+
+.statusTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.statusOk .statusTitle {
+  color: var(--success);
+}
+
+.statusWarning .statusTitle {
+  color: var(--warning);
+}
+
+.statusDanger .statusTitle {
+  color: var(--danger);
+}
+
+.statusSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================ */
+/* STATS ROW */
+/* ============================================ */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+.statCard svg {
+  flex-shrink: 0;
+}
+
+.statSuccess svg {
+  color: var(--success);
+}
+
+.statWarning svg {
+  color: var(--warning);
+}
+
+.statDanger svg {
+  color: var(--danger);
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ============================================ */
+/* CATEGORIES GRID */
+/* ============================================ */
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* ============================================ */
+/* CATEGORY CARD */
+/* ============================================ */
+.categoryCard {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-glass);
+  transition: all 0.3s ease;
+}
+
+.categoryCard:hover {
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+}
+
+.categoryCard.categoryCardSuccess {
+  border-left: 4px solid var(--success);
+}
+
+.categoryCard.categoryCardWarning {
+  border-left: 4px solid var(--warning);
+}
+
+.categoryCard.categoryCardDanger {
+  border-left: 4px solid var(--danger);
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.categoryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--accent-light);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.categoryTitleSection {
+  flex: 1;
+}
+
+.categoryTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.categoryCount {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.consultLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.consultLink:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Category Stats */
+.categoryStats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.miniStat {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+.miniStatSuccess {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.miniStatWarning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.miniStatDanger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Certidões List */
+.certidoesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.certidoesList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.certidoesList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.certidoesList::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 3px;
+}
+
+.certidaoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.certidaoItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.certidaoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.certidaoClient {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.certidaoClientName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certidaoClientDoc {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+.certidaoNome {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certidaoStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.statusBadgeSuccess {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.statusBadgeWarning {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.statusBadgeDanger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.certidaoValidade {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.emptyCategory {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ============================================ */
+/* RESPONSIVE */
+/* ============================================ */
+@media (max-width: 1200px) {
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 20px;
+  }
+
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .statusCard {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .categoryHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .consultLink {
+    width: 100%;
+    justify-content: center;
+  }
+}

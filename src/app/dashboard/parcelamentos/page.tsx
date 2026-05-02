@@ -2,9 +2,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { ParcelamentosClient } from './ParcelamentosClient';
 import styles from './page.module.css';
 import sharedStyles from '../_shared.module.css';
+import { Plus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +102,10 @@ export default async function ParcelamentosPage() {
             Monitoramento de débitos parcelados - Receita Federal e PGFN
           </p>
         </div>
+        <Link href="/dashboard/parcelamentos/novo" className={sharedStyles.newButton}>
+          <Plus size={16} />
+          Nova
+        </Link>
       </div>
 
       <ParcelamentosClient parcelamentos={parcelamentosData} stats={stats} />

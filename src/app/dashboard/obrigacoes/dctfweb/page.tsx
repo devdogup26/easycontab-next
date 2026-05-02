@@ -77,9 +77,10 @@ export default async function DCTFWebPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const stats = {
-    emProcessamento: obrigacoes.filter(o => o.status === 'EM_PROCESSAMENTO').length,
+    rascunho: obrigacoes.filter(o => ['RASCUNHO', 'VALIDANDO', 'PROCESSAMENTO'].includes(o.status)).length,
     inconsistencia: obrigacoes.filter(o => o.status === 'INCONSISTENCIA').length,
     entregue: obrigacoes.filter(o => o.status === 'ENTREGUE').length,
+    erro: obrigacoes.filter(o => o.status === 'ERRO').length,
   };
 
   const buildUrl = (updates: Record<string, string | null>) => {
@@ -104,8 +105,8 @@ export default async function DCTFWebPage({ searchParams }: PageProps) {
 
       <div className={styles.stats}>
         <div className={`${styles.statCard} ${styles.statWarning}`}>
-          <div className={styles.statValue}>{stats.emProcessamento}</div>
-          <div className={styles.statLabel}>Em Processamento</div>
+          <div className={styles.statValue}>{stats.rascunho}</div>
+          <div className={styles.statLabel}>Em Transmissão</div>
         </div>
         <div className={`${styles.statCard} ${styles.statCritical}`}>
           <div className={styles.statValue}>{stats.inconsistencia}</div>
@@ -114,6 +115,10 @@ export default async function DCTFWebPage({ searchParams }: PageProps) {
         <div className={`${styles.statCard} ${styles.statSuccess}`}>
           <div className={styles.statValue}>{stats.entregue}</div>
           <div className={styles.statLabel}>Entregues (Total)</div>
+        </div>
+        <div className={`${styles.statCard} ${styles.statCritical}`}>
+          <div className={styles.statValue}>{stats.erro}</div>
+          <div className={styles.statLabel}>Com Erro</div>
         </div>
       </div>
 

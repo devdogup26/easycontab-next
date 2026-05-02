@@ -49,11 +49,15 @@ function getMonthName(month: number): string {
 
 function getStatusInfo(status: string) {
   const badges: Record<string, { class: string; label: string }> = {
+    RASCUNHO: { class: styles.statusNeutral, label: 'Rascunho' },
+    VALIDANDO: { class: styles.statusWarning, label: 'Validando' },
+    PROCESSANDO: { class: styles.statusWarning, label: 'Processando' },
     EM_PROCESSAMENTO: { class: styles.statusWarning, label: 'Em Processamento' },
     INCONSISTENCIA: { class: styles.statusCritical, label: 'Inconsistência' },
     ENTREGUE: { class: styles.statusSuccess, label: 'Entregue' },
+    ERRO: { class: styles.statusCritical, label: 'Erro' },
   };
-  return badges[status] || badges.EM_PROCESSAMENTO;
+  return badges[status] || badges.RASCUNHO;
 }
 
 function formatDate(date: Date): string {
