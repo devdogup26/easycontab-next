@@ -393,7 +393,7 @@ export function EscritorioDetailClient({ escritorio, stats }: EscritorioDetailCl
                   <td>{usuario.email}</td>
                   <td>{usuario.cargo || '-'}</td>
                   <td>
-                    {usuario.perfil?.nome === 'ADMIN' ? (
+                    {usuario.perfil?.isAdmin ? (
                       <span className={styles.perfilBadgeAdmin}>
                         <Shield size={12} /> Admin
                       </span>

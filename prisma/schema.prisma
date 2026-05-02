@@ -93,6 +93,7 @@ model Usuario {
 
   @@index([escritorioId])
   @@index([login])
+  @@index([email])
 }
 
 // ============================================
@@ -121,10 +122,10 @@ model ClienteFinal {
   nomeFantasia        String?
   estadoCivil         String?           // Only for PF
   inscricaoEstadual   String?
-  regime              RegimeTributario
+  regime              RegimeTributario @map("regime_tributario")
   escritorio         Escritorio         @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
   escritorioId       String
-  situacaoFiscal      SituacaoFiscal
+  situacaoFiscal      SituacaoFiscal @map("situacao_fiscal")
   logradouro          String?
   bairro              String?
   cidade              String?
@@ -143,17 +144,19 @@ model ClienteFinal {
 
   @@index([escritorioId])
   @@index([documento])
+  @@index([situacaoFiscal])
+  @@index([regime])
 }
 
 enum RegimeTributario {
-  SIMPLES_NACIONAL
-  NORMAL
+  SIMPLES_NACIONAL @map("simples_nacional")
+  NORMAL @map("normal")
 }
 
 enum SituacaoFiscal {
-  REGULAR
-  REGULARIZADO
-  IRREGULAR
+  REGULAR @map("regular")
+  REGULARIZADO @map("regularizado")
+  IRREGULAR @map("irregular")
 }
 
 // ============================================
@@ -177,6 +180,7 @@ model Obrigacao {
   @@index([tipo, ano, mes])
   @@index([status])
   @@index([dataVencimento])
+  @@index([clienteId, status])
 }
 
 enum TipoObrigacao {

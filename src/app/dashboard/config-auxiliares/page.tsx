@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { TableProperties, Plus, Search, Edit, Trash2, X, Check, FolderTree } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from './page.module.css';
 
 type ConfigType = 'cfop' | 'ncm' | 'cst' | 'aliquotas';
@@ -27,6 +28,10 @@ export default function ConfigAuxiliaresPage() {
   const [editingItem, setEditingItem] = useState<ConfigItem | null>(null);
 
   const [form, setForm] = useState({ codigo: '', descricao: '', tipo: '', aliquota: '' });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; itemId: string | null }>({
+    isOpen: false,
+    itemId: null,
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') redirect('/login');
@@ -71,16 +76,22 @@ export default function ConfigAuxiliaresPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Tem certeza que deseja excluir?')) return;
+    setDeleteConfirm({ isOpen: true, itemId: id });
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm.itemId) return;
     try {
-      const res = await fetch(`/api/config-auxiliares/${id}?type=${activeTab}`, {
+      const res = await fetch(`/api/config-auxiliares/${deleteConfirm.itemId}?type=${activeTab}`, {
         method: 'DELETE',
       });
       if (res.ok) fetchItems();
+      setDeleteConfirm({ isOpen: false, itemId: null });
     } catch (error) {
       console.error('Error deleting item:', error);
+      setDeleteConfirm({ isOpen: false, itemId: null });
     }
-  }
+  };
 
   function openModal(item?: ConfigItem) {
     if (item) {

@@ -106,7 +106,7 @@ export async function changePassword(
       return { success: false, error: 'Senha atual incorreta' };
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
     await prisma.usuario.update({
       where: { id: userId },
       data: { senha: hashedPassword },

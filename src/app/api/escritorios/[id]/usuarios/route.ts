@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import bcrypt from 'bcryptjs';
 import { registrarAuditoria } from '@/lib/auditoria';
+import { createUsuarioSchema } from '@/lib/validations/usuario';
 
 // GET /api/escritorios/[id]/usuarios - List usuarios for escritorio
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -38,14 +40,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params;
   const body = await req.json();
-  const { nome, email, cargo, senha, tipoPerfil, login } = body;
 
-  if (!nome || !email || !senha || !tipoPerfil || !login) {
+  const parsed = createUsuarioSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Nome, email, senha, tipo de perfil e login são obrigatórios' },
+      { error: parsed.error.issues.map((e: z.ZodIssue) => e.message).join(', ') },
       { status: 400 }
     );
   }
+
+  const { nome, email, cargo, senha, tipoPerfil, login } = parsed.data;
 
   const perfilObj = await prisma.perfil.findFirst({
     where: { nome: tipoPerfil, escritorioId: id },
@@ -69,7 +73,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 
-  const senhaHash = await bcrypt.hash(senha, 10);
+  const senhaHash = await bcrypt.hash(senha, 12);
 
   try {
     const usuario = await prisma.usuario.create({

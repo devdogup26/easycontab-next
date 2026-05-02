@@ -1,0 +1,44 @@
+Objetivo e Escopo do módulo de clientes (Contadores) DEVE atuar como uma plataforma centralizada de inteligência e monitoramento de conformidade fiscal, servindo como o ponto único de controle para escritórios de contabilidade e departamentos fiscais. O propósito fundamental é a mitigação de riscos tributários através da identificação precoce de pendências, omissões e mensagens oficiais. O sistema DEVE automatizar a captura de dados governamentais (e-CAC e PGFN) para transformar fluxos complexos em dashboards intuitivos, garantindo que prazos de entrega e regularidade fiscal sejam monitorados em tempo real para toda a carteira de clientes.
+2. Requisitos Funcionais: Módulo de Gestão de Clientes. Este módulo DEVE realizar o controle quantitativo e a segmentação estratégica da base de dados.
+Monitoramento da Base:  O sistema DEVE exibir o volume consolidado de CNPJs ativos.
+Segmentação por Regime:  Classificação automática e exibição em lista/card para as categorias "Simples Nacional" e "Normal".
+Representatividade:  O sistema DEVE calcular e exibir a representatividade percentual (%) de cada regime sobre o total da base (Ex: Simples Nacional: 70%; Normal: 30%).3. Requisitos Funcionais: Painel de Obrigações AcessóriasO sistema DEVE gerenciar o status de transmissão de obrigações, com foco central na DCTFWeb, integrando um indicador visual de progresso (barra de progresso) que demonstre o percentual de entrega em relação ao total da base filtrada.| Status | Descrição da Regra || ------ | ------ || Entregue | Sucesso total na transmissão da obrigação; recibo gerado. || Não Entregue | Pendência de envio detectada; prazo em curso ou vencido sem transmissão. || Inconsistência | Erros de validação, divergências de débitos/créditos ou dados impeditivos. || Em Processamento | Transmitido ao ambiente do Governo, aguardando validação final de processamento. || Outros | Situações excepcionais, imunidades, isenções ou condições específicas de dispensa. |
+Controle de Filtros:  O sistema DEVE permitir a filtragem dinâmica por Tipo de Obrigação (DCTFWEB), Ano e Mês de referência.4. Requisitos Funcionais: Controle de Parcelamentos FederaisO sistema DEVE realizar o rastreio contínuo de débitos parcelados sob responsabilidade da Receita Federal e PGFN.
+Categorias Monitoradas:  O monitoramento DEVE abranger obrigatoriamente: PGFN, Não Previdenciário, Simples Nacional, Simplificado e Previdenciário.
+Lógica de Alerta de Atraso:  O sistema DEVE exibir um sinalizador de urgência (ponto vermelho) no canto superior direito do card de parcelamentos e um contador numérico em sobrescrito vermelho sobre o nome da modalidade (ex: PGFN²¹) sempre que houver parcelas com o status "Em atraso".5. Requisitos Funcionais: Situação Fiscal FederalO sistema DEVE prover uma visualização consolidada da regularidade fiscal através de um gráfico de rosca ( doughnut chart ).
+Estados de Regularidade:
+Regular (41.5%):  Ausência total de débitos ou omissões.
+Regularizado (15.2%):  Presença de débitos com exigibilidade suspensa (em parcelamento, garantia ou decisão judicial).
+Irregular (43.3%):  Presença de débitos ativos exigíveis ou omissões de declarações.
+Exibição de Dados:  O sistema DEVE apresentar o valor numérico absoluto de clientes e a respectiva porcentagem dentro ou ao lado de cada segmento do gráfico.6. Requisitos Funcionais: Gestão de Certificados e Procurações e-CACO sistema DEVE monitorar a validade das credenciais de acesso para garantir a continuidade da captura de dados.
+Procurações e-CAC:  A visualização DEVE ser apresentada através de um gráfico de anéis aninhados/gauge de semicírculo, categorizando os status por cores:
+Em dia:  Validade plena (Verde).
+Próximo ao vencimento:  Alerta preventivo (Amarelo).
+Vencidos/Cancelados:  Ação imediata requerida (Vermelho).
+Certificados Digitais:  O sistema DEVE emitir um status consolidado no card de certificados com a mensagem "Tudo certo com seu certificado!" quando a validade for superior a 30 dias.7. Requisitos Funcionais: Integração de Caixa Postal e-CACRequisito de altíssima prioridade para mitigação de riscos de notificações fiscais não atendidas.
+Banner de Alerta Prioritário:  O sistema DEVE exibir no topo do dashboard um banner de aviso em fundo amarelo ("Warning Yellow") com a mensagem exata:  "Você tem X mensagens relevantes não lidas no e-CAC. Ignorar essas mensagens pode afetar a consulta de obrigações e situação fiscal."
+Filtro de Relevância:  O sistema DEVE distinguir mensagens meramente informativas de "mensagens relevantes" (notificações de lançamento, termos de exclusão, intimações), contabilizando apenas estas últimas no banner.8. Requisitos Técnicos e de Interface
+Mecanismo de Captura:  O backend DEVE integrar-se aos portais governamentais via API oficial ou robôs de captura (crawlers) com suporte a certificados A1 e A3.
+Arquitetura de Navegação:  O menu lateral DEVE seguir rigorosamente a estrutura:
+Dashboard:  Resumo, Obrigações Acessórias.
+Clientes:  
+Tipos de Obrigações
+Prazos de Entrega
+Obrigações  (com submenu expansível).
+DCTFWeb em Andamento
+Situação Fiscal Federal
+Certidão Negativa de Débitos:  Federal, Estadual.
+Parcelamentos Federais
+Caixa Postal
+e-Consignado
+Simples Nacional
+PER/DCOMP
+Identidade Visual:  Uso mandatório de codificação semafórica (Verde: Conformidade; Amarelo: Atenção/Suspensão; Vermelho: Crítico/Atraso).9. Fornecimento de Dados (Base de Referência para Homologação)Para fins de validação de interface e cálculos, os seguintes dados reais da fonte DEVEM ser utilizados:
+Total de CNPJs:  ativos e inativos.
+Simples Nacional:  .
+Normal:  .
+Situação Fiscal:  Regular (Quantidade  - percentual sobre o total%), Regularizado (Quantidade - percentual), Irregular (Quantidade - percentual).
+DCTFWeb em Andamento:  quantidade de registros.
+Exemplo de Parcelamento (Atraso):  PGFN (totais, em atraso); Simples Nacional (totais, em atraso); Simplificado (totais, em atraso).
+Mensagens e-CAC:  mensagens relevantes não lidas. 10. Cards de sucesso (como o de Certificados) DEVEM utilizar preenchimento sólido verde para indicar conformidade total. Alertas de "Em atraso" DEVEM ser flutuantes e posicionados de forma a não obstruir a leitura dos números totais do card. O gráfico de procurações e-CAC DEVE apresentar a legenda centralizada abaixo do semicírculo para facilitar a interpretação imediata.
+

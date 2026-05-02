@@ -1,11 +1,14 @@
 'use server';
 
+import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { registrarAuditoria } from '@/lib/auditoria';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { TipoObrigacao, StatusObrigacao } from '@prisma/client';
+import { createObrigacaoSchema } from '@/lib/validations/obrigacao';
 
 export async function createObrigacao(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -22,13 +25,22 @@ export async function createObrigacao(formData: FormData) {
   });
   if (!cliente) throw new Error('Cliente não encontrado');
 
+  const tipo = formData.get('tipo') as TipoObrigacao;
+  const ano = parseInt(formData.get('ano') as string);
+  const mes = parseInt(formData.get('mes') as string);
+
+  const parsed = createObrigacaoSchema.safeParse({ clienteId, tipo, ano, mes });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((e: z.ZodIssue) => e.message).join(', '));
+  }
+
   const obrigacao = await prisma.obrigacao.create({
     data: {
       clienteId,
-      tipo: formData.get('tipo') as any,
-      ano: parseInt(formData.get('ano') as string),
-      mes: parseInt(formData.get('mes') as string),
-      status: 'OUTROS' as any,
+      tipo: parsed.data.tipo,
+      ano: parsed.data.ano,
+      mes: parsed.data.mes,
+      status: 'OUTROS' as StatusObrigacao,
     },
   });
 

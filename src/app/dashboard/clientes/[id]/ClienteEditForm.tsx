@@ -15,6 +15,9 @@ interface Cliente {
   regime: string;
   situacaoFiscal: string;
   logradouro: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
   cidade: string | null;
   uf: string | null;
   cep: string | null;
@@ -22,7 +25,6 @@ interface Cliente {
   telefone: string | null;
   responsavelTecnico: string | null;
   inscricaoEstadual: string | null;
-  bairro: string | null;
 }
 
 interface ClienteEditFormProps {
@@ -166,6 +168,85 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
             id="responsavelTecnico"
             name="responsavelTecnico"
             defaultValue={cliente.responsavelTecnico || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="logradouro">Logradouro</label>
+          <input
+            type="text"
+            id="logradouro"
+            name="logradouro"
+            defaultValue={cliente.logradouro || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="numero">Número</label>
+          <input
+            type="text"
+            id="numero"
+            name="numero"
+            defaultValue={cliente.numero || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="complemento">Complemento</label>
+          <input
+            type="text"
+            id="complemento"
+            name="complemento"
+            defaultValue={cliente.complemento || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="bairro">Bairro</label>
+          <input
+            type="text"
+            id="bairro"
+            name="bairro"
+            defaultValue={cliente.bairro || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="cidade">Cidade</label>
+          <input
+            type="text"
+            id="cidade"
+            name="cidade"
+            defaultValue={cliente.cidade || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="uf">UF</label>
+          <input
+            type="text"
+            id="uf"
+            name="uf"
+            maxLength={2}
+            defaultValue={cliente.uf || ''}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="cep">CEP</label>
+          <input
+            type="text"
+            id="cep"
+            name="cep"
+            maxLength={8}
+            defaultValue={cliente.cep || ''}
             disabled={isPending}
           />
         </div>

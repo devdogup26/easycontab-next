@@ -51,6 +51,7 @@ export default async function DashboardPage() {
       ano: currentYear,
       mes: { gte: 1, lte: currentMonth },
     },
+    select: { status: true },
   });
 
   const dctfwebStats = {
@@ -67,6 +68,7 @@ export default async function DashboardPage() {
   // ============================================
   const parcelamentos = await prisma.parcelamento.findMany({
     where: { cliente: { escritorioId } },
+    select: { tipo: true, parcelasEmAtraso: true },
   });
 
   const parcelamentoAlert = {

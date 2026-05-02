@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { registrarAuditoria } from '@/lib/auditoria';
+import { updateEscritorioSchema } from '@/lib/validations/escritorio';
 
 // GET /api/escritorios/[id] - Get single escritorio with full details
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -57,7 +59,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const body = await req.json();
-  const { nome, documento, email, telefone, crc, status, dataVencimento } = body;
+
+  const parsed = updateEscritorioSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues.map((e: z.ZodIssue) => e.message).join(', ') },
+      { status: 400 }
+    );
+  }
+
+  const { nome, documento, email, telefone, crc, status, dataVencimento } = parsed.data;
 
   try {
     // Fetch current escritorio before update for audit

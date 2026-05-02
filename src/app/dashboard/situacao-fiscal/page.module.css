@@ -235,6 +235,54 @@
   font-weight: 600;
 }
 
+.viewAllLink {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.viewAllLink:hover {
+  color: var(--accent);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+}
+
+.pageButton {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.pageButton:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--accent);
+}
+
+.pageInfo {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* ============================================ */
 /* RESPONSIVE */
 /* ============================================ */

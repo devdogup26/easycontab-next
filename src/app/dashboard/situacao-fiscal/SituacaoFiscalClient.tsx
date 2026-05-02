@@ -1,7 +1,8 @@
 'use client';
 
 import { DoughnutChart } from '@/components/charts';
-import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import styles from './page.module.css';
 
 interface Cliente {
@@ -22,13 +23,28 @@ interface SituacaoFiscalClientProps {
   clientesRegular: Cliente[];
   clientesRegularizado: Cliente[];
   clientesIrregular: Cliente[];
+  activeSituacao: string;
+  page: number;
+  totalPages: number;
+  buildUrl: (updates: Record<string, string | null>) => string;
 }
+
+const SITUACAO_TABS = [
+  { value: '', label: 'Todos' },
+  { value: 'REGULAR', label: 'Regular' },
+  { value: 'REGULARIZADO', label: 'Regularizado' },
+  { value: 'IRREGULAR', label: 'Irregular' },
+];
 
 export function SituacaoFiscalClient({
   stats,
   clientesRegular,
   clientesRegularizado,
   clientesIrregular,
+  activeSituacao,
+  page,
+  totalPages,
+  buildUrl,
 }: SituacaoFiscalClientProps) {
   const chartData = [
     { name: 'Regular', value: stats.regular, color: '#10b981' },
@@ -104,6 +120,15 @@ export function SituacaoFiscalClient({
             <div className={`${styles.listHeader} ${styles.listHeaderSuccess}`}>
               <CheckCircle size={18} />
               <span>Regular ({stats.regular})</span>
+              {stats.regular > 0 && (
+                <Link
+                  href={buildUrl({ situacao: 'REGULAR' })}
+                  className={styles.viewAllLink}
+                >
+                  <ExternalLink size={14} />
+                  Ver todos
+                </Link>
+              )}
             </div>
             <div className={styles.clientList}>
               {clientesRegular.length === 0 ? (
@@ -116,8 +141,22 @@ export function SituacaoFiscalClient({
                   </div>
                 ))
               )}
-              {stats.regular > 20 && (
-                <div className={styles.moreIndicator}>+{stats.regular - 20} outros</div>
+              {stats.regular > 50 && activeSituacao === 'REGULAR' && (
+                <div className={styles.paginationControls}>
+                  {page > 1 && (
+                    <Link href={buildUrl({ page: String(page - 1) })} className={styles.pageButton}>
+                      Anterior
+                    </Link>
+                  )}
+                  <span className={styles.pageInfo}>
+                    {page} / {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <Link href={buildUrl({ page: String(page + 1) })} className={styles.pageButton}>
+                      Próxima
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -127,6 +166,15 @@ export function SituacaoFiscalClient({
             <div className={`${styles.listHeader} ${styles.listHeaderWarning}`}>
               <Clock size={18} />
               <span>Regularizado ({stats.regularizado})</span>
+              {stats.regularizado > 0 && (
+                <Link
+                  href={buildUrl({ situacao: 'REGULARIZADO' })}
+                  className={styles.viewAllLink}
+                >
+                  <ExternalLink size={14} />
+                  Ver todos
+                </Link>
+              )}
             </div>
             <div className={styles.clientList}>
               {clientesRegularizado.length === 0 ? (
@@ -139,8 +187,22 @@ export function SituacaoFiscalClient({
                   </div>
                 ))
               )}
-              {stats.regularizado > 20 && (
-                <div className={styles.moreIndicator}>+{stats.regularizado - 20} outros</div>
+              {stats.regularizado > 50 && activeSituacao === 'REGULARIZADO' && (
+                <div className={styles.paginationControls}>
+                  {page > 1 && (
+                    <Link href={buildUrl({ page: String(page - 1) })} className={styles.pageButton}>
+                      Anterior
+                    </Link>
+                  )}
+                  <span className={styles.pageInfo}>
+                    {page} / {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <Link href={buildUrl({ page: String(page + 1) })} className={styles.pageButton}>
+                      Próxima
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -150,6 +212,15 @@ export function SituacaoFiscalClient({
             <div className={`${styles.listHeader} ${styles.listHeaderDanger}`}>
               <AlertTriangle size={18} />
               <span>Irregular ({stats.irregular})</span>
+              {stats.irregular > 0 && (
+                <Link
+                  href={buildUrl({ situacao: 'IRREGULAR' })}
+                  className={styles.viewAllLink}
+                >
+                  <ExternalLink size={14} />
+                  Ver todos
+                </Link>
+              )}
             </div>
             <div className={styles.clientList}>
               {clientesIrregular.length === 0 ? (
@@ -162,8 +233,22 @@ export function SituacaoFiscalClient({
                   </div>
                 ))
               )}
-              {stats.irregular > 20 && (
-                <div className={styles.moreIndicator}>+{stats.irregular - 20} outros</div>
+              {stats.irregular > 50 && activeSituacao === 'IRREGULAR' && (
+                <div className={styles.paginationControls}>
+                  {page > 1 && (
+                    <Link href={buildUrl({ page: String(page - 1) })} className={styles.pageButton}>
+                      Anterior
+                    </Link>
+                  )}
+                  <span className={styles.pageInfo}>
+                    {page} / {totalPages}
+                  </span>
+                  {page < totalPages && (
+                    <Link href={buildUrl({ page: String(page + 1) })} className={styles.pageButton}>
+                      Próxima
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react-dom';
 import { updateProfile, updateEscritorio, changePassword } from './actions';
 import { User, Building2, Bell, Shield, Key, Monitor, Copy, Check } from 'lucide-react';
 import styles from './page.module.css';
@@ -24,7 +24,7 @@ function SubmitButton({ label }: { label: string }) {
 }
 
 function ProfileForm({ user }: { user: any }) {
-  const [state, formAction] = useFormState(updateProfile, null);
+  const [state, formAction] = useActionState(updateProfile, null);
 
   return (
     <form action={formAction}>
@@ -89,7 +89,7 @@ function ProfileForm({ user }: { user: any }) {
 }
 
 function EscritorioForm({ escritorio }: { escritorio: any }) {
-  const [state, formAction] = useFormState(updateEscritorio, null);
+  const [state, formAction] = useActionState(updateEscritorio, null);
 
   return (
     <form action={formAction}>
@@ -205,7 +205,7 @@ function NotificacoesForm() {
 }
 
 function SegurancaForm({ user }: { user: any }) {
-  const [state, formAction] = useFormState(changePassword, null);
+  const [state, formAction] = useActionState(changePassword, null);
 
   return (
     <div>

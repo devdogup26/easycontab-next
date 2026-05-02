@@ -309,12 +309,22 @@ export default function NovoClientePage() {
               Endereço
             </h2>
             <div className={styles.grid}>
-              <div className={styles.gridColSpan2}>
+              <div className={`${styles.field} ${styles.gridColSpan2}`}>
                 <label className={styles.label}>Logradouro</label>
-                <input type="text" {...register('logradouro')} className={styles.input} placeholder="Rua, número, complemento" />
+                <input type="text" {...register('logradouro')} className={styles.input} placeholder="Rua, Avenida, etc." />
               </div>
 
-              <div className={styles.gridColSpan2}>
+              <div className={styles.field}>
+                <label className={styles.label}>Número</label>
+                <input type="text" {...register('numero')} className={styles.input} placeholder="123" />
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Complemento</label>
+                <input type="text" {...register('complemento')} className={styles.input} placeholder="Sala, andar, etc." />
+              </div>
+
+              <div className={styles.field}>
                 <label className={styles.label}>Bairro</label>
                 <input type="text" {...register('bairro')} className={styles.input} placeholder="Bairro" />
               </div>

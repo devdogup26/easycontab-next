@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { registrarAuditoria } from '@/lib/auditoria';
 import bcrypt from 'bcryptjs';
+import { createEscritorioSchema } from '@/lib/validations/escritorio';
 
 // GET /api/escritorios - List all escritorios (SUPER_ADMIN only)
 export async function GET(req: NextRequest) {
@@ -42,14 +44,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { nome, documento, email, telefone, crc, status, dataVencimento, tipoPessoa } = body;
 
-  if (!nome || !documento || !email) {
+  const parsed = createEscritorioSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: 'Nome, documento e email são obrigatórios' },
+      { error: parsed.error.issues.map((e: z.ZodIssue) => e.message).join(', ') },
       { status: 400 }
     );
   }
+
+  const { nome, documento, email, telefone, crc, status, dataVencimento, tipoPessoa } = parsed.data;
 
   try {
     const nextCodeResult = await prisma.$queryRaw<[{ max: number | null }]>`
@@ -109,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('admin123', 12);
     await prisma.usuario.create({
       data: {
         login: `${nextCode}_admin`,

@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
           perfil: user.perfil
             ? {
                 nome: user.perfil.nome,
-                isAdmin: user.perfil.nome === 'ADMIN',
+                isAdmin: user.perfil.isAdmin,
                 permissoes: user.perfil.permissoes.map((p: any) => p.codigo),
               }
             : undefined,

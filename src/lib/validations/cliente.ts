@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 const documentoSchema = z.union([
-  z.string().regex(/^\d{14}$/, 'CNPJ deve ter 14 dígitos'),
-  z.string().regex(/^[A-Z\d]{12}\d{2}$/, 'CNPJ alfanumérico inválido'),
+  z.string().regex(/^\d{14}$/, 'CNPJ deve ter 14 dígitos numéricos'),
+  z.string().regex(/^[A-Z0-9]{14}$/, 'CNPJ alfanumérico deve ter 14 caracteres'),
   z.string().regex(/^\d{11}$/, 'CPF deve ter 11 dígitos'),
 ]);
 
@@ -16,6 +16,8 @@ export const createClienteSchema = z.object({
   regime: z.enum(['SIMPLES_NACIONAL', 'NORMAL']),
   situacaoFiscal: z.enum(['REGULAR', 'REGULARIZADO', 'IRREGULAR']).optional(),
   logradouro: z.string().optional(),
+  numero: z.string().optional(),
+  complemento: z.string().optional(),
   bairro: z.string().optional(),
   cidade: z.string().optional(),
   uf: z.string().length(2).optional(),
@@ -40,6 +42,8 @@ export const updateClienteSchema = z.object({
   regime: z.enum(['SIMPLES_NACIONAL', 'NORMAL']).optional(),
   situacaoFiscal: z.enum(['REGULAR', 'REGULARIZADO', 'IRREGULAR']).optional(),
   logradouro: z.string().optional().nullable(),
+  numero: z.string().optional().nullable(),
+  complemento: z.string().optional().nullable(),
   bairro: z.string().optional().nullable(),
   cidade: z.string().optional().nullable(),
   uf: z.string().length(2).optional().nullable(),

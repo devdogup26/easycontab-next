@@ -20,9 +20,9 @@ export const usePermissionsStore = create<PermissionsStore>((set, get) => ({
   isSuperAdmin: false,
   permissoes: new Set(),
   perfilNome: null,
-  setPermissions: ({ isSuperAdmin, permissoes, perfilNome }) =>
+  setPermissions: ({ isAdmin, isSuperAdmin, permissoes, perfilNome }) =>
     set({
-      isAdmin: perfilNome === 'ADMIN',
+      isAdmin,
       isSuperAdmin,
       permissoes: new Set(permissoes),
       perfilNome: perfilNome || null,

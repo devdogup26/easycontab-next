@@ -3,34 +3,41 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { Prisma } from '@prisma/client';
-import { registrarAuditoria } from '@/lib/auditoria';
 
+// GET /api/admin/config-auxiliares - List all config-auxiliares, filter by tipo query param
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  const perfil = (session.user as any).perfil;
-  if (!perfil?.isAdmin) {
+  const user = session.user as any;
+  if (user.globalRole !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { searchParams } = new URL(req.url);
-  const tipo = searchParams.get('type') || 'cfop';
+  const tipo = searchParams.get('tipo');
+
+  const where = tipo ? { tipo } : {};
 
   const items = await prisma.configAuxiliar.findMany({
-    where: { tipo },
+    where,
     orderBy: [{ tipo: 'asc' }, { codigo: 'asc' }],
   });
 
   return NextResponse.json(items);
 }
 
+// POST /api/admin/config-auxiliares - Create new record
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  const perfil = (session.user as any).perfil;
-  if (!perfil?.isAdmin) {
+  const user = session.user as any;
+  if (user.globalRole !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -54,23 +61,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const user = session.user as any;
-    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId: user.escritorioId,
-      acao: 'CREATE',
-      entidade: 'ConfigAuxiliar',
-      entidadeId: item.id,
-      dadosAntigos: null,
-      dadosNovos: item,
-      ipAddress,
-      userAgent: req.headers.get('user-agent'),
-    }).catch((err) => console.error('[AUDITORIA]', err));
-
     return NextResponse.json(item, { status: 201 });
   } catch (error: any) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 });
+    }
     if (error.code === 'P2002') {
       return NextResponse.json({ error: 'Código já existente para este tipo' }, { status: 409 });
     }

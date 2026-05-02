@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
+import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { registrarAuditoria } from '@/lib/auditoria';
+import { updateUsuarioSchema } from '@/lib/validations/usuario';
 
 // PUT /api/escritorios/[id]/usuarios/[userId] - Update usuario
 export async function PUT(
@@ -20,13 +23,22 @@ export async function PUT(
 
   const { id, userId } = await params;
   const body = await req.json();
-  const { nome, email, cargo, senha } = body;
+
+  const parsed = updateUsuarioSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues.map((e: z.ZodIssue) => e.message).join(', ') },
+      { status: 400 }
+    );
+  }
+
+  const { nome, email, cargo, senha } = parsed.data;
 
   try {
     const oldUsuario = await prisma.usuario.findUnique({ where: { id: userId } });
 
-    const updateData: any = { nome, email, cargo };
-    if (senha) updateData.senha = await bcrypt.hash(senha, 10);
+    const updateData: Prisma.UsuarioUpdateInput = { nome, email, cargo };
+    if (senha) updateData.senha = await bcrypt.hash(senha, 12);
 
     const usuario = await prisma.usuario.update({
       where: { id: userId },
