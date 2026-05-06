@@ -53,6 +53,10 @@ export async function POST(req: NextRequest) {
     const email = formData.get('email') as string || null;
     const telefone = formData.get('telefone') as string || null;
     const responsavelTecnico = formData.get('responsavelTecnico') as string || null;
+    const dataAbertura = formData.get('dataAbertura') as string || null;
+    const cnae = formData.get('cnae') as string || null;
+    const inscricaoMunicipal = formData.get('inscricaoMunicipal') as string || null;
+    const optanteSimples = formData.get('optanteSimples') === 'true';
 
     if (!documento || !nomeRazao || !tipoPessoa || !regime) {
       return NextResponse.json({ error: 'Campos obrigatórios missing' }, { status: 400 });
@@ -89,6 +93,10 @@ export async function POST(req: NextRequest) {
         telefone,
         responsavelTecnico,
         escritorioId,
+        dataAbertura: dataAbertura ? new Date(dataAbertura) : null,
+        cnae,
+        inscricaoMunicipal,
+        optanteSimples,
       },
     });
 

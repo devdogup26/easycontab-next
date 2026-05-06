@@ -4,7 +4,7 @@ import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { authOptions } from '@/lib/auth';
 import styles from './layout.module.css';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   const user = session?.user as any;
   if (!session || user.globalRole !== 'SUPER_ADMIN') {

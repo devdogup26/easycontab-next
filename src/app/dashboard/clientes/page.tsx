@@ -128,6 +128,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                 <tr>
                   <th>Nome/Razão</th>
                   <th>Documento</th>
+                  <th>Status</th>
+                  <th>Regime</th>
                   <th>Cidade</th>
                   <th>Ações</th>
                 </tr>
@@ -139,6 +141,12 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                     <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                       {cliente.documento}
                     </td>
+                    <td>
+                      <span className={cliente.situacaoFiscal === 'REGULAR' ? sharedStyles.statusActive : sharedStyles.statusInactive}>
+                        {cliente.situacaoFiscal === 'REGULAR' ? 'Ativo' : cliente.situacaoFiscal === 'REGULARIZADO' ? 'Regularizado' : 'Inativo'}
+                      </span>
+                    </td>
+                    <td>{cliente.regime === 'SIMPLES_NACIONAL' ? 'Simples' : 'Normal'}</td>
                     <td>{cliente.cidade || '-'}</td>
                     <td>
                       <Link

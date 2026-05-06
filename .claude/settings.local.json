@@ -30,7 +30,12 @@
       "Bash(git checkout *)",
       "WebSearch",
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=sim npx prisma db push --force-reset)",
-      "Bash(psql \"postgresql://neondb_owner:npg_cCm1EfiFA3Me@ep-rapid-lake-and8hncj-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\d ClienteFinal\")"
+      "Bash(psql \"postgresql://neondb_owner:npg_cCm1EfiFA3Me@ep-rapid-lake-and8hncj-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\d ClienteFinal\")",
+      "Bash(npm --version)",
+      "Bash(nvm list *)",
+      "Bash(nvm use *)",
+      "Bash(~/.nvm/versions/node/v22.13.0/bin/node *)",
+      "Bash(export PATH=\"$HOME/.nvm/versions/node/v22.13.0/bin:$PATH\")"
     ]
   }
 }
