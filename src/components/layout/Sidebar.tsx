@@ -87,6 +87,7 @@ const usuarioNavItems: NavItem[] = [
       { label: 'Estadual', href: '/dashboard/certidoes/estadual' },
     ],
   },
+  { label: 'eSocial', href: '/dashboard/esocial', icon: FileText, code: 'obrigacoes:read' },
   { label: 'Certificados', href: '/dashboard/certificados', icon: Key, code: null },
   { label: 'Auditoria', href: '/dashboard/auditoria', icon: History, code: 'auditoria:read' },
   {

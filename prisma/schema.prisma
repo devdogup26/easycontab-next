@@ -143,6 +143,10 @@ model ClienteFinal {
   certificados        Certificado[]
   procuracoes         Procuracao[]
   mensagens           Mensagem[]
+  trabalhadores       Trabalhador[]
+  eventosESocial      EventoEsocial[]
+  lotesEnvio          LoteEnvio[]
+  configuracoesESocial ConfiguracaoESocial[]
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
@@ -249,6 +253,7 @@ model Certificado {
   validade    DateTime
   responsavel String? // quem está em posse
   status      StatusCertificado
+  arquivos    ArquivoCertificado[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -381,6 +386,168 @@ model Notificacao {
 
   @@index([usuarioId, lida])
   @@index([escritorioId, createdAt])
+}
+
+// ============================================
+// TRABALHADOR - eSocial Worker (vínculo empregatício)
+// ============================================
+model Trabalhador {
+  id              String   @id @default(cuid())
+  cliente         ClienteFinal @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId       String
+  cpf             String   @unique
+  nome            String
+  dataNascimento  DateTime
+  tipoRegime      String   // CLT, Estatutário, etc.
+  ctps            String?
+  serieCtps       String?
+  ufCtps          String?
+  pis             String?  // NIS/PIS
+  cnh             String?
+  tipoCertidao    String?  // Birth, Marriage, etc.
+  certidaoLivro   String?
+  certidaoFolha   String?
+  certidaoTermo   String?
+  rua             String?
+  numero          String?
+  complemento     String?
+  bairro          String?
+  cidade          String?
+  uf              String   @default("")
+  cep             String?
+  email           String?
+  telefone        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  eventos         EventoEsocial[]
+
+  @@index([clienteId])
+  @@index([cpf])
+}
+
+// ============================================
+// EVENTO ESOCIAL - eSocial event record
+// ============================================
+model EventoEsocial {
+  id              String           @id @default(cuid())
+  cliente         ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId       String
+  tipo            TipoEventoEsocial
+  ano             Int
+  mes             Int
+  status          StatusEventoEsocial
+  protocolo       String?
+  dataEnvio       DateTime?
+  dataRecebimento DateTime?
+  reciboXml       String?          @db.Text
+  xmlOriginal     String?          @db.Text
+  xmlAssinado     String?          @db.Text
+  erroCodigo      String?
+  erroMensagem    String?
+  versao          String           @default("S-1.2")
+  escritorioId    String
+
+  // Worker link (for events that reference a specific worker)
+  trabalhador     Trabalhador?     @relation(fields: [trabalhadorId], references: [id])
+  trabalhadorId   String?
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([clienteId])
+  @@index([tipo, ano, mes])
+  @@index([status])
+  @@index([escritorioId])
+  @@index([protocolo])
+  @@index([trabalhadorId])
+}
+
+enum TipoEventoEsocial {
+  S_1200  // Remuneração de trabalhador não optante pelo Simples
+  S_1202  // Remuneração de optante pelo Simples
+  S_1207  // Retenções de contribuições sociais
+  S_1210  // Pagamentos de rendimentos do trabalho
+  S_1250  // Registro de benefícios - FGTS
+  S_1260  // Informações do seguro desemprego
+  S_1270  // Informações de assistência à saúde
+  S_1280  // Informações do FGTS
+  S_1298  // Resumo de eventos do FGTS
+  S_1299  // Fechamento dos eventos do FGTS
+  S_2200  // Cadastramento inicial do trabalhador
+  S_2205  // Alteração de dados do trabalhador
+  S_2300  // Trabalhador sem vínculo - CTRP/DRT
+  S_2399  // Desligamento
+}
+
+enum StatusEventoEsocial {
+  RASCUNHO
+  VALIDANDO
+  PROCESSANDO
+  ENTREGUE
+  INCONSISTENCIA
+  ERRO
+}
+
+// ============================================
+// LOTE ENVIO - eSocial batch transmission
+// ============================================
+model LoteEnvio {
+  id                String   @id @default(cuid())
+  cliente           ClienteFinal @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId         String
+  protocolo         String?
+  quantidadeEventos Int      @default(0)
+  status            String   @default("ENVIADO")
+  dataEnvio         DateTime?
+  dataRecebimento   DateTime?
+  reciboXml         String?  @db.Text
+  erros             String?  @db.Text // JSON array of errors
+  escritorioId      String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([protocolo])
+  @@index([escritorioId])
+}
+
+// ============================================
+// CONFIGURACAO ESOCIAL - Per-client eSocial config
+// ============================================
+model ConfiguracaoESocial {
+  id              String   @id @default(cuid())
+  cliente         ClienteFinal @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId       String   @unique
+  porte           String   // Mikro, Pequena, Media, Grande
+  simplesNacional Boolean  @default(false)
+  enquadramento   String?  // EPP, ME, etc.
+  certificadoId   String?  // Active certificate for this client
+  escritorioId    String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([escritorioId])
+}
+
+// ============================================
+// ARQUIVO CERTIFICADO - Certificate file storage
+// ============================================
+model ArquivoCertificado {
+  id              String   @id @default(cuid())
+  certificado     Certificado @relation(fields: [certificadoId], references: [id], onDelete: Cascade)
+  certificadoId   String
+  arquivoNome     String
+  arquivoTipo     String   // application/x-pkcs12
+  arquivoHash     String   // SHA-256 hash
+  arquivoSize     Int
+  validade        DateTime
+  emissor         String?
+  subjectCN       String?
+  createdAt       DateTime @default(now())
+
+  @@index([certificadoId])
 }
 
 // ============================================
