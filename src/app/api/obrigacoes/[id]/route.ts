@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { updateObrigacaoSchema } from '@/lib/validations/obrigacao';
-import { registrarAuditoria } from '@/lib/auditoria';
 import { z } from 'zod';
 
 export async function GET(
@@ -94,21 +93,6 @@ export async function PUT(
       },
     });
 
-    const user = session.user as any;
-    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'UPDATE',
-      entidade: 'Obrigacao',
-      entidadeId: updated.id,
-      dadosAntigos: existing,
-      dadosNovos: updated,
-      ipAddress,
-      userAgent: req.headers.get('user-agent'),
-    }).catch((err) => console.error('[AUDITORIA]', err));
-
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error('Error updating obrigacao:', error);
@@ -149,21 +133,6 @@ export async function DELETE(
     await prisma.obrigacao.delete({
       where: { id },
     });
-
-    const user = session.user as any;
-    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'DELETE',
-      entidade: 'Obrigacao',
-      entidadeId: id,
-      dadosAntigos: existing,
-      dadosNovos: null,
-      ipAddress,
-      userAgent: req.headers.get('user-agent'),
-    }).catch((err) => console.error('[AUDITORIA]', err));
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

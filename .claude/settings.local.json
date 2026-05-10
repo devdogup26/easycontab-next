@@ -30,7 +30,17 @@
       "Bash(git checkout *)",
       "WebSearch",
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=sim npx prisma db push --force-reset)",
-      "Bash(psql \"postgresql://neondb_owner:npg_cCm1EfiFA3Me@ep-rapid-lake-and8hncj-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\d ClienteFinal\")"
+      "Bash(psql \"postgresql://neondb_owner:npg_cCm1EfiFA3Me@ep-rapid-lake-and8hncj-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\d ClienteFinal\")",
+      "WebFetch(domain:developers.receitaws.com.br)",
+      "WebFetch(domain:www.gov.br)",
+      "WebFetch(domain:publica.cnpj.ws)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.inss.gov.br)",
+      "WebFetch(domain:www.nfe.fazenda.gov.br)",
+      "Bash(git *)",
+      "Bash(npx next *)",
+      "Bash(openssl rand *)",
+      "Bash(echo -e \"\\\\nNEXTAUTH_SECRET=$\\(openssl rand -base64 32 2>/dev/null || node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\"\\)\")"
     ]
   }
 }

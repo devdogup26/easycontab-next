@@ -3,9 +3,8 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
-import { registrarAuditoria } from '@/lib/auditoria';
-import bcrypt from 'bcryptjs';
 import { createEscritorioSchema } from '@/lib/validations/escritorio';
+import bcrypt from 'bcryptjs';
 
 // GET /api/escritorios - List all escritorios (SUPER_ADMIN only)
 export async function GET(req: NextRequest) {
@@ -31,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/escritorios - Create new escritorio with associated contador
+// POST /api/escritorios - Create new escritorio with admin user
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -61,9 +60,6 @@ export async function POST(req: NextRequest) {
     `;
     const nextCode = nextCodeResult[0].max || 1;
 
-    const user = session.user as any;
-
-    // Create Escritorio standalone
     const escritorio = await prisma.escritorio.create({
       data: {
         codigo: nextCode,
@@ -78,52 +74,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Fire-and-forget audit logging
-    registrarAuditoria({
-      acao: 'CREATE',
-      entidade: 'Escritorio',
-      entidadeId: escritorio.id,
-      dadosAntigos: null,
-      dadosNovos: escritorio,
-    }).catch(() => {});
-
-    // Create default profiles
-    const perfilAdmin = await prisma.perfil.create({
-      data: {
-        nome: 'ADMIN',
-        isAdmin: true,
-        escritorioId: escritorio.id,
-      },
-    });
-
-    await prisma.perfil.create({
-      data: {
-        nome: 'CONTADOR',
-        isAdmin: false,
-        escritorioId: escritorio.id,
-      },
-    });
-
-    await prisma.perfil.create({
-      data: {
-        nome: 'OPERADOR',
-        isAdmin: false,
-        escritorioId: escritorio.id,
-      },
-    });
-
-    // Create admin user
+    // Create admin user for the escritorio
     const hashedPassword = await bcrypt.hash('admin123', 12);
     await prisma.usuario.create({
       data: {
-        login: `${nextCode}_admin`,
+        login: email,
         email: email,
         senha: hashedPassword,
         nome: `Admin ${nome}`,
         cargo: 'Administrador',
-        globalRole: 'CONTADOR',
+        globalRole: 'ADMIN',
         escritorioId: escritorio.id,
-        perfilId: perfilAdmin.id,
       },
     });
 

@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Users, Search, Filter } from 'lucide-react';
+import { Building2, Plus, Edit2, Trash2, X, AlertCircle, Search, Filter } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import styles from '../dashboard/page.module.css';
 
 interface Escritorio {
-  id: string;
+  id: number;
   codigo: number;
   nome: string;
   documento: string;
@@ -51,6 +51,52 @@ function getVencimentoStatus(dataVencimento: Date | string | null): 'ok' | 'prox
   return 'ok';
 }
 
+function validateCNPJ(cnpj: string): boolean {
+  if (cnpj.length !== 14) return false;
+  let sum = 0;
+  let factor = 2;
+  for (let i = 11; i >= 0; i--) {
+    sum += parseInt(cnpj[i]) * factor;
+    factor = factor === 9 ? 2 : factor + 1;
+  }
+  const rev13 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (rev13 !== parseInt(cnpj[12])) return false;
+  sum = 0;
+  factor = 2;
+  for (let i = 12; i >= 0; i--) {
+    sum += parseInt(cnpj[i]) * factor;
+    factor = factor === 9 ? 2 : factor + 1;
+  }
+  const rev14 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  return rev14 === parseInt(cnpj[13]);
+}
+
+function validateCPF(cpf: string): boolean {
+  if (cpf.length !== 11) return false;
+  if (/^(.)\1+$/.test(cpf)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cpf[i]) * (10 - i);
+  }
+  const rev10 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  if (rev10 !== parseInt(cpf[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cpf[i]) * (11 - i);
+  }
+  const rev11 = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  return rev11 === parseInt(cpf[10]);
+}
+
+function formatCNPJCPF(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length <= 11) {
+    return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, '$1.$2.$3-$4');
+  } else {
+    return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, '$1.$2.$3/$4-$5');
+  }
+}
+
 export function EscritoriosClient({ escritorios, total, page, totalPages, search, status }: EscritoriosClientProps) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -66,7 +112,9 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; escritorioId: string | null; escritorioNome: string }>({
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
+  const [cnpjValid, setCnpjValid] = useState<boolean | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; escritorioId: number | null; escritorioNome: string }>({
     isOpen: false,
     escritorioId: null,
     escritorioNome: '',
@@ -95,6 +143,8 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
       dataVencimento: '',
     });
     setError(null);
+    setCnpjError(null);
+    setCnpjValid(null);
     setShowModal(true);
   };
 
@@ -112,6 +162,8 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
         : '',
     });
     setError(null);
+    setCnpjError(null);
+    setCnpjValid(null);
     setShowModal(true);
   };
 
@@ -119,12 +171,33 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
     setShowModal(false);
     setEditingEscritorio(null);
     setError(null);
+    setCnpjError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setCnpjError(null);
+
+    const digits = formData.documento.replace(/\D/g, '');
+
+    // Client-side CNPJ/CPF validation
+    if (digits.length === 14 && !validateCNPJ(digits)) {
+      setCnpjError('CNPJ inválido');
+      setLoading(false);
+      return;
+    }
+    if (digits.length === 11 && !validateCPF(digits)) {
+      setCnpjError('CPF inválido');
+      setLoading(false);
+      return;
+    }
+    if (digits.length !== 14 && digits.length !== 11) {
+      setCnpjError(digits.length < 14 ? 'CPF deve ter 11 dígitos' : 'CNPJ deve ter 14 dígitos');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (editingEscritorio) {
@@ -162,7 +235,7 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     const escritorio = escritorios.find(e => e.id === id);
     if (!escritorio) return;
     setDeleteConfirm({ isOpen: true, escritorioId: id, escritorioNome: escritorio.nome });
@@ -301,13 +374,6 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
                           <Edit2 size={14} />
                           Editar
                         </button>
-                        <Link
-                          href={`/admin/escritorios/${escritorio.id}`}
-                          className={styles.actionBtn}
-                        >
-                          <Users size={14} />
-                          Usuários
-                        </Link>
                         <button
                           className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
                           onClick={() => handleDelete(escritorio.id)}
@@ -380,10 +446,42 @@ export function EscritoriosClient({ escritorios, total, page, totalPages, search
                   <input
                     type="text"
                     value={formData.documento}
-                    onChange={e => setFormData({ ...formData, documento: e.target.value })}
-                    required
-                    placeholder="12345678000190"
+                    onChange={e => {
+                      const masked = formatCNPJCPF(e.target.value);
+                      setFormData({ ...formData, documento: masked });
+                      setCnpjError(null);
+                      setCnpjValid(null);
+
+                      const digits = masked.replace(/\D/g, '');
+                      if (digits.length === 14) {
+                        if (validateCNPJ(digits)) {
+                          setCnpjValid(true);
+                        } else {
+                          setCnpjError('CNPJ inválido');
+                          setCnpjValid(false);
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      const digits = formData.documento.replace(/\D/g, '');
+                      if (digits.length > 0 && digits.length < 14) {
+                        setCnpjError('CNPJ deve ter 14 dígitos');
+                        setCnpjValid(false);
+                      } else if (digits.length === 14 && !validateCNPJ(digits)) {
+                        setCnpjError('CNPJ inválido');
+                        setCnpjValid(false);
+                      }
+                    }}
+                    placeholder="00.000.000/0001-00"
+                    maxLength={18}
+                    className={cnpjValid === true ? styles.inputValid : cnpjValid === false ? styles.inputInvalid : ''}
                   />
+                  {cnpjError && (
+                    <span className={styles.fieldError}>{cnpjError}</span>
+                  )}
+                  {cnpjValid === true && !cnpjError && (
+                    <span className={styles.fieldSuccess}>CNPJ válido</span>
+                  )}
                 </div>
 
                 <div className={styles.formField}>

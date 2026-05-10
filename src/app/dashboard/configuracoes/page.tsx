@@ -16,7 +16,6 @@ export default async function ConfiguracoesPage() {
   const [usuario, escritorio] = await Promise.all([
     prisma.usuario.findUnique({
       where: { id: userId },
-      include: { perfil: true },
     }),
     prisma.escritorio.findUnique({
       where: { id: escritorioId },
@@ -29,13 +28,7 @@ export default async function ConfiguracoesPage() {
         email: usuario.email,
         nome: usuario.nome,
         cargo: usuario.cargo,
-        perfil: usuario.perfil
-          ? {
-              id: usuario.perfil.id,
-              nome: usuario.perfil.nome,
-              isAdmin: usuario.perfil.isAdmin,
-            }
-          : null,
+        globalRole: usuario.globalRole,
       }
     : null;
 

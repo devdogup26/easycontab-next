@@ -35,7 +35,7 @@ export default function ConfigAuxiliaresPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') redirect('/login');
-    if (!(session?.user as any)?.perfil?.isAdmin) redirect('/dashboard');
+    if ((session?.user as any)?.globalRole !== 'ADMIN') redirect('/dashboard');
     fetchItems();
   }, [status, session, activeTab]);
 

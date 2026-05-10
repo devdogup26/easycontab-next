@@ -71,11 +71,11 @@ function ProfileForm({ user }: { user: any }) {
           <input type="text" id="cargo" defaultValue={user?.cargo || ''} readOnly />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="perfil">Perfil</label>
+          <label htmlFor="globalRole">Função</label>
           <input
             type="text"
-            id="perfil"
-            defaultValue={user?.perfil?.nome || 'Sem perfil'}
+            id="globalRole"
+            defaultValue={user?.globalRole === 'ADMIN' ? 'Administrador' : 'Usuário'}
             readOnly
           />
         </div>

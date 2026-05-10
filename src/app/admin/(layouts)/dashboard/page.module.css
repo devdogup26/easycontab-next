@@ -497,6 +497,26 @@
   gap: 6px;
 }
 
+.fieldError {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.fieldSuccess {
+  color: var(--success);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.inputValid {
+  border-color: var(--success) !important;
+}
+
+.inputInvalid {
+  border-color: var(--danger) !important;
+}
+
 .formField label {
   font-size: 12px;
   font-weight: 600;

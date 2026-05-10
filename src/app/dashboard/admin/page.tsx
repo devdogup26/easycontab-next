@@ -2,18 +2,13 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
-import Link from 'next/link';
 import {
-  Building2,
   Users,
-  UserCheck,
   AlertTriangle,
-  TrendingUp,
   FileText,
   CheckCircle,
   Clock,
   Shield,
-  ArrowRight,
   Calendar,
 } from 'lucide-react';
 import styles from './page.module.css';
@@ -24,67 +19,47 @@ export default async function AdminPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
 
-  const perfil = (session.user as any).perfil;
-  if (!perfil?.isAdmin) redirect('/dashboard');
+  const globalRole = (session.user as any).globalRole;
+  if (globalRole !== 'ADMIN') redirect('/dashboard');
+
+  const escritorioId = (session.user as any).escritorioId;
 
   const [
-    escritorios,
     stats,
     clientesPorSituacao,
     obrigacoesPorStatus,
     recentClientes,
-    topEscritorios,
   ] = await Promise.all([
-    prisma.escritorio.findMany({
-      include: {
-        _count: { select: { clientes: true, usuarios: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
     prisma.$transaction([
-      prisma.escritorio.count(),
-      prisma.clienteFinal.count(),
-      prisma.usuario.count(),
-      prisma.obrigacao.count({ where: { status: 'NAO_ENTREGUE' } }),
-      prisma.clienteFinal.count({ where: { situacaoFiscal: 'IRREGULAR' } }),
-      prisma.clienteFinal.count({ where: { regime: 'SIMPLES_NACIONAL' } }),
+      prisma.clienteFinal.count({ where: { escritorioId } }),
+      prisma.obrigacao.count({ where: { status: 'NAO_ENTREGUE', cliente: { escritorioId } } }),
+      prisma.clienteFinal.count({ where: { escritorioId, situacaoFiscal: 'IRREGULAR' } }),
+      prisma.clienteFinal.count({ where: { escritorioId, regime: 'SIMPLES_NACIONAL' } }),
     ]),
     prisma.clienteFinal.groupBy({
       by: ['situacaoFiscal'],
       _count: true,
+      where: { escritorioId },
     }),
     prisma.obrigacao.groupBy({
       by: ['status'],
       _count: true,
+      where: { cliente: { escritorioId } },
     }),
     prisma.clienteFinal.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
+      where: { escritorioId },
       include: { escritorio: { select: { nome: true } } },
-    }),
-    prisma.escritorio.findMany({
-      take: 5,
-      orderBy: { clientes: { _count: 'desc' } },
-      include: {
-        _count: { select: { clientes: true, usuarios: true } },
-        clientes: {
-          where: { situacaoFiscal: 'REGULAR' },
-          select: { id: true },
-        },
-      },
     }),
   ]);
 
   const [
-    totalEscritorios,
     totalClientes,
-    totalUsuarios,
     obrigacoesAtrasadas,
     clientesIrregulares,
     clientesSimples,
   ] = stats;
-
-  const maxClientes = Math.max(...escritorios.map(e => e._count.clientes), 1);
 
   const situacaoMap = Object.fromEntries(
     clientesPorSituacao.map(s => [s.situacaoFiscal, s._count])
@@ -95,29 +70,12 @@ export default async function AdminPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Painel Administrativo</h1>
-          <p className={styles.subtitle}>Visão geral da plataforma</p>
+          <h1 className={styles.title}>Dashboard do Escritório</h1>
+          <p className={styles.subtitle}>Visão geral do seu escritório</p>
         </div>
-        <Link href="/admin/escritorios" className={styles.manageBtn}>
-          <span>Gerenciar Escritórios</span>
-          <ArrowRight size={16} />
-        </Link>
       </header>
 
       <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
-            style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa' }}
-          >
-            <Building2 size={24} />
-          </div>
-          <div className={styles.statContent}>
-            <span className={styles.statValue}>{totalEscritorios}</span>
-            <span className={styles.statLabel}>Escritórios</span>
-          </div>
-        </div>
-
         <div className={styles.statCard}>
           <div
             className={styles.statIcon}
@@ -134,19 +92,6 @@ export default async function AdminPage() {
         <div className={styles.statCard}>
           <div
             className={styles.statIcon}
-            style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}
-          >
-            <UserCheck size={24} />
-          </div>
-          <div className={styles.statContent}>
-            <span className={styles.statValue}>{totalUsuarios}</span>
-            <span className={styles.statLabel}>Usuários</span>
-          </div>
-        </div>
-
-        <div className={styles.statCard}>
-          <div
-            className={styles.statIcon}
             style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171' }}
           >
             <AlertTriangle size={24} />
@@ -154,6 +99,32 @@ export default async function AdminPage() {
           <div className={styles.statContent}>
             <span className={styles.statValue}>{obrigacoesAtrasadas}</span>
             <span className={styles.statLabel}>Obrigações Atrasadas</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div
+            className={styles.statIcon}
+            style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}
+          >
+            <Shield size={24} />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{clientesIrregulares}</span>
+            <span className={styles.statLabel}>Clientes Irregulares</span>
+          </div>
+        </div>
+
+        <div className={styles.statCard}>
+          <div
+            className={styles.statIcon}
+            style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}
+          >
+            <FileText size={24} />
+          </div>
+          <div className={styles.statContent}>
+            <span className={styles.statValue}>{clientesSimples}</span>
+            <span className={styles.statLabel}>Simples Nacional</span>
           </div>
         </div>
       </div>
@@ -246,35 +217,6 @@ export default async function AdminPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h2 className={styles.cardTitle}>
-                <TrendingUp size={18} />
-                Top 5 Escritórios
-              </h2>
-              <Link href="/admin/escritorios" className={styles.cardLink}>
-                Ver todos
-              </Link>
-            </div>
-            <div className={styles.topList}>
-              {topEscritorios.map((esc, idx) => (
-                <div key={esc.id} className={styles.topItem}>
-                  <span className={styles.topRank}>#{idx + 1}</span>
-                  <div className={styles.topInfo}>
-                    <span className={styles.topName}>{esc.nome}</span>
-                    <span className={styles.topMeta}>
-                      {esc.cidade || 'Sem cidade'} • {esc._count.clientes} clientes
-                    </span>
-                  </div>
-                  <div className={styles.topStats}>
-                    <span className={styles.topClients}>{esc._count.clientes}</span>
-                    <span className={styles.topClientsLabel}>clientes</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>
                 <Calendar size={18} />
                 Clientes Recentes
               </h2>
@@ -288,7 +230,7 @@ export default async function AdminPage() {
                   <div className={styles.recentInfo}>
                     <span className={styles.recentName}>{cliente.nomeRazao}</span>
                     <span className={styles.recentMeta}>
-                      {cliente.escritorio.nome} • {cliente.regime.replace('_', ' ')}
+                      {cliente.regime.replace('_', ' ')}
                     </span>
                   </div>
                   <span
@@ -300,35 +242,6 @@ export default async function AdminPage() {
               ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2 className={styles.cardTitle}>
-            <Building2 size={18} />
-            Distribuição de Clientes por Escritório
-          </h2>
-        </div>
-        <div className={styles.chartList}>
-          {escritorios
-            .sort((a, b) => b._count.clientes - a._count.clientes)
-            .slice(0, 8)
-            .map(esc => (
-              <div key={esc.id} className={styles.chartItem}>
-                <div className={styles.chartInfo}>
-                  <span className={styles.chartName}>{esc.nome}</span>
-                  <span className={styles.chartMeta}>{esc._count.usuarios} usuários</span>
-                </div>
-                <div className={styles.chartBar}>
-                  <div
-                    className={styles.chartProgress}
-                    style={{ width: `${(esc._count.clientes / maxClientes) * 100}%` }}
-                  />
-                </div>
-                <span className={styles.chartValue}>{esc._count.clientes}</span>
-              </div>
-            ))}
         </div>
       </div>
     </div>

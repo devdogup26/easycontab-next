@@ -1,4 +1,4 @@
-// Seed script for EasyContab - Superadmin Only
+// Seed script for EasyContab
 // Run with: node prisma/seed.js
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
@@ -10,7 +10,6 @@ const bcrypt = require('bcryptjs');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
-// Decode URL-encoded characters and clean connection string
 let cleanUrl = DATABASE_URL;
 if (cleanUrl.includes('%40')) {
   cleanUrl = cleanUrl.replace(/%40/g, '@');
@@ -26,16 +25,13 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('Starting EasyContab database seed...\n');
 
-  // Clean existing data
   console.log('Cleaning existing data...');
-  await prisma.mensagem.deleteMany();
+  await prisma.notificacao.deleteMany();
   await prisma.procuracao.deleteMany();
-  await prisma.certificado.deleteMany();
   await prisma.parcelamento.deleteMany();
   await prisma.obrigacao.deleteMany();
   await prisma.clienteFinal.deleteMany();
   await prisma.usuario.deleteMany();
-  await prisma.perfil.deleteMany();
   await prisma.escritorio.deleteMany();
   console.log('Existing data cleaned.\n');
 
@@ -60,96 +56,51 @@ async function main() {
   });
   console.log(`Created Escritorio: ${escritorio.nome}`);
 
-  // ============================================
-  // CREATE PERMISSOES
-  // ============================================
-  const permKeys = [
-    'clientes:read',
-    'clientes:create',
-    'clientes:update',
-    'clientes:delete',
-    'obrigacoes:read',
-    'obrigacoes:create',
-    'obrigacoes:update',
-    'obrigacoes:delete',
-    'dctfweb:transmitir',
-    'dctfweb:view',
-    'parcelamentos:read',
-    'parcelamentos:create',
-    'certidoes:read',
-    'certidoes:create',
-    'auditoria:read',
-    'configuracoes',
-    'usuarios:manage',
-  ];
-
-  for (const codigo of permKeys) {
-    await prisma.permissao.upsert({
-      where: { codigo },
-      update: {},
-      create: { codigo, descricao: `Acesso a ${codigo}` },
-    });
-  }
-  console.log('Created Permissoes');
-
-  const allPerms = await prisma.permissao.findMany();
-
-  // ============================================
-  // CREATE PERFIS
-  // ============================================
-  const perfilAdmin = await prisma.perfil.create({
-    data: {
-      nome: 'ADMIN',
-      isAdmin: true,
-      escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.map(p => ({ id: p.id })) },
-    },
-  });
-
-  await prisma.perfil.create({
-    data: {
-      nome: 'CONTADOR',
-      isAdmin: false,
-      escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.slice(0, 8).map(p => ({ id: p.id })) },
-    },
-  });
-
-  await prisma.perfil.create({
-    data: {
-      nome: 'OPERADOR',
-      isAdmin: false,
-      escritorioId: escritorio.id,
-      permissoes: { connect: allPerms.slice(0, 5).map(p => ({ id: p.id })) },
-    },
-  });
-
-  console.log('Created Perfis: ADMIN, CONTADOR, OPERADOR');
-
-  // ============================================
-  // CREATE SUPERADMIN USER
-  // ============================================
   const hashedPassword = await bcrypt.hash('admin123', 12);
 
+  // ============================================
+  // CREATE SUPER_ADMIN (for admin module)
+  // ============================================
   await prisma.usuario.create({
     data: {
-      login: 'admin',
-      email: 'admin@dogup.com.br',
+      login: 'admin@admin.com',
+      email: 'admin@admin.com',
       senha: hashedPassword,
       nome: 'Administrador',
       cargo: 'Administrador da Plataforma',
       globalRole: 'SUPER_ADMIN',
       escritorioId: escritorio.id,
-      perfilId: perfilAdmin.id,
     },
   });
-  console.log('Created Superadmin User\n');
+  console.log('Created SUPER_ADMIN: admin@admin.com');
+
+  // ============================================
+  // CREATE ADMIN (for client/dashboard module)
+  // Login = escritorio email
+  // ============================================
+  await prisma.usuario.create({
+    data: {
+      login: 'admin@dogup.com.br',
+      email: 'admin@dogup.com.br',
+      senha: hashedPassword,
+      nome: 'Administrador do Escritório',
+      cargo: 'Administrador',
+      globalRole: 'ADMIN',
+      escritorioId: escritorio.id,
+    },
+  });
+  console.log('Created ADMIN: admin@dogup.com.br\n');
 
   console.log('='.repeat(50));
   console.log('Seed completed successfully!');
   console.log('='.repeat(50));
   console.log('\n🔐 Login credentials:');
-  console.log('   admin@dogup.com.br / admin123');
+  console.log('');
+  console.log('  Módulo ADMIN (admin.module):');
+  console.log('  admin@admin.com / admin123');
+  console.log('');
+  console.log('  Módulo CLIENTES (dashboard):');
+  console.log('  admin@dogup.com.br / admin123');
 }
 
 main()

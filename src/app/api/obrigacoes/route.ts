@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { createObrigacaoSchema } from '@/lib/validations/obrigacao';
-import { registrarAuditoria } from '@/lib/auditoria';
 import { z } from 'zod';
 
 export async function GET(req: NextRequest) {
@@ -126,21 +125,6 @@ export async function POST(req: NextRequest) {
         status: 'OUTROS',
       },
     });
-
-    const user = session.user as any;
-    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null;
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'CREATE',
-      entidade: 'Obrigacao',
-      entidadeId: obrigacao.id,
-      dadosAntigos: null,
-      dadosNovos: obrigacao,
-      ipAddress,
-      userAgent: req.headers.get('user-agent'),
-    }).catch((err) => console.error('[AUDITORIA]', err));
 
     return NextResponse.json(obrigacao, { status: 201 });
   } catch (error: any) {

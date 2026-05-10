@@ -1,5 +1,4 @@
 // Prisma Schema for DOGUP Fiscal Compliance System
-// Multi-tenant architecture: Escritorio → Usuario/ClienteFinal/Perfil
 
 generator client {
   provider = "prisma-client-js"
@@ -10,146 +9,22 @@ datasource db {
 }
 
 // ============================================
-// TIPO PESSOA - Discriminator for PF/PJ
+// ENUMS
 // ============================================
 enum TipoPessoa {
-  PF  // Pessoa Física
-  PJ  // Pessoa Jurídica
+  PF
+  PJ
 }
 
-// ============================================
-// GLOBAL ROLE - Platform-wide roles
-// ============================================
 enum GlobalRole {
-  CONTADOR      // Regular user within an escritorio
-  SUPER_ADMIN   // Platform super-admin
+  ADMIN
+  SUPER_ADMIN
 }
 
-// ============================================
-// ESCOPO STATUS - Subscription status
-// ============================================
 enum EscopoStatus {
   ATIVO
   VENCIDO
   SUSPENSO
-}
-
-// ============================================
-// ESCRITORIO - System client (accounting office platform customer)
-// Absorbed fields from Contador: tipoPessoa, cna, inscricaoEstadual, logradouro, etc.
-// ============================================
-model Escritorio {
-  id              String       @id @default(cuid())
-  codigo          Int          @unique  // Sequential numeric ID (1, 2, 3...)
-  nome            String
-  documento       String       // CNPJ
-  email           String
-  telefone        String?
-  crc             String?
-  status          EscopoStatus @default(ATIVO)
-  dataVencimento  DateTime?
-
-  // Contador fields absorbed into Escritorio
-  tipoPessoa          TipoPessoa @default(PJ)
-  cna                 String?
-  inscricaoEstadual   String?
-  logradouro          String?
-  numero              String?
-  complemento         String?
-  bairro              String?
-  cidade              String?
-  uf                  String    @default("")
-  cep                 String?
-  logoUrl             String?
-  responsavel         String?   // Technical responsible name
-
-  // Relations
-  usuarios            Usuario[]
-  clientes            ClienteFinal[]
-  perfis              Perfil[]
-
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-}
-
-// ============================================
-// USUÁRIO - User belonging to an Escritorio
-// ============================================
-model Usuario {
-  id        String   @id @default(cuid())
-  login     String   @unique  // Format: {codigoEscritorio}_{nomeUsuario}, e.g., "1_admin"
-  email     String   @unique
-  senha     String   // bcrypt hashed
-  nome      String
-  cargo     String?
-  globalRole GlobalRole @default(CONTADOR)
-  perfil    Perfil?  @relation(fields: [perfilId], references: [id])
-  perfilId  String?
-  escritorio   Escritorio  @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
-  escritorioId String
-  sessoes   Sessao[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([escritorioId])
-  @@index([login])
-  @@index([email])
-}
-
-// ============================================
-// SESSÃO - Authentication sessions
-// ============================================
-model Sessao {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([token])
-  @@index([usuarioId])
-}
-
-// ============================================
-// CLIENTE FINAL - CNPJ/CPF Client of the escritorio
-// ============================================
-model ClienteFinal {
-  id                  String            @id @default(cuid())
-  tipoPessoa          TipoPessoa
-  documento           String            @unique  // CPF or CNPJ, digits only
-  nomeRazao           String
-  nomeFantasia        String?
-  estadoCivil         String?           // Only for PF
-  inscricaoEstadual   String?
-  regime              RegimeTributario @map("regime_tributario")
-  escritorio         Escritorio         @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
-  escritorioId       String
-  situacaoFiscal      SituacaoFiscal @map("situacao_fiscal")
-  logradouro          String?
-  bairro              String?
-  cidade              String?
-  uf                  String?
-  cep                 String?
-  email               String?
-  telefone            String?
-  responsavelTecnico   String?
-  dataAbertura        DateTime?        @map("data_abertura")
-  cnae                String?          @map("cnae")
-  inscricaoMunicipal  String?          @map("inscricao_municipal")
-  optanteSimples      Boolean          @default(false) @map("optante_simples")
-  obrigacoes          Obrigacao[]
-  parcelamentos       Parcelamento[]
-  certificados        Certificado[]
-  procuracoes         Procuracao[]
-  mensagens           Mensagem[]
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  @@index([escritorioId])
-  @@index([documento])
-  @@index([situacaoFiscal])
-  @@index([regime])
 }
 
 enum RegimeTributario {
@@ -161,30 +36,6 @@ enum SituacaoFiscal {
   REGULAR @map("regular")
   REGULARIZADO @map("regularizado")
   IRREGULAR @map("irregular")
-}
-
-// ============================================
-// OBRIGAÇÃO ACESSÓRIA - DCTFWeb, etc.
-// ============================================
-model Obrigacao {
-  id              String           @id @default(cuid())
-  cliente         ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  clienteId       String
-  tipo            TipoObrigacao
-  ano             Int
-  mes             Int
-  dataVencimento  DateTime?
-  status          StatusObrigacao
-  reciboUrl       String?
-  observacao      String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  @@index([clienteId])
-  @@index([tipo, ano, mes])
-  @@index([status])
-  @@index([dataVencimento])
-  @@index([clienteId, status])
 }
 
 enum TipoObrigacao {
@@ -209,8 +60,147 @@ enum StatusObrigacao {
   OUTROS
 }
 
+enum TipoParcelamento {
+  PGFN
+  NAO_PREVIDENCIARIO
+  SIMPLES_NACIONAL
+  SIMPLIFICADO
+  PREVIDENCIARIO
+}
+
+enum TipoProcuracao {
+  COMPLETA
+  PARCIAL
+  LIMITADA
+}
+
+enum StatusProcuracao {
+  VALIDA
+  VENCIDA
+  CANCELADA
+  SEM_PROCURACAO
+}
+
 // ============================================
-// PARCELAMENTO - Federal Installments
+// ESCRITORIO - System client (accounting office)
+// ============================================
+model Escritorio {
+  id              Int          @id @default(autoincrement())
+  codigo          Int          @unique
+  nome            String
+  documento       String
+  email           String
+  telefone        String?
+  crc             String?
+  status          EscopoStatus @default(ATIVO)
+  dataVencimento  DateTime?
+
+  tipoPessoa          TipoPessoa @default(PJ)
+  logradouro          String?
+  numero              String?
+  complemento         String?
+  bairro              String?
+  cidade              String?
+  uf                  String    @default("")
+  cep                 String?
+  logoUrl             String?
+  responsavel         String?
+
+  usuarios            Usuario[]
+  clientes            ClienteFinal[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// ============================================
+// USUÁRIO - Single admin user per escritorio
+// Login = email, Password = admin123
+// ============================================
+model Usuario {
+  id        String   @id @default(cuid())
+  login     String   @unique
+  email     String   @unique
+  senha     String
+  nome      String
+  cargo     String?
+  globalRole GlobalRole @default(ADMIN)
+  escritorio   Escritorio  @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
+  escritorioId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([escritorioId])
+  @@index([email])
+}
+
+// ============================================
+// CLIENTE FINAL - CNPJ/CPF Client
+// ============================================
+model ClienteFinal {
+  id                  String            @id @default(cuid())
+  tipoPessoa          TipoPessoa
+  documento           String            @unique
+  nomeRazao           String
+  nomeFantasia        String?
+  estadoCivil         String?
+  inscricaoEstadual   String?
+  regime              RegimeTributario @map("regime_tributario")
+  escritorio         Escritorio         @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
+  escritorioId       Int
+  situacaoFiscal      SituacaoFiscal @map("situacao_fiscal")
+  logradouro          String?
+  bairro              String?
+  cidade              String?
+  uf                  String?
+  cep                 String?
+  email               String?
+  telefone            String?
+  responsavelTecnico   String?
+  dataAbertura        DateTime?        @map("data_abertura")
+  cnae                String?          @map("cnae")
+  inscricaoMunicipal  String?          @map("inscricao_municipal")
+  optanteSimples      Boolean          @default(false) @map("optante_simples")
+
+  obrigacoes          Obrigacao[]
+  parcelamentos       Parcelamento[]
+  procuracoes         Procuracao[]
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([escritorioId])
+  @@index([documento])
+  @@index([situacaoFiscal])
+  @@index([regime])
+}
+
+// ============================================
+// OBRIGAÇÃO ACESSÓRIA
+// ============================================
+model Obrigacao {
+  id              String           @id @default(cuid())
+  cliente         ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId       String
+  tipo            TipoObrigacao
+  ano             Int
+  mes             Int
+  dataVencimento  DateTime?
+  status          StatusObrigacao
+  reciboUrl       String?
+  observacao      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([clienteId])
+  @@index([tipo, ano, mes])
+  @@index([status])
+  @@index([dataVencimento])
+  @@index([clienteId, status])
+}
+
+// ============================================
+// PARCELAMENTO
 // ============================================
 model Parcelamento {
   id          String             @id @default(cuid())
@@ -229,41 +219,8 @@ model Parcelamento {
   @@index([tipo])
 }
 
-enum TipoParcelamento {
-  PGFN
-  NAO_PREVIDENCIARIO
-  SIMPLES_NACIONAL
-  SIMPLIFICADO
-  PREVIDENCIARIO
-}
-
 // ============================================
-// CERTIFICADO - Digital Certificate
-// ============================================
-model Certificado {
-  id          String   @id @default(cuid())
-  cliente     ClienteFinal  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  clienteId   String
-  tipo        String   // A1, A3
-  cnpj        String?  // emissor do certificado
-  validade    DateTime
-  responsavel String? // quem está em posse
-  status      StatusCertificado
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([clienteId])
-  @@index([validade])
-}
-
-enum StatusCertificado {
-  VALIDO
-  VENCIDO
-  CANCELADO
-}
-
-// ============================================
-// PROCURACAO - e-CAC Power of Attorney
+// PROCURACAO
 // ============================================
 model Procuracao {
   id          String           @id @default(cuid())
@@ -279,101 +236,16 @@ model Procuracao {
   @@index([validade])
 }
 
-enum TipoProcuracao {
-  COMPLETA
-  PARCIAL
-  LIMITADA
-}
-
-enum StatusProcuracao {
-  VALIDA
-  VENCIDA
-  CANCELADA
-  SEM_PROCURACAO
-}
-
 // ============================================
-// MENSAGEM - e-CAC Mailbox Messages
+// NOTIFICACAO
 // ============================================
-model Mensagem {
-  id          String           @id @default(cuid())
-  cliente     ClienteFinal     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  clienteId   String
-  titulo      String
-  conteudo    String
-  tipo        TipoMensagem
-  relevancia  RelevanciaMensagem
-  lida        Boolean          @default(false)
-  data        DateTime
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  @@index([clienteId])
-  @@index([relevancia, lida])
-}
-
-enum TipoMensagem {
-  NOTIFICACAO
-  INTIMACAO
-  TERMO_EXCLUSAO
-  INFORMATIVA
-  OTIMOS
-}
-
-enum RelevanciaMensagem {
-  RELEVANTE
-  NAO_RELEVANTE
-}
-
-// ============================================
-// RBAC - Roles & Permissions
-// ============================================
-model Perfil {
-  id          String      @id @default(cuid())
-  nome        String
-  isAdmin     Boolean     @default(false)
-  escritorio  Escritorio  @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
-  escritorioId String
-  usuarios    Usuario[]
-  permissoes  Permissao[] @relation("PerfilPermissoes")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  @@unique([nome, escritorioId])
-  @@index([escritorioId])
-}
-
-model Permissao {
-  id          String   @id @default(cuid())
-  codigo      String   @unique
-  descricao   String?
-  perfis      Perfil[] @relation("PerfilPermissoes")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ============================================
-// CONFIGURAÇÕES AUXILIARES - CFOP, NCM, CST, etc.
-// ============================================
-model ConfigAuxiliar {
-  id          String   @id @default(cuid())
-  tipo        String   // cfop, ncm, cst, aliquotas
-  codigo      String
-  descricao   String
-  aliquota    Decimal? @db.Decimal(5, 2)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([tipo, codigo])
-}
-
 model Notificacao {
   id           String   @id @default(cuid())
   usuarioId    String
-  escritorioId String
+  escritorioId Int
   titulo       String
   mensagem     String
-  tipo         String   // 'warning', 'error', 'info', 'success'
+  tipo         String
   link         String?
   urgente      Boolean  @default(false)
   lida         Boolean  @default(false)
@@ -381,33 +253,4 @@ model Notificacao {
 
   @@index([usuarioId, lida])
   @@index([escritorioId, createdAt])
-}
-
-// ============================================
-// AUDITORIA - Audit Trail
-// ============================================
-model Auditoria {
-  id           String         @id @default(cuid())
-  usuarioId    String
-  usuarioNome  String
-  escritorioId String
-  acao         EnumAuditoria
-  entidade     String
-  entidadeId   String
-  dadosAntigos Json?
-  dadosNovos   Json?
-  ipAddress    String?
-  userAgent    String?
-  createdAt    DateTime       @default(now())
-
-  @@index([escritorioId, createdAt])
-  @@index([entidade, entidadeId])
-  @@index([usuarioId])
-  @@index([acao])
-}
-
-enum EnumAuditoria {
-  CREATE
-  UPDATE
-  DELETE
 }

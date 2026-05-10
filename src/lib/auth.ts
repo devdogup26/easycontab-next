@@ -14,14 +14,12 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials: any) {
         if (!credentials?.login || !credentials?.password) return null;
 
-        // Find user by login or email
         const user = await prisma.usuario.findFirst({
           where: {
             OR: [{ login: credentials.login }, { email: credentials.login }],
           },
           include: {
             escritorio: { select: { id: true, codigo: true, nome: true } },
-            perfil: { include: { permissoes: true } },
           },
         });
 
@@ -39,13 +37,6 @@ export const authOptions: NextAuthOptions = {
           escritorioId: user.escritorioId,
           escritorioCodigo: user.escritorio?.codigo,
           escritorioNome: user.escritorio?.nome,
-          perfil: user.perfil
-            ? {
-                nome: user.perfil.nome,
-                isAdmin: user.perfil.isAdmin,
-                permissoes: user.perfil.permissoes.map((p: any) => p.codigo),
-              }
-            : undefined,
         };
       },
     }),
@@ -63,8 +54,6 @@ export const authOptions: NextAuthOptions = {
         token.escritorioId = user.escritorioId;
         token.escritorioCodigo = user.escritorioCodigo;
         token.escritorioNome = user.escritorioNome;
-        token.perfil = user.perfil;
-        token.permissoes = user.perfil?.permissoes || [];
       }
       return token;
     },
@@ -76,8 +65,6 @@ export const authOptions: NextAuthOptions = {
         session.user.escritorioId = token.escritorioId;
         session.user.escritorioCodigo = token.escritorioCodigo;
         session.user.escritorioNome = token.escritorioNome;
-        session.user.perfil = token.perfil;
-        session.user.permissoes = token.permissoes || [];
       }
       return session;
     },

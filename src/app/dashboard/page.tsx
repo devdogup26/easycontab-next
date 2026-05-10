@@ -14,11 +14,10 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const perfil = (session.user as any).perfil;
-
-  // Admin (isAdmin=true) goes to admin dashboard
-  if (perfil?.isAdmin) {
-    redirect('/dashboard/admin');
+  const globalRole = (session.user as any).globalRole;
+  // Only SUPER_ADMIN goes to admin dashboard
+  if (globalRole === 'SUPER_ADMIN') {
+    redirect('/admin');
   }
 
   const escritorioId = (session.user as any).escritorioId;
@@ -94,30 +93,8 @@ export default async function DashboardPage() {
       .reduce((sum, p) => sum + p.parcelasEmAtraso, 0),
   };
 
-  // ============================================
-  // e-CAC Alert (relevant unread messages)
-  // ============================================
-  const relevantUnreadMessages = await prisma.mensagem.findMany({
-    where: {
-      cliente: { escritorioId },
-      relevancia: 'RELEVANTE',
-      lida: false,
-    },
-    include: { cliente: { select: { nomeRazao: true } } },
-    orderBy: { data: 'desc' },
-    take: 10,
-  });
-
-  const ecacAlert = {
-    count: relevantUnreadMessages.length,
-    messages: relevantUnreadMessages.map(m => ({
-      id: m.id,
-      titulo: m.titulo,
-      clienteNome: m.cliente.nomeRazao,
-      tipo: m.tipo,
-      data: m.data.toLocaleDateString('pt-BR'),
-    })),
-  };
+  // e-CAC Alert - não disponível na versão minimalista
+  const ecacAlert = { count: 0, messages: [] };
 
   // ============================================
   // Prepare Dashboard Data

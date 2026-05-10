@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
-import { usePermissionsStore } from '@/stores/permissions';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import {
@@ -16,7 +15,6 @@ import {
   Mail,
   FileCheck,
   Key,
-  History,
   BarChart3,
   Settings,
   LogOut,
@@ -32,32 +30,24 @@ type NavItem = {
   label: string;
   href?: string;
   icon: React.ElementType;
-  code?: string | null;
   children?: { label: string; href: string }[];
 };
 
-// Navigation for ADMIN users (isAdmin=true in their perfil)
-const adminNavItems: NavItem[] = [
+// Navigation for SUPER_ADMIN (Plataforma)
+const superAdminNavItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin', icon: BarChart3 },
   { label: 'Escritórios', href: '/admin/escritorios', icon: Building2 },
   { label: 'Config. Auxiliares', href: '/admin/config-auxiliares', icon: TableProperties },
-  { label: 'Auditoria', href: '/admin/auditoria', icon: History },
   { label: 'Configurações', href: '/admin/configuracoes', icon: Settings },
 ];
 
-// Navigation for regular USUARIO (belongs to escritorio, isAdmin=false)
-const usuarioNavItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: Home, code: null },
-  {
-    label: 'Clientes',
-    href: '/dashboard/clientes',
-    icon: Users,
-    code: 'clientes:read',
-  },
+// Navigation for ADMIN (Escritório)
+const adminNavItems: NavItem[] = [
+  { label: 'Dashboard', href: '/dashboard', icon: Home },
+  { label: 'Clientes', href: '/dashboard/clientes', icon: Users },
   {
     label: 'Obrigações',
     icon: FileText,
-    code: 'obrigacoes:read',
     children: [
       { label: 'Tipos de Obrigações', href: '/dashboard/obrigacoes/tipos' },
       { label: 'Prazos de Entrega', href: '/dashboard/obrigacoes/prazos' },
@@ -65,48 +55,27 @@ const usuarioNavItems: NavItem[] = [
       { label: 'Todas as Obrigações', href: '/dashboard/obrigacoes' },
     ],
   },
-  {
-    label: 'Situação Fiscal Federal',
-    href: '/dashboard/situacao-fiscal',
-    icon: Shield,
-    code: null,
-  },
-  {
-    label: 'Parcelamentos Federais',
-    href: '/dashboard/parcelamentos',
-    icon: CreditCard,
-    code: 'parcelamentos:read',
-  },
-  { label: 'Caixa Postal', href: '/dashboard/caixa-postal', icon: Mail, code: null },
-  {
-    label: 'Certidões',
-    icon: FileCheck,
-    code: 'certidoes:read',
-    children: [
-      { label: 'Federal', href: '/dashboard/certidoes' },
-      { label: 'Estadual', href: '/dashboard/certidoes/estadual' },
-    ],
-  },
-  { label: 'Certificados', href: '/dashboard/certificados', icon: Key, code: null },
-  { label: 'Auditoria', href: '/dashboard/auditoria', icon: History, code: 'auditoria:read' },
+  // TODO: reabilitar quando implementado
+  // { label: 'Situação Fiscal Federal', href: '/dashboard/situacao-fiscal', icon: Shield },
+  // { label: 'Parcelamentos Federais', href: '/dashboard/parcelamentos', icon: CreditCard },
+  { label: 'Caixa Postal', href: '/dashboard/caixa-postal', icon: Mail },
   {
     label: 'Configurações',
     href: '/dashboard/configuracoes',
     icon: Settings,
-    code: 'configuracoes',
   },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { isAdmin } = usePermissionsStore();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  // Admin sees admin nav, otherwise regular usuario nav
-  const navItems = isAdmin ? adminNavItems : usuarioNavItems;
+  const globalRole = (session?.user as any)?.globalRole;
+  const navItems = globalRole === 'SUPER_ADMIN' ? superAdminNavItems : adminNavItems;
+  const isSuperAdmin = globalRole === 'SUPER_ADMIN';
 
   const toggleMobile = () => setMobileOpen(!mobileOpen);
   const closeMobile = () => setMobileOpen(false);
@@ -198,7 +167,7 @@ export function Sidebar() {
               <span className={styles.userEmail}>
                 {(session.user as any).escritorioNome || 'Admin'}
               </span>
-              {isAdmin && <span className={styles.userBadge}>Admin</span>}
+              {isSuperAdmin && <span className={styles.userBadge}>Super Admin</span>}
             </div>
           )}
           <button

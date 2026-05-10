@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, AlertTriangle, Clock, CheckCircle, CreditCard, FileText, Award } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, AlertTriangle, Clock, CreditCard, FileText } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -27,15 +27,6 @@ interface Parcelamento {
   parcelasEmAtraso: number;
 }
 
-interface Certificado {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  tipo: string;
-  validade: Date;
-  status: string;
-}
-
 interface CalendarDay {
   date: Date;
   day: number;
@@ -43,7 +34,6 @@ interface CalendarDay {
   isToday: boolean;
   obligations: Obligation[];
   parcelamentos: Parcelamento[];
-  certificados: Certificado[];
 }
 
 interface CalendarioClientProps {
@@ -57,7 +47,6 @@ interface CalendarioClientProps {
   };
   obligations: Obligation[];
   parcelamentos: Parcelamento[];
-  certificados: Certificado[];
 }
 
 const TIPO_LABELS: Record<string, string> = {
@@ -126,11 +115,10 @@ export function CalendarioClient({
   monthStats,
   obligations,
   parcelamentos,
-  certificados,
 }: CalendarioClientProps) {
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
 
-  const totalItems = obligations.length + parcelamentos.length + certificados.length;
+  const totalItems = obligations.length + parcelamentos.length;
   const hasOverdue = monthStats.overdue > 0;
   const hasDueToday = monthStats.dueToday > 0;
 
@@ -163,16 +151,10 @@ export function CalendarioClient({
           <span className={styles.statLabel}>Parcelamentos</span>
           <span className={styles.statValue}>{parcelamentos.length}</span>
         </div>
-        <div className={styles.statItem}>
-          <Award size={18} />
-          <span className={styles.statLabel}>Certificados</span>
-          <span className={styles.statValue}>{certificados.length}</span>
-        </div>
       </div>
 
       {/* Calendar Grid */}
       <div className={styles.calendarCard}>
-        {/* Calendar Header */}
         <div className={styles.calendarHeader}>
           <div className={styles.monthYear}>
             {MONTH_NAMES[currentMonth - 1]} {currentYear}
@@ -187,7 +169,6 @@ export function CalendarioClient({
           </div>
         </div>
 
-        {/* Day Headers */}
         <div className={styles.dayHeaders}>
           {DAY_NAMES.map(day => (
             <div key={day} className={styles.dayHeader}>
@@ -196,10 +177,9 @@ export function CalendarioClient({
           ))}
         </div>
 
-        {/* Calendar Days */}
         <div className={styles.calendarGrid}>
           {calendarDays.map((day, index) => {
-            const hasItems = day.obligations.length > 0 || day.parcelamentos.length > 0 || day.certificados.length > 0;
+            const hasItems = day.obligations.length > 0 || day.parcelamentos.length > 0;
             const isSelected = selectedDay?.date.toDateString() === day.date.toDateString();
 
             return (
@@ -227,11 +207,6 @@ export function CalendarioClient({
                         {day.parcelamentos.length}
                       </div>
                     )}
-                    {day.certificados.length > 0 && (
-                      <div className={`${styles.indicator} ${styles.indicatorCertificado}`}>
-                        {day.certificados.length}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -239,7 +214,6 @@ export function CalendarioClient({
           })}
         </div>
 
-        {/* Legend */}
         <div className={styles.legend}>
           <div className={styles.legendItem}>
             <div className={`${styles.legendDot} ${styles.legendObligacao}`} />
@@ -248,10 +222,6 @@ export function CalendarioClient({
           <div className={styles.legendItem}>
             <div className={`${styles.legendDot} ${styles.legendParcelamento}`} />
             <span>Parcelamento</span>
-          </div>
-          <div className={styles.legendItem}>
-            <div className={`${styles.legendDot} ${styles.legendCertificado}`} />
-            <span>Certificado</span>
           </div>
         </div>
       </div>
@@ -276,7 +246,6 @@ export function CalendarioClient({
           </div>
 
           <div className={styles.detailsContent}>
-            {/* Obligations */}
             {selectedDay.obligations.length > 0 && (
               <div className={styles.detailsSection}>
                 <h4 className={styles.detailsSectionTitle}>
@@ -309,7 +278,6 @@ export function CalendarioClient({
               </div>
             )}
 
-            {/* Parcelamentos */}
             {selectedDay.parcelamentos.length > 0 && (
               <div className={styles.detailsSection}>
                 <h4 className={styles.detailsSectionTitle}>
@@ -345,43 +313,8 @@ export function CalendarioClient({
               </div>
             )}
 
-            {/* Certificados */}
-            {selectedDay.certificados.length > 0 && (
-              <div className={styles.detailsSection}>
-                <h4 className={styles.detailsSectionTitle}>
-                  <Award size={16} />
-                  Certificados ({selectedDay.certificados.length})
-                </h4>
-                <div className={styles.detailsList}>
-                  {selectedDay.certificados.map(c => (
-                    <div key={c.id} className={styles.detailsItem}>
-                      <div className={styles.itemMain}>
-                        <span className={styles.itemTipo}>Certificado {c.tipo}</span>
-                        <Link
-                          href={`/dashboard/clientes/${c.clienteId}`}
-                          className={styles.itemCliente}
-                        >
-                          {c.clienteNome}
-                        </Link>
-                      </div>
-                      <div className={styles.itemMeta}>
-                        <span className={`${styles.statusBadge} ${c.status === 'VALIDO' ? styles.statusSuccess : styles.statusDanger}`}>
-                          {c.status === 'VALIDO' ? 'Válido' : 'Vencido'}
-                        </span>
-                        <span className={styles.itemDate}>
-                          Validade: {formatDate(c.validade)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty Day */}
             {selectedDay.obligations.length === 0 &&
-              selectedDay.parcelamentos.length === 0 &&
-              selectedDay.certificados.length === 0 && (
+              selectedDay.parcelamentos.length === 0 && (
                 <div className={styles.emptyDay}>
                   <Calendar size={32} />
                   <p>Nenhum evento neste dia</p>
@@ -391,12 +324,11 @@ export function CalendarioClient({
         </div>
       )}
 
-      {/* Empty State */}
       {totalItems === 0 && (
         <div className={styles.emptyState}>
           <Calendar size={48} />
           <h3>Nenhum evento este mês</h3>
-          <p>Não há obrigações, parcelamentos ou certificados com vencimento neste mês.</p>
+          <p>Não há obrigações ou parcelamentos com vencimento neste mês.</p>
         </div>
       )}
     </div>

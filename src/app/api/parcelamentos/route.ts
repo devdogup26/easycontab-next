@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { createParcelamentoSchema } from '@/lib/validations/parcelamento';
-import { registrarAuditoria } from '@/lib/auditoria';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -67,7 +66,6 @@ export async function POST(req: NextRequest) {
   }
 
   const escritorioId = (session.user as any).escritorioId;
-  const user = session.user as any;
 
   try {
     const body = await req.json();
@@ -110,20 +108,6 @@ export async function POST(req: NextRequest) {
           },
         },
       },
-    });
-
-    // Fire-and-forget auditoria
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'CREATE',
-      entidade: 'Parcelamento',
-      entidadeId: parcelamento.id,
-      dadosAntigos: null,
-      dadosNovos: parcelamento,
-      ipAddress: req.headers.get('x-forwarded-for') || null,
-      userAgent: req.headers.get('user-agent') || null,
     });
 
     return NextResponse.json({

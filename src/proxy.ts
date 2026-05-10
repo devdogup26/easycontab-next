@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = await getToken({ req: request });
   const pathname = request.nextUrl.pathname;
 
@@ -31,9 +31,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Dashboard routes - require CONTADOR role
+  // Dashboard routes - require ADMIN role
   if (pathname.startsWith('/dashboard')) {
-    if (token.globalRole !== 'CONTADOR') {
+    if (token.globalRole !== 'ADMIN') {
       // If super admin trying to access dashboard, redirect to admin
       if (token.globalRole === 'SUPER_ADMIN') {
         return NextResponse.redirect(new URL('/admin', request.url));

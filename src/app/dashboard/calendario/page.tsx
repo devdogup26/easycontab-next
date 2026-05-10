@@ -15,7 +15,6 @@ interface CalendarDay {
   isToday: boolean;
   obligations: Obligation[];
   parcelamentos: Parcelamento[];
-  certificados: Certificado[];
 }
 
 interface Obligation {
@@ -40,15 +39,6 @@ interface Parcelamento {
   parcelasEmAtraso: number;
 }
 
-interface Certificado {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  tipo: string;
-  validade: Date;
-  status: string;
-}
-
 interface CalendarioClientProps {
   currentMonth: number;
   currentYear: number;
@@ -60,7 +50,6 @@ interface CalendarioClientProps {
   };
   obligations: Obligation[];
   parcelamentos: Parcelamento[];
-  certificados: Certificado[];
 }
 
 export default async function CalendarioPage() {
@@ -72,16 +61,14 @@ export default async function CalendarioPage() {
 
   const escritorioId = (session.user as any).escritorioId;
 
-  // Get current date for calendar
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
-  // Fetch obligations for the current month (and nearby for context)
   const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
   const endOfMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59);
 
-  const [obrigacoes, parcelamentos, certificados] = await Promise.all([
+  const [obrigacoes, parcelamentos] = await Promise.all([
     prisma.obrigacao.findMany({
       where: {
         cliente: { escritorioId },
@@ -111,23 +98,8 @@ export default async function CalendarioPage() {
         },
       },
     }),
-    prisma.certificado.findMany({
-      where: {
-        cliente: { escritorioId },
-        validade: {
-          gte: startOfMonth,
-          lte: endOfMonth,
-        },
-      },
-      include: {
-        cliente: {
-          select: { id: true, nomeRazao: true },
-        },
-      },
-    }),
   ]);
 
-  // Transform data
   const obligationsData: Obligation[] = obrigacoes.map(o => ({
     id: o.id,
     tipo: o.tipo,
@@ -150,28 +122,16 @@ export default async function CalendarioPage() {
     parcelasEmAtraso: p.parcelasEmAtraso,
   }));
 
-  const certificadosData: Certificado[] = certificados.map(c => ({
-    id: c.id,
-    clienteId: c.cliente.id,
-    clienteNome: c.cliente.nomeRazao,
-    tipo: c.tipo,
-    validade: c.validade,
-    status: c.status,
-  }));
-
-  // Build calendar days
   const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
   const lastDayOfMonth = new Date(currentYear, currentMonth, 0);
   const startDay = firstDayOfMonth.getDay();
   const daysInMonth = lastDayOfMonth.getDate();
 
-  // Previous month padding
   const prevMonth = new Date(currentYear, currentMonth - 1, 0);
   const daysInPrevMonth = prevMonth.getDate();
 
   const calendarDays: CalendarDay[] = [];
 
-  // Previous month days
   for (let i = startDay - 1; i >= 0; i--) {
     const day = daysInPrevMonth - i;
     calendarDays.push({
@@ -181,31 +141,21 @@ export default async function CalendarioPage() {
       isToday: false,
       obligations: [],
       parcelamentos: [],
-      certificados: [],
     });
   }
 
-  // Current month days
   for (let day = 1; day <= daysInMonth; day++) {
     const date = new Date(currentYear, currentMonth - 1, day);
     const isToday = day === now.getDate();
 
-    // Filter obligations for this day
     const dayObligations = obligationsData.filter(o => {
       if (!o.dataVencimento) return false;
       const d = new Date(o.dataVencimento);
       return d.getDate() === day && d.getMonth() === currentMonth - 1 && d.getFullYear() === currentYear;
     });
 
-    // Filter parcelamentos that started on this day
     const dayParcelamentos = parcelamentosData.filter(p => {
       const d = new Date(p.inicio);
-      return d.getDate() === day && d.getMonth() === currentMonth - 1 && d.getFullYear() === currentYear;
-    });
-
-    // Filter certificados that expire on this day
-    const dayCertificados = certificadosData.filter(c => {
-      const d = new Date(c.validade);
       return d.getDate() === day && d.getMonth() === currentMonth - 1 && d.getFullYear() === currentYear;
     });
 
@@ -216,11 +166,9 @@ export default async function CalendarioPage() {
       isToday,
       obligations: dayObligations,
       parcelamentos: dayParcelamentos,
-      certificados: dayCertificados,
     });
   }
 
-  // Next month days
   const remainingDays = 42 - calendarDays.length;
   for (let day = 1; day <= remainingDays; day++) {
     calendarDays.push({
@@ -230,11 +178,9 @@ export default async function CalendarioPage() {
       isToday: false,
       obligations: [],
       parcelamentos: [],
-      certificados: [],
     });
   }
 
-  // Calculate month stats
   const today = now.toDateString();
   const overdue = obligationsData.filter(o => {
     if (!o.dataVencimento) return false;
@@ -269,7 +215,6 @@ export default async function CalendarioPage() {
         monthStats={monthStats}
         obligations={obligationsData}
         parcelamentos={parcelamentosData}
-        certificados={certificadosData}
       />
     </div>
   );

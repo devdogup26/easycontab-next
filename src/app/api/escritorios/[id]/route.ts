@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
-import { registrarAuditoria } from '@/lib/auditoria';
 import { updateEscritorioSchema } from '@/lib/validations/escritorio';
 
 // GET /api/escritorios/[id] - Get single escritorio with full details
@@ -19,23 +18,23 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const { id } = await params;
+  const escritorioId = parseInt(id, 10);
 
   try {
     const escritorio = await prisma.escritorio.findUnique({
-      where: { id },
+      where: { id: escritorioId },
     });
 
     if (!escritorio) {
       return NextResponse.json({ error: 'Escritório não encontrado' }, { status: 404 });
     }
 
-    // Get stats for this escritorio
     const totalClientes = await prisma.clienteFinal.count({
-      where: { escritorioId: id },
+      where: { escritorioId },
     });
 
     const totalObrigacoes = await prisma.obrigacao.count({
-      where: { cliente: { escritorioId: id } },
+      where: { cliente: { escritorioId } },
     });
 
     return NextResponse.json({ ...escritorio, totalClientes, totalObrigacoes });
@@ -58,6 +57,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const { id } = await params;
+  const escritorioId = parseInt(id, 10);
   const body = await req.json();
 
   const parsed = updateEscritorioSchema.safeParse(body);
@@ -71,17 +71,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { nome, documento, email, telefone, crc, status, dataVencimento } = parsed.data;
 
   try {
-    // Fetch current escritorio before update for audit
-    const oldEscritorio = await prisma.escritorio.findUnique({
-      where: { id },
-    });
-
-    if (!oldEscritorio) {
-      return NextResponse.json({ error: 'Escritório não encontrado' }, { status: 404 });
-    }
-
     const updatedEscritorio = await prisma.escritorio.update({
-      where: { id },
+      where: { id: escritorioId },
       data: {
         nome,
         documento: documento?.replace(/\D/g, ''),
@@ -92,15 +83,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         dataVencimento: dataVencimento ? new Date(dataVencimento) : null,
       },
     });
-
-    // Fire-and-forget audit logging
-    registrarAuditoria({
-      acao: 'UPDATE',
-      entidade: 'Escritorio',
-      entidadeId: id,
-      dadosAntigos: oldEscritorio,
-      dadosNovos: updatedEscritorio,
-    }).catch(() => {});
 
     return NextResponse.json(updatedEscritorio);
   } catch (error: any) {
@@ -128,29 +110,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
 
   const { id } = await params;
+  const escritorioId = parseInt(id, 10);
 
   try {
-    // Fetch escritorio before deletion for audit
-    const deletedEscritorio = await prisma.escritorio.findUnique({
-      where: { id },
-    });
-
-    if (!deletedEscritorio) {
-      return NextResponse.json({ error: 'Escritório não encontrado' }, { status: 404 });
-    }
-
     await prisma.escritorio.delete({
-      where: { id },
+      where: { id: escritorioId },
     });
-
-    // Fire-and-forget audit logging
-    registrarAuditoria({
-      acao: 'DELETE',
-      entidade: 'Escritorio',
-      entidadeId: id,
-      dadosAntigos: deletedEscritorio,
-      dadosNovos: null,
-    }).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

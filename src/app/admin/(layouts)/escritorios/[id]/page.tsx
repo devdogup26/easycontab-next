@@ -25,9 +25,10 @@ export default async function EscritorioDetailPage({
   }
 
   const { id } = await params;
+  const escritorioId = parseInt(id, 10);
 
   const escritorio = await prisma.escritorio.findUnique({
-    where: { id },
+    where: { id: escritorioId },
     include: { clientes: { select: { id: true } } },
   });
 
@@ -36,11 +37,11 @@ export default async function EscritorioDetailPage({
   }
 
   const totalClientes = await prisma.clienteFinal.count({
-    where: { escritorioId: id },
+    where: { escritorioId },
   });
 
   const totalObrigacoes = await prisma.obrigacao.count({
-    where: { cliente: { escritorioId: id } },
+    where: { cliente: { escritorioId } },
   });
 
   return (

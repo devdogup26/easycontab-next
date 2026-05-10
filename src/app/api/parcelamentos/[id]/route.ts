@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/server/prisma';
 import { updateParcelamentoSchema } from '@/lib/validations/parcelamento';
-import { registrarAuditoria } from '@/lib/auditoria';
 
 export async function GET(
   req: NextRequest,
@@ -63,10 +62,8 @@ export async function PUT(
   }
 
   const escritorioId = (session.user as any).escritorioId;
-  const user = session.user as any;
   const { id } = await params;
 
-  // Get existing parcelamento
   const existing = await prisma.parcelamento.findFirst({
     where: {
       id,
@@ -111,20 +108,6 @@ export async function PUT(
       },
     });
 
-    // Fire-and-forget auditoria
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'UPDATE',
-      entidade: 'Parcelamento',
-      entidadeId: updated.id,
-      dadosAntigos: existing,
-      dadosNovos: updated,
-      ipAddress: req.headers.get('x-forwarded-for') || null,
-      userAgent: req.headers.get('user-agent') || null,
-    });
-
     return NextResponse.json({
       id: updated.id,
       clienteId: updated.clienteId,
@@ -155,10 +138,8 @@ export async function DELETE(
   }
 
   const escritorioId = (session.user as any).escritorioId;
-  const user = session.user as any;
   const { id } = await params;
 
-  // Get existing parcelamento
   const existing = await prisma.parcelamento.findFirst({
     where: {
       id,
@@ -173,20 +154,6 @@ export async function DELETE(
   try {
     await prisma.parcelamento.delete({
       where: { id },
-    });
-
-    // Fire-and-forget auditoria
-    registrarAuditoria({
-      usuarioId: user.id,
-      usuarioNome: user.nome || user.email,
-      escritorioId,
-      acao: 'DELETE',
-      entidade: 'Parcelamento',
-      entidadeId: id,
-      dadosAntigos: existing,
-      dadosNovos: null,
-      ipAddress: req.headers.get('x-forwarded-for') || null,
-      userAgent: req.headers.get('user-agent') || null,
     });
 
     return NextResponse.json({ success: true });
