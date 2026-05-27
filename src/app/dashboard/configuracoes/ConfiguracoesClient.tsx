@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { updateProfile, updateEscritorio, changePassword } from './actions';
-import { User, Building2, Bell, Shield, Key, Monitor, Copy, Check } from 'lucide-react';
+import { User, Building2, Bell, Shield, Key, Monitor, Copy, Check, FileKey } from 'lucide-react';
 import styles from './page.module.css';
+import { CertificadosTab } from './CertificadosTab';
 
 const tabs = [
   { id: 'perfil', label: 'Perfil', icon: User },
@@ -12,6 +13,7 @@ const tabs = [
   { id: 'notificacoes', label: 'Notificações', icon: Bell },
   { id: 'seguranca', label: 'Segurança', icon: Shield },
   { id: 'api', label: 'API', icon: Key },
+  { id: 'certificados', label: 'Certificados', icon: FileKey },
 ];
 
 function SubmitButton({ label }: { label: string }) {
@@ -365,9 +367,11 @@ function ApiSection() {
 interface ConfiguracoesClientProps {
   usuario: any;
   escritorio: any;
+  certificados?: any[];
+  clientes?: any[];
 }
 
-export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClientProps) {
+export function ConfiguracoesClient({ usuario, escritorio, certificados, clientes }: ConfiguracoesClientProps) {
   const [activeTab, setActiveTab] = useState('perfil');
 
   return (
@@ -425,6 +429,13 @@ export function ConfiguracoesClient({ usuario, escritorio }: ConfiguracoesClient
           <>
             <h2 className={styles.sectionTitle}>API e Integrações</h2>
             <ApiSection />
+          </>
+        )}
+
+        {activeTab === 'certificados' && (
+          <>
+            <h2 className={styles.sectionTitle}>Certificados Digitais</h2>
+            <CertificadosTab initialCertificados={certificados || []} clientes={clientes || []} />
           </>
         )}
       </div>

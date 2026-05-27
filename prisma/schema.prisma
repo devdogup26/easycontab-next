@@ -82,6 +82,53 @@ enum StatusProcuracao {
 }
 
 // ============================================
+// CERTIFICADO - Digital certificates for government services
+// ============================================
+enum CertStatus {
+  ATIVO
+  INATIVO
+  VENCIDO
+}
+
+enum TipoCertificado {
+  DV_RFB
+  CNPJ
+  DCTFWEB
+  EFD_ICMS_IPI
+  REINF
+  ESOCIAL
+}
+
+model Certificado {
+  id              String    @id @default(cuid())
+  escritorioId    Int
+  clienteId       String?
+  nome            String
+  tipo            TipoCertificado
+  filename        String
+  conteudo        Bytes     @db.Bytea
+  passwordHash    String
+  subject         String?
+  issuer          String?
+  validFrom       DateTime?
+  validTo         DateTime?
+  serialNumber    String?
+  thumbprint      String?
+  status          CertStatus  @default(ATIVO)
+  observacao      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  escritorio      Escritorio  @relation(fields: [escritorioId], references: [id], onDelete: Cascade)
+
+  @@index([escritorioId])
+  @@index([clienteId])
+  @@index([tipo])
+  @@index([status])
+  @@index([validTo])
+}
+
+// ============================================
 // ESCRITORIO - System client (accounting office)
 // ============================================
 model Escritorio {
@@ -108,6 +155,7 @@ model Escritorio {
 
   usuarios            Usuario[]
   clientes            ClienteFinal[]
+  certificados       Certificado[]
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

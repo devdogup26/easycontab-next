@@ -13,12 +13,18 @@ export default async function ConfiguracoesPage() {
   const userId = (session.user as any).id;
   const escritorioId = (session.user as any).escritorioId;
 
-  const [usuario, escritorio] = await Promise.all([
-    prisma.usuario.findUnique({
-      where: { id: userId },
+  const [usuario, escritorio, certificados, clientes] = await Promise.all([
+    prisma.usuario.findUnique({ where: { id: userId } }),
+    prisma.escritorio.findUnique({ where: { id: escritorioId } }),
+    prisma.certificado.findMany({
+      where: { escritorioId },
+      include: { cliente: { select: { id: true, nomeRazao: true, documento: true } } },
+      orderBy: { createdAt: 'desc' },
     }),
-    prisma.escritorio.findUnique({
-      where: { id: escritorioId },
+    prisma.clienteFinal.findMany({
+      where: { escritorioId },
+      select: { id: true, nomeRazao: true, documento: true },
+      orderBy: { nomeRazao: 'asc' },
     }),
   ]);
 
@@ -44,5 +50,5 @@ export default async function ConfiguracoesPage() {
       }
     : null;
 
-  return <ConfiguracoesClient usuario={usuarioData} escritorio={escritorioData} />;
+  return <ConfiguracoesClient usuario={usuarioData} escritorio={escritorioData} certificados={certificados} clientes={clientes} />;
 }

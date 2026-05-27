@@ -672,4 +672,405 @@
     align-items: flex-start;
     gap: 16px;
   }
+}/* ============================================
+   CERTIFICADOS TAB STYLES
+   ============================================ */
+
+.certHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.certFilters {
+  display: flex;
+  gap: 12px;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnPrimary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.emptyState svg {
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.emptyState p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 4px;
+}
+
+.emptyState span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.certTable {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.certTableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.2fr 1fr 0.8fr 0.7fr;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.certTableRow {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1.2fr 1fr 0.8fr 0.7fr;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--glass-border);
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.certTableRow:last-child {
+  border-bottom: none;
+}
+
+.certTableRow:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.certColName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.certIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.certNameInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.certName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certFilename {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certColTipo,
+.certColCliente,
+.certColValidade,
+.certColSerial,
+.certColStatus,
+.certColActions {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certColValidade {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.certValidity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.certValidity span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.certStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.certColActions {
+  display: flex;
+  gap: 8px;
+}
+
+.certActionBtn {
+  padding: 6px;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.certActionBtn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.certActionDanger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  padding: 32px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.dropZone {
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.dropZone:hover,
+.dropZoneActive {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dropZone svg {
+  color: var(--text-muted);
+}
+
+.dropZone p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dropZoneFile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropZoneFile svg {
+  color: var(--accent);
+}
+
+.dropZoneFile span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dropZoneSize {
+  font-size: 12px;
+  color: var(--text-muted) !important;
+  font-weight: 400 !important;
+}
+
+.passwordInput {
+  display: flex;
+  gap: 8px;
+}
+
+.passwordInput input {
+  flex: 1;
+}
+
+.passwordInput button {
+  padding: 10px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordInput button:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.passwordHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--glass-border);
+  margin-top: 24px;
+}
+
+.btnCancel {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btnCancel:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.btnDanger {
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+}
+
+.certDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.certDetailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.certDetailItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.certDetailItem label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.certDetailItem span {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.mono {
+  font-family: monospace;
+  font-size: 12px !important;
+  word-break: break-all;
 }
