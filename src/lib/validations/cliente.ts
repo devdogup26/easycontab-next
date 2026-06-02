@@ -53,11 +53,7 @@ export const createClienteSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   telefone: z.string().optional(),
   responsavelTecnico: z.string().optional(),
-  dataAbertura: z.coerce
-    .date()
-    .refine((d) => d >= minDate, { message: 'Data de abertura não pode ser anterior a 1800' })
-    .refine((d) => d <= new Date(), { message: 'Data de abertura não pode ser futura' })
-    .optional(),
+  dataAbertura: z.string().optional(),
   cnae: z.string().regex(/^\d{7,8}$/, 'CNAE deve ter 7 ou 8 dígitos').optional(),
   optanteSimples: z.boolean().default(false),
 });

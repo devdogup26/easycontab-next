@@ -1,10 +1,14 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { updateClienteSchema, type UpdateClienteInput } from '@/lib/validations/cliente';
 import { useRouter } from 'next/navigation';
-import { updateCliente } from '../actions';
+import { Mail, MapPin, User, FileText, Shield, Loader2, X, Trash2, Save } from 'lucide-react';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import styles from './ClienteEditForm.module.css';
+import styles from '../novo/page.module.css';
 
 interface Cliente {
   id: string;
@@ -36,46 +40,154 @@ interface ClienteEditFormProps {
   cliente: Cliente;
 }
 
-type ActionState = {
-  errors?: Record<string, string[]>;
-  error?: string;
-  success?: boolean;
-  cliente?: Cliente;
+const UF_OPTIONS = [
+  { value: '', label: 'Selecione' },
+  { value: 'AC', label: 'AC' }, { value: 'AL', label: 'AL' }, { value: 'AP', label: 'AP' },
+  { value: 'AM', label: 'AM' }, { value: 'BA', label: 'BA' }, { value: 'CE', label: 'CE' },
+  { value: 'DF', label: 'DF' }, { value: 'ES', label: 'ES' }, { value: 'GO', label: 'GO' },
+  { value: 'MA', label: 'MA' }, { value: 'MT', label: 'MT' }, { value: 'MS', label: 'MS' },
+  { value: 'MG', label: 'MG' }, { value: 'PA', label: 'PA' }, { value: 'PB', label: 'PB' },
+  { value: 'PR', label: 'PR' }, { value: 'PE', label: 'PE' }, { value: 'PI', label: 'PI' },
+  { value: 'RJ', label: 'RJ' }, { value: 'RN', label: 'RN' }, { value: 'RS', label: 'RS' },
+  { value: 'RO', label: 'RO' }, { value: 'RR', label: 'RR' }, { value: 'SC', label: 'SC' },
+  { value: 'SP', label: 'SP' }, { value: 'SE', label: 'SE' }, { value: 'TO', label: 'TO' },
+];
+
+const TIPO_PESSOA_OPTIONS = [
+  { value: 'PJ', label: 'Pessoa Jurídica (CNPJ)' },
+  { value: 'PF', label: 'Pessoa Física (CPF)' },
+];
+
+const REGIME_OPTIONS = [
+  { value: 'SIMPLES_NACIONAL', label: 'Simples Nacional' },
+  { value: 'NORMAL', label: 'Normal (Lucro Presumido/Real)' },
+];
+
+const SITUACAO_OPTIONS = [
+  { value: 'REGULAR', label: 'Regular' },
+  { value: 'REGULARIZADO', label: 'Regularizado' },
+  { value: 'IRREGULAR', label: 'Irregular' },
+];
+
+const ESTADO_CIVIL_OPTIONS = [
+  { value: '', label: 'Selecione' },
+  { value: 'SOLTEIRO', label: 'Solteiro(a)' },
+  { value: 'CASADO', label: 'Casado(a)' },
+  { value: 'DIVORCIADO', label: 'Divorciado(a)' },
+  { value: 'VIUVO', label: 'Viúvo(a)' },
+  { value: 'UNIAO_ESTAVEL', label: 'União Estável' },
+];
+
+const formatDateForInput = (date: Date | string | null | undefined): string => {
+  if (!date) return '';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    if (year < 1800) return '';
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch {
+    return '';
+  }
 };
 
-const initialState: ActionState = {};
+const getDefaultValues = (cliente: Cliente) => ({
+  tipoPessoa: cliente.tipoPessoa as 'PJ' | 'PF',
+  documento: cliente.documento,
+  nomeRazao: cliente.nomeRazao,
+  nomeFantasia: cliente.nomeFantasia || '',
+  estadoCivil: cliente.estadoCivil || '',
+  inscricaoEstadual: cliente.inscricaoEstadual || '',
+  inscricaoMunicipal: cliente.inscricaoMunicipal || '',
+  regime: cliente.regime as 'SIMPLES_NACIONAL' | 'NORMAL',
+  situacaoFiscal: cliente.situacaoFiscal as 'REGULAR' | 'REGULARIZADO' | 'IRREGULAR',
+  logradouro: cliente.logradouro || '',
+  numero: cliente.numero || '',
+  complemento: cliente.complemento || '',
+  bairro: cliente.bairro || '',
+  cidade: cliente.cidade || '',
+  uf: cliente.uf || '',
+  cep: cliente.cep || '',
+  email: cliente.email || '',
+  telefone: cliente.telefone || '',
+  responsavelTecnico: cliente.responsavelTecnico || '',
+  cnae: cliente.cnae || '',
+  optanteSimples: cliente.optanteSimples,
+  dataAbertura: formatDateForInput(cliente.dataAbertura),
+});
 
 export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(formActionHandler, initialState);
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  async function formActionHandler(prevState: ActionState, formData: FormData) {
-    return updateCliente(cliente.id, prevState, formData);
-  }
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<UpdateClienteInput>({
+    resolver: zodResolver(updateClienteSchema),
+    defaultValues: getDefaultValues(cliente),
+  });
 
-  useEffect(() => {
-    if (state.success) {
+  const tipoPessoa = watch('tipoPessoa');
+
+  async function onSubmit(data: UpdateClienteInput) {
+    setIsLoading(true);
+    setServerError(null);
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        formData.append(key, String(value));
+      }
+    });
+
+    try {
+      const response = await fetch(`/api/clientes?id=${cliente.id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.errors) {
+          setServerError(Object.values(result.errors).flat().join(', '));
+        } else {
+          setServerError(result.error || 'Erro ao atualizar cliente');
+        }
+        return;
+      }
+
       router.push('/dashboard/clientes');
       router.refresh();
+    } catch (error) {
+      setServerError('Erro ao atualizar cliente. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [state.success, router]);
+  }
 
   async function handleDelete() {
     setIsDeleting(true);
-    setDeleteError(null);
     try {
       const res = await fetch(`/api/clientes?id=${cliente.id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Erro ao excluir');
       }
-      router.push('/dashboard/clientes');
-      router.refresh();
+      // Redirect to clients list on success
+      window.location.href = '/dashboard/clientes';
     } catch (err: any) {
-      setDeleteError(err.message);
+      setServerError(err.message);
       setDeleteConfirm(false);
     } finally {
       setIsDeleting(false);
@@ -83,270 +195,252 @@ export default function ClienteEditForm({ cliente }: ClienteEditFormProps) {
   }
 
   return (
-    <form action={formAction} className={styles.form}>
-      {/* Form fields remain the same */}
-      <div className={styles.grid}>
-        <div className={styles.field}>
-          <label htmlFor="tipoPessoa">Tipo de Pessoa</label>
-          <select
-            id="tipoPessoa"
-            name="tipoPessoa"
-            defaultValue={cliente.tipoPessoa}
-            disabled={isPending}
+    <div className={styles.formCard}>
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+        {serverError && (
+          <div className={styles.errorBanner}>
+            <Shield size={16} />
+            {serverError}
+          </div>
+        )}
+
+        {/* Dados principais */}
+        <div className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>
+            <User size={16} />
+            Dados Principais
+          </h2>
+          <div className={styles.grid}>
+            <div className={styles.field}>
+              <label className={styles.label}>Tipo de Pessoa *</label>
+              <CustomSelect
+                value={tipoPessoa}
+                onChange={(val) => setValue('tipoPessoa', val as 'PJ' | 'PF')}
+                options={TIPO_PESSOA_OPTIONS}
+                name="tipoPessoa"
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>{tipoPessoa === 'PF' ? 'CPF *' : 'CNPJ *'}</label>
+              <input
+                type="text"
+                {...register('documento')}
+                className={`${styles.input} ${errors.documento ? styles.inputError : ''}`}
+                disabled
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>{tipoPessoa === 'PF' ? 'Nome Completo *' : 'Razão Social *'}</label>
+              <input
+                type="text"
+                {...register('nomeRazao')}
+                className={`${styles.input} ${errors.nomeRazao ? styles.inputError : ''}`}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Regime Tributário *</label>
+              <CustomSelect
+                value={watch('regime')}
+                onChange={(val) => setValue('regime', val as 'SIMPLES_NACIONAL' | 'NORMAL')}
+                options={REGIME_OPTIONS}
+                name="regime"
+              />
+            </div>
+
+            {tipoPessoa === 'PJ' && (
+              <>
+                <div className={styles.field}>
+                  <label className={styles.label}>Data Abertura</label>
+                  <input type="date" {...register('dataAbertura')} className={styles.input} />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>CNAE</label>
+                  <input
+                    type="text"
+                    {...register('cnae')}
+                    className={styles.input}
+                    placeholder="0000000"
+                    maxLength={8}
+                  />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Inscrição Municipal</label>
+                  <input
+                    type="text"
+                    {...register('inscricaoMunicipal')}
+                    className={styles.input}
+                  />
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label}>Optante pelo Simples</label>
+                  <CustomSelect
+                    value={watch('optanteSimples') ? 'true' : 'false'}
+                    onChange={(val) => setValue('optanteSimples', val === 'true')}
+                    options={[
+                      { value: 'false', label: 'Não' },
+                      { value: 'true', label: 'Sim' },
+                    ]}
+                    name="optanteSimples"
+                  />
+                </div>
+              </>
+            )}
+
+            {tipoPessoa === 'PJ' ? (
+              <div className={styles.field}>
+                <label className={styles.label}>Nome Fantasia</label>
+                <input type="text" {...register('nomeFantasia')} className={styles.input} />
+              </div>
+            ) : (
+              <div className={styles.field}>
+                <label className={styles.label}>Estado Civil</label>
+                <CustomSelect
+                  value={watch('estadoCivil') || ''}
+                  onChange={(val) => setValue('estadoCivil', val as any)}
+                  options={ESTADO_CIVIL_OPTIONS}
+                  name="estadoCivil"
+                />
+              </div>
+            )}
+
+            <div className={styles.field}>
+              <label className={styles.label}>Situação Fiscal</label>
+              <CustomSelect
+                value={watch('situacaoFiscal') || 'REGULAR'}
+                onChange={(val) => setValue('situacaoFiscal', val as 'REGULAR' | 'REGULARIZADO' | 'IRREGULAR')}
+                options={SITUACAO_OPTIONS}
+                name="situacaoFiscal"
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Inscrição Estadual</label>
+              <input type="text" {...register('inscricaoEstadual')} className={styles.input} />
+            </div>
+          </div>
+        </div>
+
+        {/* Endereço */}
+        <div className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>
+            <MapPin size={16} />
+            Endereço
+          </h2>
+          <div className={styles.grid}>
+            <div className={`${styles.field} ${styles.gridColSpan2}`}>
+              <label className={styles.label}>Logradouro</label>
+              <input type="text" {...register('logradouro')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Número</label>
+              <input type="text" {...register('numero')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Complemento</label>
+              <input type="text" {...register('complemento')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Bairro</label>
+              <input type="text" {...register('bairro')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Cidade</label>
+              <input type="text" {...register('cidade')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>UF</label>
+              <CustomSelect
+                value={watch('uf') || ''}
+                onChange={(val) => setValue('uf', val)}
+                options={UF_OPTIONS}
+                name="uf"
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>CEP</label>
+              <input type="text" {...register('cep')} className={styles.input} placeholder="00000-000" maxLength={9} />
+            </div>
+          </div>
+        </div>
+
+        {/* Contato */}
+        <div className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>
+            <Mail size={16} />
+            Contato
+          </h2>
+          <div className={styles.grid}>
+            <div className={styles.field}>
+              <label className={styles.label}>E-mail</label>
+              <input type="email" {...register('email')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Telefone</label>
+              <input type="tel" {...register('telefone')} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Responsável Técnico</label>
+              <input type="text" {...register('responsavelTecnico')} className={styles.input} />
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard/clientes')}
+            className={styles.cancelButton}
+            title="Cancelar"
+            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6b7280' }}
           >
-            <option value="PJ">Pessoa Jurídica (CNPJ)</option>
-            <option value="PF">Pessoa Física (CPF)</option>
-          </select>
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="documento">CNPJ/CPF</label>
-          <input
-            type="text"
-            id="documento"
-            name="documento"
-            defaultValue={cliente.documento}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="nomeRazao">Razão Social / Nome</label>
-          <input
-            type="text"
-            id="nomeRazao"
-            name="nomeRazao"
-            defaultValue={cliente.nomeRazao}
-            required
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="nomeFantasia">Nome Fantasia</label>
-          <input
-            type="text"
-            id="nomeFantasia"
-            name="nomeFantasia"
-            defaultValue={cliente.nomeFantasia || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="regime">Regime Tributário</label>
-          <select id="regime" name="regime" defaultValue={cliente.regime} disabled={isPending}>
-            <option value="SIMPLES_NACIONAL">Simples Nacional</option>
-            <option value="NORMAL">Normal</option>
-          </select>
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="situacaoFiscal">Situação Fiscal</label>
-          <select
-            id="situacaoFiscal"
-            name="situacaoFiscal"
-            defaultValue={cliente.situacaoFiscal}
-            disabled={isPending}
+            <X size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeleteConfirm(true)}
+            className={styles.dangerButton}
+            title="Excluir Cliente"
+            style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#dc2626' }}
           >
-            <option value="REGULAR">Regular</option>
-            <option value="REGULARIZADO">Regularizado</option>
-            <option value="IRREGULAR">Irregular</option>
-          </select>
+            <Trash2 size={16} />
+          </button>
+          <button type="submit" disabled={isLoading} className={styles.submitButton} title="Salvar Alterações" style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#10b981' }}>
+            {isLoading ? (
+              <>
+                <span className={styles.spinner} />
+              </>
+            ) : (
+              <Save size={16} />
+            )}
+          </button>
         </div>
+      </form>
 
-        <div className={styles.field}>
-          <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
-          <input
-            type="text"
-            id="inscricaoEstadual"
-            name="inscricaoEstadual"
-            defaultValue={cliente.inscricaoEstadual || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="inscricaoMunicipal">Inscrição Municipal</label>
-          <input
-            type="text"
-            id="inscricaoMunicipal"
-            name="inscricaoMunicipal"
-            defaultValue={cliente.inscricaoMunicipal || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="dataAbertura">Data Abertura</label>
-          <input
-            type="date"
-            id="dataAbertura"
-            name="dataAbertura"
-            defaultValue={cliente.dataAbertura || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="cnae">CNAE</label>
-          <input
-            type="text"
-            id="cnae"
-            name="cnae"
-            defaultValue={cliente.cnae || ''}
-            maxLength={8}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="optanteSimples">Optante pelo Simples</label>
-          <select
-            id="optanteSimples"
-            name="optanteSimples"
-            defaultValue={cliente.optanteSimples ? 'true' : 'false'}
-            disabled={isPending}
-          >
-            <option value="false">Não</option>
-            <option value="true">Sim</option>
-          </select>
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            defaultValue={cliente.email || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="telefone">Telefone</label>
-          <input
-            type="text"
-            id="telefone"
-            name="telefone"
-            defaultValue={cliente.telefone || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="responsavelTecnico">Responsável Técnico</label>
-          <input
-            type="text"
-            id="responsavelTecnico"
-            name="responsavelTecnico"
-            defaultValue={cliente.responsavelTecnico || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="logradouro">Logradouro</label>
-          <input
-            type="text"
-            id="logradouro"
-            name="logradouro"
-            defaultValue={cliente.logradouro || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="numero">Número</label>
-          <input
-            type="text"
-            id="numero"
-            name="numero"
-            defaultValue={cliente.numero || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="complemento">Complemento</label>
-          <input
-            type="text"
-            id="complemento"
-            name="complemento"
-            defaultValue={cliente.complemento || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="bairro">Bairro</label>
-          <input
-            type="text"
-            id="bairro"
-            name="bairro"
-            defaultValue={cliente.bairro || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="cidade">Cidade</label>
-          <input
-            type="text"
-            id="cidade"
-            name="cidade"
-            defaultValue={cliente.cidade || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="uf">UF</label>
-          <input
-            type="text"
-            id="uf"
-            name="uf"
-            maxLength={2}
-            defaultValue={cliente.uf || ''}
-            disabled={isPending}
-          />
-        </div>
-
-        <div className={styles.field}>
-          <label htmlFor="cep">CEP</label>
-          <input
-            type="text"
-            id="cep"
-            name="cep"
-            maxLength={8}
-            defaultValue={cliente.cep || ''}
-            disabled={isPending}
-          />
-        </div>
-      </div>
-
-      {state.error && <div className={styles.errorMessage}>{state.error}</div>}
-
-      <div className={styles.actions}>
-        <button type="button" className={styles.dangerButton} onClick={() => setDeleteConfirm(true)}>
-          Excluir Cliente
-        </button>
-        <button type="submit" className={styles.submitButton} disabled={isPending}>
-          {isPending ? 'Salvando...' : 'Salvar Alterações'}
-        </button>
-      </div>
-    </form>
-    <ConfirmDialog
-      isOpen={deleteConfirm}
-      title="Excluir Cliente"
-      message={`Tem certeza que deseja excluir o cliente "${cliente.nomeRazao}"? Esta ação não pode ser desfeita.`}
-      confirmLabel="Excluir"
-      cancelLabel="Cancelar"
-      variant="danger"
-      onConfirm={handleDelete}
-      onCancel={() => setDeleteConfirm(false)}
-    />
-    {deleteError && <div className={styles.errorMessage}>{deleteError}</div>}
+      <ConfirmDialog
+        isOpen={deleteConfirm}
+        title="Excluir Cliente"
+        message={`Tem certeza que deseja excluir o cliente "${cliente.nomeRazao}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirm(false)}
+      />
+    </div>
   );
 }

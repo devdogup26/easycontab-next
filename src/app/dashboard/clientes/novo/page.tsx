@@ -137,13 +137,14 @@ export default function NovoClientePage() {
   }
 
   async function onSubmit(data: CreateClienteInput) {
+    console.log('Form submitted with data:', data);
     setIsLoading(true);
     setServerError(null);
 
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== '') {
-        formData.append(key, value);
+        formData.append(key, String(value));
       }
     });
 

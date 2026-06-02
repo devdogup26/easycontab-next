@@ -106,7 +106,7 @@ model Certificado {
   nome            String
   tipo            TipoCertificado
   filename        String
-  conteudo        Bytes     @db.Bytea
+  conteudo        String   @db.Text
   passwordHash    String
   subject         String?
   issuer          String?

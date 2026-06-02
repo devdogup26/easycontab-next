@@ -3,13 +3,15 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Pencil } from 'lucide-react';
+import { DeleteButton } from './components/DeleteButton';
 import styles from './page.module.css';
 import sharedStyles from '../_shared.module.css';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  searchParams: Promise<{ search?: string; tipo?: string; situacao?: string; page?: string }>;
+  searchParams: Promise<{ search?: string; tipo?: string; situacao?: string; regime?: string; page?: string }>;
 }
 
 const PAGE_SIZE = 20;
@@ -27,6 +29,21 @@ const SITUACAO_OPTIONS = [
   { value: 'IRREGULAR', label: 'Irregular' },
 ];
 
+const REGIME_OPTIONS = [
+  { value: '', label: 'Todos os regimes' },
+  { value: 'SIMPLES_NACIONAL', label: 'Simples Nacional' },
+  { value: 'NORMAL', label: 'Normal' },
+];
+
+function getSituacaoStyle(situacao: string | null): string {
+  switch (situacao) {
+    case 'REGULAR': return sharedStyles.badgeSuccess;
+    case 'REGULARIZADO': return sharedStyles.badgeWarning;
+    case 'IRREGULAR': return sharedStyles.badgeDanger;
+    default: return sharedStyles.badgeNeutral;
+  }
+}
+
 export default async function ClientesPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
@@ -36,6 +53,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const search = params.search || '';
   const tipo = params.tipo || '';
   const situacao = params.situacao || '';
+  const regime = params.regime || '';
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
   const where = {
@@ -51,6 +69,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
       : {}),
     ...(tipo ? { tipoPessoa: tipo as 'PJ' | 'PF' } : {}),
     ...(situacao ? { situacaoFiscal: situacao as 'REGULAR' | 'REGULARIZADO' | 'IRREGULAR' } : {}),
+    ...(regime ? { regime: regime as 'SIMPLES_NACIONAL' | 'NORMAL' } : {}),
   };
 
   const [clientes, total] = await Promise.all([
@@ -66,7 +85,7 @@ export default async function ClientesPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const buildUrl = (updates: Record<string, string | null>) => {
-    const base = { search, tipo, situacao, page: String(page) };
+    const base = { search, tipo, situacao, regime, page: String(page) };
     const merged = { ...base, ...updates };
     const params = new URLSearchParams();
     Object.entries(merged).forEach(([k, v]) => {
@@ -106,10 +125,15 @@ export default async function ClientesPage({ searchParams }: PageProps) {
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
+        <select name="regime" defaultValue={regime} className={sharedStyles.filterSelect}>
+          {REGIME_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
         <button type="submit" className={sharedStyles.pageButton}>
           Filtrar
         </button>
-        {(search || tipo || situacao) && (
+        {(search || tipo || situacao || regime) && (
           <Link href="/dashboard/clientes" className={sharedStyles.secondaryButton}>
             Limpar
           </Link>
@@ -127,7 +151,10 @@ export default async function ClientesPage({ searchParams }: PageProps) {
               <thead>
                 <tr>
                   <th>Nome/Razão</th>
+                  <th>Nome Fantasia</th>
                   <th>Documento</th>
+                  <th>Regime</th>
+                  <th>Situação</th>
                   <th>Cidade</th>
                   <th>Ações</th>
                 </tr>
@@ -136,17 +163,30 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                 {clientes.map(cliente => (
                   <tr key={cliente.id}>
                     <td>{cliente.nomeRazao}</td>
+                    <td>{cliente.nomeFantasia || '-'}</td>
                     <td style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                       {cliente.documento}
                     </td>
+                    <td>
+                      {cliente.regime === 'SIMPLES_NACIONAL' ? 'Simples Nacional' : 'Normal'}
+                    </td>
+                    <td>
+                      <span className={`${sharedStyles.badge} ${getSituacaoStyle(cliente.situacaoFiscal)}`}>
+                        {cliente.situacaoFiscal || 'Regular'}
+                      </span>
+                    </td>
                     <td>{cliente.cidade || '-'}</td>
                     <td>
-                      <Link
-                        href={`/dashboard/clientes/${cliente.id}`}
-                        className={sharedStyles.actionLink}
-                      >
-                        Editar
-                      </Link>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <Link
+                          href={`/dashboard/clientes/${cliente.id}`}
+                          className={sharedStyles.actionLink}
+                          title="Editar"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                        <DeleteButton clienteId={cliente.id} />
+                      </div>
                     </td>
                   </tr>
                 ))}
