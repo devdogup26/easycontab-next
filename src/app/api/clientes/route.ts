@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         responsavelTecnico,
         escritorioId,
         dataAbertura: dataAbertura ? new Date(dataAbertura) : null,
-        cnae: cnae || null,
+        cnae,
         inscricaoMunicipal,
         optanteSimples,
       },

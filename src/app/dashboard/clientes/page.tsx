@@ -153,8 +153,8 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                   <th>Nome/Razão</th>
                   <th>Nome Fantasia</th>
                   <th>Documento</th>
+                  <th>Status</th>
                   <th>Regime</th>
-                  <th>Situação</th>
                   <th>Cidade</th>
                   <th>Ações</th>
                 </tr>
@@ -168,13 +168,11 @@ export default async function ClientesPage({ searchParams }: PageProps) {
                       {cliente.documento}
                     </td>
                     <td>
-                      {cliente.regime === 'SIMPLES_NACIONAL' ? 'Simples Nacional' : 'Normal'}
-                    </td>
-                    <td>
-                      <span className={`${sharedStyles.badge} ${getSituacaoStyle(cliente.situacaoFiscal)}`}>
-                        {cliente.situacaoFiscal || 'Regular'}
+                      <span className={cliente.situacaoFiscal === 'REGULAR' ? sharedStyles.statusActive : sharedStyles.statusInactive}>
+                        {cliente.situacaoFiscal === 'REGULAR' ? 'Ativo' : cliente.situacaoFiscal === 'REGULARIZADO' ? 'Regularizado' : 'Inativo'}
                       </span>
                     </td>
+                    <td>{cliente.regime === 'SIMPLES_NACIONAL' ? 'Simples' : 'Normal'}</td>
                     <td>{cliente.cidade || '-'}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

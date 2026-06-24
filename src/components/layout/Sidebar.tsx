@@ -55,10 +55,31 @@ const adminNavItems: NavItem[] = [
       { label: 'Todas as Obrigações', href: '/dashboard/obrigacoes' },
     ],
   },
-  // TODO: reabilitar quando implementado
-  // { label: 'Situação Fiscal Federal', href: '/dashboard/situacao-fiscal', icon: Shield },
-  // { label: 'Parcelamentos Federais', href: '/dashboard/parcelamentos', icon: CreditCard },
-  { label: 'Caixa Postal', href: '/dashboard/caixa-postal', icon: Mail },
+  {
+    label: 'Situação Fiscal Federal',
+    href: '/dashboard/situacao-fiscal',
+    icon: Shield,
+    code: null,
+  },
+  {
+    label: 'Parcelamentos Federais',
+    href: '/dashboard/parcelamentos',
+    icon: CreditCard,
+    code: 'parcelamentos:read',
+  },
+  { label: 'Caixa Postal', href: '/dashboard/caixa-postal', icon: Mail, code: null },
+  {
+    label: 'Certidões',
+    icon: FileCheck,
+    code: 'certidoes:read',
+    children: [
+      { label: 'Federal', href: '/dashboard/certidoes' },
+      { label: 'Estadual', href: '/dashboard/certidoes/estadual' },
+    ],
+  },
+  { label: 'eSocial', href: '/dashboard/esocial', icon: FileText, code: 'obrigacoes:read' },
+  { label: 'Certificados', href: '/dashboard/certificados', icon: Key, code: null },
+  { label: 'Auditoria', href: '/dashboard/auditoria', icon: History, code: 'auditoria:read' },
   {
     label: 'Configurações',
     href: '/dashboard/configuracoes',
